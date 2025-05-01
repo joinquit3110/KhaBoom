@@ -1,18 +1,21 @@
 # Kha-Boom!
 
-A modern web application with user authentication system, built with the MERN stack (MongoDB, Express, React, Node.js).
+A modern learning web application with user authentication system, built with the MERN stack (MongoDB, Express, React, Node.js).
 
-![Kha-Boom Logo](frontend/public/favicon.svg)
+<p align="center">
+  <img src="frontend/public/favicon.svg" alt="Kha-Boom Logo" width="200" />
+</p>
 
 ## Project Overview
 
-Kha-Boom! is a full-stack web application that demonstrates:
+Kha-Boom! is a full-stack web application featuring:
 
 - Modern React frontend with Vite build tool
 - Express.js backend API with MongoDB integration
 - Complete user authentication system (register/login)
 - JWT-based authorization
 - Deployment configuration for Netlify (frontend) and Render (backend)
+- Colorful, modern, and creative user interface
 
 ## Project Structure
 
@@ -46,9 +49,30 @@ kha-boom/
 │           └── auth.middleware.js
 ```
 
+## Key Features
+
+### Advanced User System
+
+- Registration and login with JWT authentication
+- Comprehensive user profiles with fields:
+  - Username (name)
+  - Full name (fullName)
+  - Class (class)
+  - Birth date (birthdate)
+  - Primary email (email)
+  - Optional Gmail account (gmail)
+  - Automatic avatar generation (avatar)
+
+### Modern Interface
+
+- Responsive design for all devices
+- Colorful and dynamic interface
+- Smooth transition effects
+- Full Vietnamese language support
+
 ## Getting Started
 
-### Prerequisites
+### System Requirements
 
 - Node.js v16 or later
 - npm (Node Package Manager)
