@@ -502,7 +502,7 @@ const scanAvailableCourses = async () => {
     } else {
       try {
         const responseText = await contentResponse.text();
-        console.log('API Response:', responseText);
+        console.log('API Response:', responseText.substring(0, 500) + '...'); // Log just the beginning to avoid too much output
         
         // Parse the JSON response
         const data = JSON.parse(responseText);
@@ -640,12 +640,15 @@ export const getCourseContent = async (courseId) => {
         });
       }
       
+      // Process content with parseMathigonMd to get HTML
+      const parsedContent = parseMathigonMd(markdownContent);
+      
       return {
         course,
         content: {
           metadata,
           sections,
-          html: markdownContent // Include raw content as fallback
+          html: parsedContent.html // Use the HTML from parsed content
         }
       };
     } catch (err) {
@@ -654,9 +657,9 @@ export const getCourseContent = async (courseId) => {
       // Provide a properly structured fallback content that matches the expected format
       console.log(`Using simple fallback content for ${courseId}`);
       
-      // Create a properly structured content object instead of trying to parse HTML
+      // Create a properly structured content object with HTML field that matches what renderCourseContent expects
       const fallbackContent = {
-        meta: {
+        metadata: {
           id: courseId,
           title: course.title || courseId
         },
@@ -664,15 +667,17 @@ export const getCourseContent = async (courseId) => {
           {
             id: 'introduction',
             title: 'Introduction',
-            content: '<p>Error loading course content. Please try again later.</p>',
-            subsections: [
-              {
-                id: 'error',
-                content: '<p>Error loading course content. Please try again later.</p>'
-              }
-            ]
+            content: '<p>Error loading course content. Please try again later.</p>'
           }
-        ]
+        ],
+        html: `<h1>${course.title || courseId}</h1>
+               <p>We're having trouble loading this course content right now. Please try again later.</p>
+               <div class="section" data-section="introduction">
+                 <h2 id="introduction">Introduction</h2>
+                 <div class="section-content">
+                   <p>This course is currently unavailable. Please check back soon.</p>
+                 </div>
+               </div>`
       };
       
       return {
