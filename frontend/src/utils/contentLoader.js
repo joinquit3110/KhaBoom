@@ -13,7 +13,7 @@ const parseMathigonMd = (content) => {
   
   // Extract metadata from content
   const metadata = {};
-  const metadataRegex = /> (\w+): (.+)/g;
+  const metadataRegex = /> ([\w-]+): (.+)/g;
   let match;
   while ((match = metadataRegex.exec(content)) !== null) {
     metadata[match[1]] = match[2];
@@ -31,21 +31,54 @@ const parseMathigonMd = (content) => {
     .replace(/::: column\.grow/g, '<div class="column grow">')
     .replace(/:::/g, '</div>')
     
-    // Process images
-    .replace(/x-img\(src="([^"]+)" width=(\d+) height=(\d+)\)/g, '<img src="$1" width="$2" height="$3" />')
+    // Process images with full path resolution
+    .replace(/x-img\(src="([^"]+)" width=(\d+) height=(\d+)\)/g, (match, src, width, height) => {
+      // Check if it's a relative path and construct proper URL
+      if (src.startsWith('./') || !src.startsWith('http')) {
+        const baseUrl = '/assets/';
+        src = `${baseUrl}${src.replace('./', '')}`;
+      }
+      return `<img src="${src}" width="${width}" height="${height}" class="mathigon-image" />`;
+    })
     
     // Process gloss terms
     .replace(/\[__([^_]+)__\]\(gloss:([^\)]+)\)/g, '<span class="term" data-gloss="$2">$1</span>')
     
-    // Process interactive sections
-    .replace(/x-geopad\(([^\)]+)\)/g, '<div class="interactive-element geopad" data-params="$1"><div class="placeholder-text">Interactive Diagram</div></div>')
+    // Process all interactive elements types
+    .replace(/x-geopad\(([^\)]+)\)/g, '<div class="interactive-element geopad" data-params="$1"><div class="placeholder-text">Interactive Geometry</div></div>')
+    .replace(/x-coordinate-system\(([^\)]+)\)/g, '<div class="interactive-element graph" data-params="$1"><div class="placeholder-text">Interactive Graph</div></div>')
+    .replace(/x-slider\(([^\)]+)\)/g, '<div class="interactive-element slider" data-params="$1"><div class="placeholder-text">Interactive Slider</div></div>')
+    .replace(/x-equation\(([^\)]+)\)/g, '<div class="interactive-element equation" data-params="$1"><div class="placeholder-text">Interactive Equation</div></div>')
+    .replace(/x-sortable\(([^\)]+)\)/g, '<div class="interactive-element sortable" data-params="$1"><div class="placeholder-text">Drag and Sort</div></div>')
+    .replace(/x-gesture\(([^\)]+)\)/g, '<div class="interactive-element gesture" data-params="$1"><div class="placeholder-text">Draw Here</div></div>')
+    .replace(/x-picker\(([^\)]+)\)/g, '<div class="interactive-element picker" data-params="$1"><div class="placeholder-text">Multiple Choice</div></div>')
+    .replace(/x-quizzes\(([^\)]+)\)/g, '<div class="interactive-element quiz" data-params="$1"><div class="placeholder-text">Quiz</div></div>')
+    .replace(/x-code\(([^\)]+)\)/g, '<div class="interactive-element code" data-params="$1"><div class="placeholder-text">Code Editor</div></div>')
+    .replace(/x-simulation\(([^\)]+)\)/g, '<div class="interactive-element simulation" data-params="$1"><div class="placeholder-text">Interactive Simulation</div></div>')
+    
+    // Process step blocks and tabs
+    .replace(/{step.*?}/g, '<div class="step-block">')
+    .replace(/{:\/step}/g, '</div>')
+    .replace(/{tab.*?}/g, '<div class="tab-content">')
+    .replace(/{:\/tab}/g, '</div>')
+    
+    // Process math expressions
+    .replace(/\${2}([^$]+)\${2}/g, '<span class="math-block">$1</span>')
+    .replace(/\$([^$\n]+)\$/g, '<span class="math-inline">$1</span>')
     
     // Process basic markdown
     .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/__([^_]+)__/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
     
-    // Process paragraphs
-    .replace(/^([^<].*)/gm, '<p>$1</p>')
+    // Process lists
+    .replace(/^\* (.*)$/gm, '<li>$1</li>')
+    
+    // Wrap lists in ul tags (simple approach)
+    .replace(/<li>(.*\n)+?(?=\n|$)/g, match => `<ul>${match}</ul>`)
+    
+    // Process paragraphs (non-HTML content)
+    .replace(/^([^<\n].*?)(?=\n|$)/gm, '<p>$1</p>')
     
     // Clean up empty paragraphs
     .replace(/<p>\s*<\/p>/g, '');
@@ -85,12 +118,19 @@ const fileExists = async (path) => {
       return true;
     }
     
-    // Then check if the file exists on the server by making a HEAD request
-    // This will check for files that might be in our content directory but not predefined
-    const response = await fetch(`/api/content/exists?path=${encodeURIComponent(path)}`, {
-      method: 'HEAD'
-    });
-    return response.ok;
+    // Check both in main content directory and learned content directory
+    const checkPaths = [
+      `/api/content/exists?path=${encodeURIComponent(path)}`,
+      `/api/content/exists?path=${encodeURIComponent(`learned/textbooks-master/${path}`)}`
+    ];
+    
+    // Try both paths
+    for (const checkPath of checkPaths) {
+      const response = await fetch(checkPath, { method: 'HEAD' });
+      if (response.ok) return true;
+    }
+    
+    return false;
   } catch (error) {
     console.error('Error checking if file exists:', error);
     return false;
@@ -163,37 +203,50 @@ const getAssistantResponse = (courseId, userMessage) => {
 // Function to scan available courses from the content directory
 const scanAvailableCourses = async () => {
   try {
-    // Fetch the list of available courses from the server
-    const response = await fetch('/api/content/courses');
+    // Fetch courses from both content directories
+    const mainContentResponse = await fetch('/api/content/courses');
+    const learnedContentResponse = await fetch('/api/content/courses/learned');
     
-    if (response.ok) {
-      const coursesFromServer = await response.json();
-      
-      // Merge with our predefined courses, preferring server data when there's overlap
-      const mergedCourses = [...availableCourses];
-      
-      coursesFromServer.forEach(serverCourse => {
-        const existingIndex = mergedCourses.findIndex(c => c.id === serverCourse.id);
-        
-        if (existingIndex >= 0) {
-          // Update existing course with server data
-          mergedCourses[existingIndex] = {
-            ...mergedCourses[existingIndex],
-            ...serverCourse
-          };
-        } else {
-          // Add new course from server
-          mergedCourses.push(serverCourse);
-        }
-      });
-      
-      // Replace our availableCourses array with the merged data
-      availableCourses.length = 0;
-      availableCourses.push(...mergedCourses);
+    const mergedCourses = [...availableCourses];
+    
+    // Process courses from main content
+    if (mainContentResponse.ok) {
+      const mainCourses = await mainContentResponse.json();
+      processCourses(mainCourses, mergedCourses);
     }
+    
+    // Process courses from learned content
+    if (learnedContentResponse.ok) {
+      const learnedCourses = await learnedContentResponse.json();
+      processCourses(learnedCourses, mergedCourses);
+    }
+    
+    // Replace our availableCourses array with the merged data
+    availableCourses.length = 0;
+    availableCourses.push(...mergedCourses);
+    
+    console.log(`Loaded ${availableCourses.length} courses in total`);
   } catch (error) {
     console.error('Error scanning courses:', error);
   }
+};
+
+// Helper function to process and merge courses
+const processCourses = (coursesToAdd, mergedCourses) => {
+  coursesToAdd.forEach(course => {
+    const existingIndex = mergedCourses.findIndex(c => c.id === course.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing course with new data
+      mergedCourses[existingIndex] = {
+        ...mergedCourses[existingIndex],
+        ...course
+      };
+    } else {
+      // Add new course
+      mergedCourses.push(course);
+    }
+  });
 };
 
 // Call this when the app initializes to populate courses
@@ -213,13 +266,30 @@ export const getCourseContent = async (courseId) => {
   const course = getCourseById(courseId);
   if (!course) return null;
   
-  // Load content from the server
-  const content = await loadContentFile(courseId);
-  
-  return {
-    course,
-    content
-  };
+  try {
+    // Load content from the main API endpoint
+    const path = `/api/content/${courseId}`;
+    
+    try {
+      const response = await fetch(path);
+      if (response.ok) {
+        const content = await response.json();
+        return {
+          course,
+          content
+        };
+      }
+    } catch (e) {
+      console.log(`Failed to fetch content from ${path}`, e);
+    }
+    
+    // If we get here, we couldn't find the content
+    console.error(`Could not load content for course: ${courseId}`);
+    return null;
+  } catch (error) {
+    console.error(`Error getting course content for ${courseId}:`, error);
+    return null;
+  }
 };
 
 export const getGlossaryDefinition = (term) => {
@@ -229,15 +299,24 @@ export const getGlossaryDefinition = (term) => {
 // Get available translations for a course
 export const getAvailableTranslations = async (courseId) => {
   try {
-    // Fetch available translations from the server
-    const response = await fetch(`/api/translations/${courseId}`);
+    // Only need to check one path now
+    const path = `/api/translations/${courseId}`;
     
-    if (response.ok) {
-      return await response.json();
+    let translations = [{ code: 'en', name: 'English' }];
+    
+    try {
+      const response = await fetch(path);
+      if (response.ok) {
+        const result = await response.json();
+        if (Array.isArray(result) && result.length > 0) {
+          translations = result;
+        }
+      }
+    } catch (e) {
+      console.log(`Failed to fetch translations from ${path}`, e);
     }
     
-    // Default to English if server request fails
-    return [{ code: 'en', name: 'English' }];
+    return translations;
   } catch (error) {
     console.error('Error getting available translations:', error);
     return [{ code: 'en', name: 'English' }];
@@ -252,14 +331,20 @@ export const loadTranslation = async (courseId, languageCode) => {
       return await getCourseContent(courseId);
     }
     
-    // Fetch translated content from the server
-    const response = await fetch(`/api/translations/${courseId}/${languageCode}`);
+    // Only need to check one path now
+    const path = `/api/translations/${courseId}/${languageCode}`;
     
-    if (response.ok) {
-      return await response.json();
+    try {
+      const response = await fetch(path);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.log(`Failed to fetch translation from ${path}`, e);
     }
     
     // Fall back to English if translation not available
+    console.log(`No translation available for ${courseId} in ${languageCode}, falling back to English`);
     return await getCourseContent(courseId);
   } catch (error) {
     console.error(`Error loading translation for ${languageCode}:`, error);

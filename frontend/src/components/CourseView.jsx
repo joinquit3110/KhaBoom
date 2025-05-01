@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getCourseById, 
   getCourseContent, 
@@ -8,6 +9,9 @@ import {
   getAvailableTranslations,
   loadTranslation
 } from '../utils/contentLoader';
+import InteractiveComponent from '../interactive/InteractiveComponent';
+import Notification from '../components/Notification';
+import ChatBot from '../components/ChatBot';
 
 const CourseView = () => {
   const { courseId } = useParams();
@@ -27,6 +31,18 @@ const CourseView = () => {
   const [language, setLanguage] = useState('en');
   const [availableLanguages, setAvailableLanguages] = useState([{ code: 'en', name: 'English' }]);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  
+  // Interactive elements state
+  const [interactiveElements, setInteractiveElements] = useState([]);
+  const [activeInteractive, setActiveInteractive] = useState(null);
+  
+  // Notification state
+  const [notifications, setNotifications] = useState([]);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  
+  // Progress tracking
+  const [progress, setProgress] = useState(0);
+  const [completedSections, setCompletedSections] = useState([]);
 
   // Load course data and available languages
   useEffect(() => {
@@ -64,6 +80,38 @@ const CourseView = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Process interactive elements in the course content
+  const processInteractiveElements = useCallback(() => {
+    if (!contentRef.current) return;
+    
+    // Find all interactive elements in the content
+    const elements = contentRef.current.querySelectorAll('.interactive-element');
+    const interactives = [];
+    
+    elements.forEach((el, index) => {
+      const type = el.classList[1]; // geopad, graph, etc.
+      const params = el.getAttribute('data-params');
+      
+      interactives.push({
+        id: `${type}-${index}`,
+        type,
+        params: params ? JSON.parse(params.replace(/'/g, '"')) : {},
+        element: el
+      });
+      
+      // Add click event to activate the interactive
+      el.addEventListener('click', () => {
+        setActiveInteractive({
+          id: `${type}-${index}`,
+          type,
+          params: params ? JSON.parse(params.replace(/'/g, '"')) : {}
+        });
+      });
+    });
+    
+    setInteractiveElements(interactives);
+  }, []);
   
   // Handle interactions with content elements
   useEffect(() => {
@@ -83,6 +131,13 @@ const CourseView = () => {
             left: e.clientX - 100
           }
         });
+        
+        // Show a notification that a glossary term was viewed
+        addNotification({
+          type: 'info',
+          message: `Glossary: ${term}`,
+          duration: 3000
+        });
       }
     };
     
@@ -91,13 +146,33 @@ const CourseView = () => {
       term.addEventListener('click', handleGlossaryClick);
     });
     
+    // Process interactive elements
+    processInteractiveElements();
+    
+    // Mark section as viewed after 10 seconds
+    const timer = setTimeout(() => {
+      if (!completedSections.includes(currentSection)) {
+        setCompletedSections(prev => [...prev, currentSection]);
+        const newProgress = Math.floor(((completedSections.length + 1) / (course?.sections?.length || 1)) * 100);
+        setProgress(newProgress);
+        
+        // Show progress notification
+        addNotification({
+          type: 'success',
+          message: `Progress: ${newProgress}% complete`,
+          duration: 3000
+        });
+      }
+    }, 10000);
+    
     // Remove event listeners on cleanup
     return () => {
       glossaryTerms.forEach(term => {
         term.removeEventListener('click', handleGlossaryClick);
       });
+      clearTimeout(timer);
     };
-  }, [currentSection, course]);
+  }, [currentSection, course, processInteractiveElements, completedSections]);
   
   // Close glossary popup when clicking elsewhere
   useEffect(() => {
@@ -113,6 +188,28 @@ const CourseView = () => {
     }
   }, [activeGlossary]);
 
+  // Add notification to the notifications array
+  const addNotification = (notification) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { ...notification, id }]);
+    setNotificationOpen(true);
+    
+    // Auto-dismiss after duration
+    if (notification.duration) {
+      setTimeout(() => {
+        removeNotification(id);
+      }, notification.duration);
+    }
+  };
+  
+  // Remove notification from the array
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    if (notifications.length <= 1) {
+      setNotificationOpen(false);
+    }
+  };
+
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -125,42 +222,97 @@ const CourseView = () => {
     setTimeout(() => {
       const response = getAssistantResponse(courseId, userMessage);
       setMessages(prev => [...prev, { sender: 'bot', text: response }]);
+      setNewMessage('');
     }, 800);
-
-    // Clear the input
-    setNewMessage('');
   };
 
-  if (loading) {
-    return <div className="loading">Loading course content...</div>;
-  }
 
-  if (!course) {
-    return <div className="error-message">Course not found</div>;
-  }
 
+if (loading) {
   return (
-    <main className="course-view">
-      <div className="course-header" style={{ backgroundColor: course.color }}>
-        <div className="container">
-          <Link to="/dashboard" className="back-button">← Back to Dashboard</Link>
-          <div className="course-header-content">
-            <h1>{course.title}</h1>
-            <p className="course-description">{course.description}</p>
-          </div>
+    <div className="loading-container">
+      <motion.div 
+        className="loading"
+        animate={{ 
+          scale: [1, 1.2, 1],
+          rotate: [0, 180, 360] 
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity 
+        }}
+      >
+        Loading...
+      </motion.div>
+    </div>
+  );
+}
+
+if (!course) {
+  return (
+    <motion.div 
+      className="error"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      Course not found
+    </motion.div>
+  );
+}
+
+return (
+  <motion.main 
+    className="course-view" 
+    style={{ "--course-color": course.color }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.5 }}
+  >
+    {/* Notification system */}
+    <AnimatePresence>
+      {notificationOpen && (
+        <Notification 
+          notifications={notifications} 
+          removeNotification={removeNotification} 
+        />
+      )}
+    </AnimatePresence>
+    
+    {/* Course header with animation */}
+    <motion.div 
+      className="course-header" 
+      style={{ backgroundColor: course.color }}
+      initial={{ y: -50 }}
+      animate={{ y: 0 }}
+      transition={{ delay: 0.2, duration: 0.5 }}
+    >
+      <div className="container">
+        <h1>{course.title}</h1>
+        <p className="course-description">{course.description}</p>
+        
+        <div className="course-meta">
+          <span className="level">Level: {course.level}</span>
+          <span className="category">Category: {course.category}</span>
+          <span className="progress">Progress: {progress}%</span>
           
-          {/* Language selector */}
           <div className="language-selector">
             <button 
               className="language-button"
               onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
             >
               {availableLanguages.find(lang => lang.code === language)?.name || 'English'}
-              <span className="dropdown-arrow">▼</span>
             </button>
             
-            {languageMenuOpen && (
-              <div className="language-dropdown">
+            <AnimatePresence>
+              {languageMenuOpen && (
+              <motion.div 
+                className="language-dropdown"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
                 {availableLanguages.map(lang => (
                   <button
                     key={lang.code}
@@ -173,36 +325,66 @@ const CourseView = () => {
                     {lang.name}
                   </button>
                 ))}
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
+    </motion.div>
 
-      <div className="course-container">
-        <div className="course-sidebar">
-          <h3>Course Sections</h3>
-          <ul className="section-list">
-            {course.sections.map((section, index) => (
-              <li 
-                key={index} 
-                className={currentSection === index ? 'active' : ''}
-                onClick={() => setCurrentSection(index)}
-              >
-                {section.title}
-              </li>
-            ))}
-          </ul>
-          <button 
-            className="chat-toggle" 
-            onClick={() => setChatOpen(!chatOpen)}
-            style={{ backgroundColor: course.color }}
-          >
-            {chatOpen ? 'Close Assistant' : 'Learning Assistant'}
-          </button>
+    <div className="course-container">
+      <motion.div 
+        className="course-sidebar"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <h3>Course Sections</h3>
+        <div className="progress-bar">
+          <div 
+            className="progress-fill" 
+            style={{ 
+              width: `${progress}%`,
+              backgroundColor: course.color
+            }}
+          ></div>
         </div>
+        <ul className="section-list">
+          {course.sections.map((section, index) => (
+            <motion.li 
+              key={index} 
+              className={`${currentSection === index ? 'active' : ''} ${completedSections.includes(index) ? 'completed' : ''}`}
+              onClick={() => setCurrentSection(index)}
+              whileHover={{ scale: 1.05, x: 5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span className="section-number">{index + 1}</span>
+              <span className="section-title">{section.title}</span>
+              {completedSections.includes(index) && (
+                <span className="completion-mark">✓</span>
+              )}
+            </motion.li>
+          ))}
+        </ul>
+        <motion.button 
+          className="chat-toggle" 
+          onClick={() => setChatOpen(!chatOpen)}
+          style={{ backgroundColor: course.color }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {chatOpen ? 'Close Assistant' : 'Learning Assistant'}
+        </motion.button>
+        </motion.div>
 
-        <div className="course-content">
+        <motion.div 
+          className="course-content"
+          key={currentSection} // This forces re-animation when section changes
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="section-content">
             <h2>{course.sections[currentSection].title}</h2>
             <div 
@@ -211,73 +393,99 @@ const CourseView = () => {
               dangerouslySetInnerHTML={{ __html: course.sections[currentSection].content }}
             />
             
-            {/* Glossary tooltip */}
-            {activeGlossary && (
-              <div 
-                className="glossary-tooltip" 
-                style={{
-                  top: activeGlossary.position.top,
-                  left: activeGlossary.position.left
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h4>{activeGlossary.term}</h4>
-                <p>{activeGlossary.definition}</p>
-              </div>
-            )}
+            {/* Interactive component modal */}
+            <AnimatePresence>
+              {activeInteractive && (
+                <motion.div 
+                  className="interactive-modal"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="interactive-modal-content">
+                    <button className="close-button" onClick={() => setActiveInteractive(null)}>×</button>
+                    <h3>Interactive Demonstration</h3>
+                    <InteractiveComponent 
+                      type={activeInteractive.type} 
+                      params={activeInteractive.params} 
+                      courseId={courseId}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Glossary tooltip with animation */}
+            <AnimatePresence>
+              {activeGlossary && (
+                <motion.div 
+                  className="glossary-tooltip" 
+                  style={{
+                    top: activeGlossary.position.top,
+                    left: activeGlossary.position.left
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h4>{activeGlossary.term}</h4>
+                  <p>{activeGlossary.definition}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
             <div className="section-navigation">
               {currentSection > 0 && (
-                <button 
+                <motion.button 
                   className="btn btn-outline"
                   onClick={() => setCurrentSection(currentSection - 1)}
+                  whileHover={{ scale: 1.05, x: -3 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   ← Previous Section
-                </button>
+                </motion.button>
               )}
               {currentSection < course.sections.length - 1 && (
-                <button 
+                <motion.button 
                   className="btn btn-primary"
                   onClick={() => setCurrentSection(currentSection + 1)}
                   style={{ backgroundColor: course.color }}
+                  whileHover={{ scale: 1.05, x: 3 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Next Section →
-                </button>
+                </motion.button>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {chatOpen && (
-          <div className="course-chat">
-            <div className="chat-header" style={{ backgroundColor: course.color }}>
-              <h3>Learning Assistant</h3>
-            </div>
-            <div className="chat-messages">
-              {messages.map((message, index) => (
-                <div key={index} className={`message ${message.sender}`}>
-                  {message.text}
-                </div>
-              ))}
-              <div ref={messagesEndRef} /> {/* This element will be scrolled into view */}
-            </div>
-            <form className="chat-input" onSubmit={handleSendMessage}>
-              <input
-                type="text"
-                placeholder="Ask a question..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+        <AnimatePresence>
+          {chatOpen && (
+            <motion.div 
+              className="course-chat"
+              initial={{ x: 300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 300, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChatBot 
+                courseId={courseId} 
+                courseColor={course.color} 
+                initialMessages={messages}
+                onSendMessage={handleSendMessage}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                messagesEndRef={messagesEndRef}
               />
-              <button 
-                type="submit" 
-                style={{ backgroundColor: course.color }}
-              >
-                Send
-              </button>
-            </form>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </main>
+    </motion.main>
   );
 };
 

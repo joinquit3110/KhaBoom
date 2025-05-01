@@ -7,13 +7,21 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Root paths for content and translations
-const contentRoot = path.resolve(process.cwd(), "../learned/textbooks-master/content");
-const translationsRoot = path.resolve(process.cwd(), "../learned/textbooks-master/translations");
+// Root paths for content and translations - only using main folders
+const contentRoot = path.resolve(process.cwd(), "../content");
+const translationsRoot = path.resolve(process.cwd(), "../translations");
+
+// Helper to get content root (simplified to only use main folders)
+const getContentRoot = () => contentRoot;
+
+// Helper to get translations root (simplified to only use main folders)
+const getTranslationsRoot = () => translationsRoot;
 
 // Helper to read course metadata from Mathigon format
 const readCourseMetadata = (courseId) => {
   try {
+    const contentRoot = getContentRoot();
+    
     // First try to get metadata from content.md (Mathigon style)
     const contentPath = path.join(contentRoot, courseId, "content.md");
     if (fs.existsSync(contentPath)) {
@@ -44,7 +52,8 @@ const readCourseMetadata = (courseId) => {
     const metadataPath = path.join(contentRoot, courseId, "index.json");
     if (fs.existsSync(metadataPath)) {
       const data = fs.readFileSync(metadataPath, "utf8");
-      return JSON.parse(data);
+      const parsedData = JSON.parse(data);
+      return parsedData;
     }
     
     // Default metadata if no files exist
@@ -62,9 +71,15 @@ const readCourseMetadata = (courseId) => {
   }
 };
 
+// Read course metadata (simplified since we only have one content source)
+const readCourseMeta = (courseId) => {
+  return readCourseMetadata(courseId);
+};
+
 // Helper to read content from a course directory (Mathigon format)
 const readCourseContent = (courseId) => {
   try {
+    const contentRoot = getContentRoot();
     const coursePath = path.join(contentRoot, courseId);
     if (!fs.existsSync(coursePath)) {
       return null;
@@ -100,10 +115,13 @@ const readCourseContent = (courseId) => {
       for (let i = 0; i < sectionPoints.length; i++) {
         const current = sectionPoints[i];
         const next = sectionPoints[i + 1];
-        const sectionContent = next ? 
-          mainContent.substring(current.index, next.index) : 
-          mainContent.substring(current.index);
+        const startIndex = current.index;
+        const endIndex = next ? next.index : mainContent.length;
         
+        // Extract the section content
+        const sectionContent = mainContent.substring(startIndex, endIndex);
+        
+        // Add to sections array
         sections.push({
           id: current.id,
           title: current.title,
@@ -111,69 +129,42 @@ const readCourseContent = (courseId) => {
         });
       }
     } else {
-      // Fallback to directory scanning if no main content file
-      // Get markdown files and subdirectories with content.md
+      // No main content.md file, look for individual markdown files
       const files = fs.readdirSync(coursePath).filter(file => 
-        file.endsWith(".md") || 
-        (fs.statSync(path.join(coursePath, file)).isDirectory() && 
-        fs.existsSync(path.join(coursePath, file, "content.md")))
+        file.endsWith(".md") && file !== "content.md"
       );
       
-      // Process each file or directory
+      // Process each markdown file as a section
       files.forEach(file => {
-        // Skip the main content.md file which we already processed
-        if (file === "content.md") return;
+        const sectionId = file.replace(".md", "");
+        const filePath = path.join(coursePath, file);
+        const content = fs.readFileSync(filePath, "utf8");
         
-        let content = '';
-        let id = file.replace(".md", "");
-        let title = id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, " ");
-        
-        if (file.endsWith(".md")) {
-          content = fs.readFileSync(path.join(coursePath, file), "utf8");
-        } else {
-          const contentFilePath = path.join(coursePath, file, "content.md");
-          if (fs.existsSync(contentFilePath)) {
-            content = fs.readFileSync(contentFilePath, "utf8");
-            
-            // Try to extract title from metadata
-            const titleMatch = content.match(/> title: (.+)/);
-            if (titleMatch) {
-              title = titleMatch[1];
-            }
-          }
-        }
-        
-        // Skip if no content
-        if (!content) return;
+        // Extract title from the content (first heading)
+        const titleMatch = content.match(/# ([^\n]+)/);
+        const title = titleMatch ? titleMatch[1] : sectionId;
         
         sections.push({
-          id,
-          title,
-          content
+          id: sectionId,
+          title: title,
+          content: content
         });
       });
     }
-
+    
     // Get course metadata
     const metadata = readCourseMetadata(courseId);
     
-    // If we have no sections, try to create at least one from the entire content
-    if (sections.length === 0 && mainContent) {
-      sections.push({
-        id: "introduction",
-        title: "Introduction",
-        content: mainContent
-      });
-    }
-    
+    // Return the structured content
     return {
-      course: metadata,
+      metadata: metadata,
       content: {
-        sections
+        id: courseId,
+        sections: sections
       }
     };
   } catch (error) {
-    console.error(`Error reading course content for ${courseId}:`, error);
+    console.error(`Error reading content for ${courseId}:`, error);
     return null;
   }
 };
@@ -181,69 +172,61 @@ const readCourseContent = (courseId) => {
 // Helper to get available translations
 const getTranslations = (courseId) => {
   try {
-    const availableTranslations = [{ code: "en", name: "English" }];
+    const contentRoot = getContentRoot();
+    const translationsRoot = getTranslationsRoot();
     
-    // Get all language directories from translations
-    const translationsPath = path.join(translationsRoot);
-    if (!fs.existsSync(translationsPath)) {
-      return availableTranslations;
+    // Check if course exists
+    const coursePath = path.join(contentRoot, courseId);
+    if (!fs.existsSync(coursePath)) {
+      return [{ code: "en", name: "English" }];
     }
     
-    const langDirs = fs.readdirSync(translationsPath).filter(dir => 
-      fs.statSync(path.join(translationsPath, dir)).isDirectory()
-    );
+    // Always include English
+    const availableTranslations = [{ code: "en", name: "English" }];
     
-    // For each language, check if it has content for this course
-    langDirs.forEach(langCode => {
-      const coursePath = path.join(translationsPath, langCode, courseId);
-      if (fs.existsSync(coursePath)) {
-        let langName = langCode;
-        
-        // Try to get language name from strings.yaml
-        const stringsPath = path.join(translationsPath, "strings.yaml");
-        if (fs.existsSync(stringsPath)) {
-          const stringsContent = fs.readFileSync(stringsPath, "utf8");
-          const langMatch = stringsContent.match(new RegExp(`${langCode}: (.+)`));
-          if (langMatch) {
-            langName = langMatch[1];
+    // Check the translations directory
+    if (fs.existsSync(translationsRoot)) {
+      const langDirs = fs.readdirSync(translationsRoot).filter(dir => 
+        fs.statSync(path.join(translationsRoot, dir)).isDirectory()
+      );
+      
+      // Check each language directory for this course
+      langDirs.forEach(langCode => {
+        const langPath = path.join(translationsRoot, langCode, courseId);
+        if (fs.existsSync(langPath)) {
+          // Get language name from the code (simple mapping)
+          let langName = "";
+          switch (langCode) {
+            case "es": langName = "Español"; break;
+            case "fr": langName = "Français"; break;
+            case "de": langName = "Deutsch"; break;
+            case "it": langName = "Italiano"; break;
+            case "pt": langName = "Português"; break;
+            case "ru": langName = "Русский"; break;
+            case "zh": langName = "中文"; break;
+            case "ja": langName = "日本語"; break;
+            case "ko": langName = "한국어"; break;
+            default: langName = langCode.toUpperCase();
           }
+          
+          availableTranslations.push({
+            code: langCode,
+            name: langName
+          });
         }
-        
-        // Language name mapping as fallback
-        const langNames = {
-          "ar": "Arabic",
-          "cn": "Chinese",
-          "de": "German",
-          "es": "Spanish",
-          "fr": "French",
-          "hi": "Hindi",
-          "hr": "Croatian",
-          "it": "Italian",
-          "ja": "Japanese",
-          "pt": "Portuguese",
-          "ro": "Romanian",
-          "ru": "Russian",
-          "sv": "Swedish",
-          "tr": "Turkish",
-          "vi": "Vietnamese"
-        };
-        
-        if (langCode in langNames) {
-          langName = langNames[langCode];
-        }
-        
-        availableTranslations.push({
-          code: langCode,
-          name: langName
-        });
-      }
-    });
+      });
+    }
     
     return availableTranslations;
   } catch (error) {
     console.error(`Error getting translations for ${courseId}:`, error);
     return [{ code: "en", name: "English" }];
   }
+};
+
+// Get translations (simplified since we only have one source)
+const getAllTranslations = (courseId) => {
+  return getTranslations(courseId);
 };
 
 // Helper to get translated content
@@ -254,6 +237,7 @@ const getTranslatedContent = (courseId, langCode) => {
       return readCourseContent(courseId);
     }
     
+    const translationsRoot = getTranslationsRoot();
     const translationPath = path.join(translationsRoot, langCode, courseId);
     if (!fs.existsSync(translationPath)) {
       return readCourseContent(courseId);
