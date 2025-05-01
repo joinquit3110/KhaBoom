@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, fullName, email, password, class: className, birthdate, gmail } = req.body;
+    const { name, fullName, email, password, class: className, birthdate, gender } = req.body;
     
     // Validate required fields
     if (!name || !fullName || !email || !password || !className || !birthdate) {
@@ -18,8 +18,10 @@ router.post("/register", async (req, res) => {
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ msg: "Email already in use" });
     
-    // Generate avatar URL using DiceBear
-    const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/ /g, '')}`;
+    // Generate random avatar URL using DiceBear based on the gender
+    const styles = gender === 'female' ? 'avataaars-female' : 'avataaars';
+    const randomSeed = Math.random().toString(36).substring(2, 10);
+    const avatar = `https://api.dicebear.com/7.x/${styles}/svg?seed=${randomSeed}`;
     
     // Create new user
     const user = await User.create({ 
@@ -29,7 +31,7 @@ router.post("/register", async (req, res) => {
       password, 
       class: className, 
       birthdate: new Date(birthdate),
-      gmail: gmail || email,
+      gender: gender || 'male',
       avatar 
     });
     

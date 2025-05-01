@@ -7,9 +7,9 @@ const Register = ({ setUser }) => {
     name: '',
     fullName: '',
     email: '',
-    gmail: '',
     class: '',
     birthdate: '',
+    gender: 'male',
     password: '',
     confirmPassword: ''
   });
@@ -137,15 +137,42 @@ const Register = ({ setUser }) => {
           </div>
           
           <div className="form-group">
-            <label htmlFor="gmail" className="form-label">Gmail (optional)</label>
-            <input
-              type="email"
-              id="gmail"
-              name="gmail"
-              className="form-input"
-              value={formData.gmail}
-              onChange={handleChange}
-            />
+            <label className="form-label">Gender</label>
+            <div className="radio-group">
+              <div className="radio-option">
+                <input
+                  type="radio"
+                  id="male"
+                  name="gender"
+                  value="male"
+                  checked={formData.gender === 'male'}
+                  onChange={handleChange}
+                />
+                <label htmlFor="male">Male</label>
+              </div>
+              <div className="radio-option">
+                <input
+                  type="radio"
+                  id="female"
+                  name="gender"
+                  value="female"
+                  checked={formData.gender === 'female'}
+                  onChange={handleChange}
+                />
+                <label htmlFor="female">Female</label>
+              </div>
+              <div className="radio-option">
+                <input
+                  type="radio"
+                  id="other"
+                  name="gender"
+                  value="other"
+                  checked={formData.gender === 'other'}
+                  onChange={handleChange}
+                />
+                <label htmlFor="other">Other</label>
+              </div>
+            </div>
           </div>
           
           <div className="form-group">

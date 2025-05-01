@@ -7,8 +7,8 @@ const UserSchema = new mongoose.Schema({
   class: { type: String, required: true },
   birthdate: { type: Date, required: true },
   email: { type: String, required: true, unique: true },
-  gmail: { type: String, required: false },
-  avatar: { type: String, default: "https://api.dicebear.com/7.x/avataaars/svg?seed=default" },
+  gender: { type: String, enum: ['male', 'female', 'other'], default: 'male' },
+  avatar: { type: String },
   password: { type: String, required: true }
 }, { timestamps: true });
 
