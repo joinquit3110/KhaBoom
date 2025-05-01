@@ -75,13 +75,35 @@ const CourseView = () => {
       }
     }, 10000); // 10 second timeout
     
+    // Create container if it doesn't exist
+    let container = document.getElementById('course-container');
+    if (!container) {
+      console.log("Course container not found, creating one");
+      container = document.createElement('div');
+      container.id = 'course-container';
+      container.style.width = '100%';
+      container.style.height = '600px';
+      container.style.border = '1px solid #eee';
+      container.style.borderRadius = '8px';
+      container.style.overflow = 'hidden';
+      container.style.marginBottom = '20px';
+      
+      // Find a suitable place to append the container
+      const mainContent = document.querySelector('.dashboard') || document.querySelector('main');
+      if (mainContent) {
+        mainContent.prepend(container);
+      } else {
+        // As a last resort, append to body
+        document.body.prepend(container);
+      }
+    }
+    
     // Clear previous content and append iframe
-    const container = document.getElementById('course-container');
     if (container) {
       container.innerHTML = '';
       container.appendChild(iframe);
     } else {
-      console.error("Course container element not found");
+      console.error("Course container element not found and couldn't be created");
       setError("An error occurred while preparing the course view.");
       setLoading(false);
     }
@@ -89,6 +111,12 @@ const CourseView = () => {
     // Fetch course metadata
     axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`)
       .then(res => {
+        if (!res.data || !res.data.courses) {
+          console.error("Invalid course data format:", res.data);
+          setError("Received invalid course data format");
+          setLoading(false);
+          return;
+        }
         const foundCourse = res.data.courses.find(c => c.id === courseId);
         if (foundCourse) {
           setCourse(foundCourse);

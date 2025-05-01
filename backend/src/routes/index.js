@@ -20,26 +20,63 @@ router.use('/content', contentRoutes);
 router.get('/courses', (req, res) => {
   const contentDir = path.join(rootDir, 'content');
   try {
-    const courses = fs.readdirSync(contentDir)
+    // Check if the content directory exists
+    if (!fs.existsSync(contentDir)) {
+      console.error(`Content directory not found: ${contentDir}`);
+      return res.status(404).json({ 
+        error: 'Content directory not found',
+        courses: [] 
+      });
+    }
+
+    // Get all subdirectories in the content directory
+    const dirs = fs.readdirSync(contentDir);
+    
+    // Filter valid course directories
+    const courses = dirs
       .filter(dir => {
-        return dir !== 'shared' && 
-              !dir.startsWith('_') && 
-              fs.statSync(path.join(contentDir, dir)).isDirectory() &&
-              fs.existsSync(path.join(contentDir, dir, 'content.md'));
+        // Skip if directory doesn't exist or is special
+        if (dir === 'shared' || dir.startsWith('_')) return false;
+        
+        const dirPath = path.join(contentDir, dir);
+        // Skip if not a directory
+        if (!fs.statSync(dirPath).isDirectory()) return false;
+        
+        // Check if content.md exists
+        const contentFile = path.join(dirPath, 'content.md');
+        return fs.existsSync(contentFile);
       })
       .map(dir => {
-        // Basic course info
+        // Extract title from content.md if possible
+        const contentFile = path.join(contentDir, dir, 'content.md');
+        let title = dir.charAt(0).toUpperCase() + dir.slice(1).replace(/-/g, ' ');
+        
+        try {
+          // Try to parse the title from the content file
+          const content = fs.readFileSync(contentFile, 'utf8');
+          const titleMatch = content.match(/# ([^\n]+)/);
+          if (titleMatch) {
+            title = titleMatch[1];
+          }
+        } catch (error) {
+          console.warn(`Could not parse title from ${contentFile}`);
+        }
+        
         return {
           id: dir,
-          title: dir.charAt(0).toUpperCase() + dir.slice(1).replace(/-/g, ' '),
+          title: title,
           url: `/course/${dir}`
         };
       });
     
+    console.log(`Found ${courses.length} courses`);
     res.json({ courses });
   } catch (err) {
     console.error('Error reading courses:', err);
-    res.status(500).json({ error: 'Failed to retrieve course list' });
+    res.status(500).json({ 
+      error: 'Failed to retrieve course list',
+      courses: [] 
+    });
   }
 });
 

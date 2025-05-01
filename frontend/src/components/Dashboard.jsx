@@ -11,12 +11,20 @@ export default function Dashboard({ user }) {
     // Fetch courses from backend API
     axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`)
       .then(res => {
-        setCourses(res.data.courses);
+        if (!res.data || !res.data.courses) {
+          console.error("Invalid course data format:", res.data);
+          setError("Received invalid course data. Please try again later.");
+          setCourses([]);
+          setLoading(false);
+          return;
+        }
+        setCourses(res.data.courses || []);
         setLoading(false);
       })
       .catch(err => {
         console.error("Error fetching courses:", err);
         setError("Failed to load courses. Please try again later.");
+        setCourses([]);
         setLoading(false);
       });
   }, []);
@@ -47,7 +55,7 @@ export default function Dashboard({ user }) {
           <div className="no-courses">No courses available at this time.</div>
         ) : (
           <div className="courses-grid">
-            {courses.map(course => (
+            {courses && courses.length > 0 ? courses.map(course => (
               <div key={course.id} className="course-card">
                 <div className="course-image">
                   <img 
@@ -66,7 +74,9 @@ export default function Dashboard({ user }) {
                   </Link>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="no-courses">No courses available at this time.</div>
+            )}
           </div>
         )}
       </div>
