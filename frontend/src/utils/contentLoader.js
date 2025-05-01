@@ -260,8 +260,19 @@ const getAssistantResponse = async (courseId, userMessage) => {
 const scanAvailableCourses = async () => {
   try {
     // Use direct file system access via the API
-    // This will look in both d:\sucvat\content and d:\sucvat\translations directories
-    const contentResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/scan`);
+    // This will look in both content and translations directories
+    console.log('Attempting to fetch courses from API...');
+    const apiUrl = `${import.meta.env.VITE_API_BASE || ''}/api/content/scan`;
+    console.log('API URL:', apiUrl);
+    
+    const contentResponse = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors'
+    });
     
     // Handle response
     if (!contentResponse.ok) {
@@ -269,10 +280,15 @@ const scanAvailableCourses = async () => {
       // Don't throw, continue with hardcoded fallback courses
     } else {
       try {
-        const data = await contentResponse.json();
+        const responseText = await contentResponse.text();
+        console.log('API Response:', responseText);
+        
+        // Parse the JSON response
+        const data = JSON.parse(responseText);
         
         if (data && Array.isArray(data.courses) && data.courses.length > 0) {
           // Success! Clear existing courses and add the new ones
+          console.log(`Found ${data.courses.length} courses from API`);
           availableCourses.length = 0;
           
           // Process and add each course
@@ -295,8 +311,10 @@ const scanAvailableCourses = async () => {
             }
           });
           
-          console.log(`Loaded ${availableCourses.length} courses from content directory`);
-          return;
+          console.log(`Loaded ${availableCourses.length} courses from API`);
+          return; // Successfully loaded courses from API
+        } else {
+          console.error('Invalid or empty courses data:', data);
         }
       } catch (parseError) {
         console.error('Error parsing course data:', parseError);
@@ -304,8 +322,40 @@ const scanAvailableCourses = async () => {
     }
     
     // If we reach here, something went wrong with API or parsing
-    // Don't clear the fallback courses - we'll use those instead
-    console.log(`Using ${availableCourses.length} fallback courses`);
+    // Fallback to local directory scanning if available
+    console.log('API fetch failed, trying to scan content directory directly...');
+    
+    try {
+      // Attempt to scan content directory directly using a different API endpoint
+      const fallbackResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/courses`);
+      if (fallbackResponse.ok) {
+        const coursesData = await fallbackResponse.json();
+        if (Array.isArray(coursesData) && coursesData.length > 0) {
+          // Don't clear existing courses unless we have new ones
+          availableCourses.length = 0;
+          
+          coursesData.forEach(course => {
+            availableCourses.push({
+              ...course,
+              thumbnail: `/api/content/${course.id}/icon.png`
+            });
+          });
+          
+          console.log(`Loaded ${availableCourses.length} courses from fallback API endpoint`);
+          return;
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Fallback content scan failed:', fallbackError);
+    }
+    
+    // If we still have fallback courses, log that we're using them
+    if (availableCourses.length > 0) {
+      console.log(`Using ${availableCourses.length} hardcoded fallback courses`);
+    } else {
+      console.error('No courses available from any source!');
+    }
+    
   } catch (error) {
     console.error('Error scanning courses:', error);
   }

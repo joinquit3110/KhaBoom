@@ -15,9 +15,9 @@ const Navbar = ({ user, onLogout }) => {
           <img 
             src="/logo.png" 
             alt="Kha-Boom!" 
-            style={{ height: '60px', marginRight: '15px', borderRadius: '8px' }} 
+            style={{ height: '45px', marginRight: '10px', borderRadius: '6px' }} 
           />
-          <span style={{ fontSize: '1.8rem', fontWeight: '700' }}>Kha-Boom!</span>
+          <span style={{ fontSize: '1.5rem', fontWeight: '700' }}>Kha-Boom!</span>
         </Link>
       </div>
       
@@ -45,11 +45,11 @@ const Navbar = ({ user, onLogout }) => {
                     className="user-avatar"
                   />
                 )}
-                <span>{user.fullName}</span>
+                <span className="user-full-name">{user.fullName}</span>
               </span>
               <button 
                 onClick={onLogout} 
-                className="btn btn-outline logout-btn"
+                className="btn btn-sm btn-outline logout-btn"
               >
                 Logout
               </button>

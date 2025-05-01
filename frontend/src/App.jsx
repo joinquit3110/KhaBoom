@@ -76,14 +76,12 @@ function HomePage({ message, user }) {
             src="/logo.png" 
             alt="Kha-Boom Logo" 
             className="hero-logo" 
-            style={{ maxWidth: '180px', marginBottom: '1rem' }}
+            style={{ maxWidth: '250px', marginBottom: '1.5rem' }}
           />
           <h1>Kha-Boom!</h1>
           <p className="hero-subtitle">
             Unleash your learning potential with our creative and interactive platform!
           </p>
-          
-          {message && <div className="api-status">API Status: {message}</div>}
           
           {!user ? (
             <div className="auth-buttons">
@@ -115,30 +113,32 @@ function HomePage({ message, user }) {
       </section>
       
       <section className="features">
-        <h2 className="section-title">Explore Our Features</h2>
-        <div className="cards-container">
-          <div className="feature-card" style={{ backgroundColor: 'rgba(255, 64, 129, 0.05)' }}>
-            <div className="feature-icon" style={{ backgroundColor: 'rgba(255, 64, 129, 0.15)' }}>
-              <span role="img" aria-label="Video">🎬</span>
+        <div className="container">
+          <h2 className="section-title">Explore Our Features</h2>
+          <div className="cards-container features-grid">
+            <div className="feature-card" style={{ backgroundColor: 'rgba(255, 64, 129, 0.05)' }}>
+              <div className="feature-icon" style={{ backgroundColor: 'rgba(255, 64, 129, 0.15)' }}>
+                <span role="img" aria-label="Video">🎬</span>
+              </div>
+              <h3>Interactive Learning</h3>
+              <p>Engage with dynamic content designed to make learning fun and effective.</p>
             </div>
-            <h3>Interactive Learning</h3>
-            <p>Engage with dynamic content designed to make learning fun and effective.</p>
-          </div>
-          
-          <div className="feature-card" style={{ backgroundColor: 'rgba(0, 188, 212, 0.05)' }}>
-            <div className="feature-icon" style={{ backgroundColor: 'rgba(0, 188, 212, 0.15)' }}>
-              <span role="img" aria-label="Chart">📊</span>
+            
+            <div className="feature-card" style={{ backgroundColor: 'rgba(0, 188, 212, 0.05)' }}>
+              <div className="feature-icon" style={{ backgroundColor: 'rgba(0, 188, 212, 0.15)' }}>
+                <span role="img" aria-label="Chart">📊</span>
+              </div>
+              <h3>Track Progress</h3>
+              <p>Monitor your achievements and learning journey with detailed analytics.</p>
             </div>
-            <h3>Track Progress</h3>
-            <p>Monitor your achievements and learning journey with detailed analytics.</p>
-          </div>
-          
-          <div className="feature-card" style={{ backgroundColor: 'rgba(124, 77, 255, 0.05)' }}>
-            <div className="feature-icon" style={{ backgroundColor: 'rgba(124, 77, 255, 0.15)' }}>
-              <span role="img" aria-label="People">👥</span>
+            
+            <div className="feature-card" style={{ backgroundColor: 'rgba(124, 77, 255, 0.05)' }}>
+              <div className="feature-icon" style={{ backgroundColor: 'rgba(124, 77, 255, 0.15)' }}>
+                <span role="img" aria-label="People">👥</span>
+              </div>
+              <h3>Community Support</h3>
+              <p>Connect with fellow learners and instructors to enhance your knowledge.</p>
             </div>
-            <h3>Community Support</h3>
-            <p>Connect with fellow learners and instructors to enhance your knowledge.</p>
           </div>
         </div>
       </section>

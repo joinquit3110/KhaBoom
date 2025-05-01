@@ -206,30 +206,34 @@ export default function Dashboard({ user }) {
         {/* Category and Sort Controls */}
         <div className="course-filters">
           <div className="filter-group">
-            <label>Category:</label>
-            <select 
-              value={categoryFilter} 
-              onChange={(e) => setCategoryFilter(e.target.value)} 
-              className="filter-select"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+            <label className="filter-label">Category:</label>
+            <div className="select-wrapper primary-select">
+              <select 
+                value={categoryFilter} 
+                onChange={(e) => setCategoryFilter(e.target.value)} 
+                className="filter-select"
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div className="filter-group">
-            <label>Sort by:</label>
-            <select 
-              value={sortOrder} 
-              onChange={(e) => setSortOrder(e.target.value)} 
-              className="filter-select"
-            >
-              <option value="default">Default</option>
-              <option value="alphabetical">A-Z</option>
-              <option value="level">Level</option>
-              <option value="category">Category</option>
-            </select>
+            <label className="filter-label">Sort by:</label>
+            <div className="select-wrapper secondary-select">
+              <select 
+                value={sortOrder} 
+                onChange={(e) => setSortOrder(e.target.value)} 
+                className="filter-select"
+              >
+                <option value="default">Default</option>
+                <option value="alphabetical">A-Z</option>
+                <option value="level">Level</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
           </div>
         </div>
         

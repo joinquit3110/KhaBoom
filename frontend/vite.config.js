@@ -7,6 +7,24 @@ import compression from 'vite-plugin-compression'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Define environment variables here
+  define: {
+    'import.meta.env.VITE_API_BASE': JSON.stringify('http://localhost:5000'),
+  },
+  server: {
+    // Configure server to handle JSX properly
+    fs: {
+      strict: false,
+    },
+    // Set correct MIME types
+    middlewareMode: true,
+  },
+  build: {
+    // Ensure modules are handled correctly
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+  },
   plugins: [
     react(),
     splitVendorChunkPlugin(),

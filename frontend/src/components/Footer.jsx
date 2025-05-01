@@ -46,10 +46,10 @@ const Footer = () => {
       <div className="footer-bottom">
         <p>© {currentYear} Kha-Boom! All rights reserved.</p>
         <div className="social-links">
-          <a href="#" aria-label="Facebook">📱</a>
-          <a href="#" aria-label="Twitter">🐦</a>
-          <a href="#" aria-label="Instagram">📸</a>
-          <a href="#" aria-label="YouTube">🎬</a>
+          <a href="#" aria-label="Facebook" className="social-icon">📱</a>
+          <a href="#" aria-label="Twitter" className="social-icon">🐦</a>
+          <a href="#" aria-label="Instagram" className="social-icon">📸</a>
+          <a href="#" aria-label="YouTube" className="social-icon">🎬</a>
         </div>
       </div>
     </footer>
