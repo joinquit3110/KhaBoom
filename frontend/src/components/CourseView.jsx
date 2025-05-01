@@ -54,17 +54,36 @@ const CourseView = () => {
     iframe.style.height = '100%';
     iframe.style.border = 'none';
     iframe.style.borderRadius = '8px';
-    iframe.onload = () => setLoading(false);
-    iframe.onerror = () => {
-      setError("Failed to load course content");
+    
+    // Improved error handling and loading state management
+    iframe.onload = () => {
+      console.log("Course iframe loaded successfully");
       setLoading(false);
     };
+    
+    iframe.onerror = (error) => {
+      console.error("Failed to load course content:", error);
+      setError("Failed to load course content. Please try again later.");
+      setLoading(false);
+    };
+    
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn("Loading timeout reached - forcing loading state to complete");
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
     
     // Clear previous content and append iframe
     const container = document.getElementById('course-container');
     if (container) {
       container.innerHTML = '';
       container.appendChild(iframe);
+    } else {
+      console.error("Course container element not found");
+      setError("An error occurred while preparing the course view.");
+      setLoading(false);
     }
     
     // Fetch course metadata
@@ -75,20 +94,23 @@ const CourseView = () => {
           setCourse(foundCourse);
         } else {
           setError("Course not found");
+          setLoading(false);
         }
       })
       .catch(err => {
         console.error("Error fetching course data:", err);
-        setError("Failed to load course information");
+        setError("Failed to load course information. Please check your connection and try again.");
+        setLoading(false);
       });
       
     // Cleanup function
     return () => {
+      clearTimeout(loadingTimeout);
       if (container) {
         container.innerHTML = '';
       }
     };
-  }, [courseId]);
+  }, [courseId, loading]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {

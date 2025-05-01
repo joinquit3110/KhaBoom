@@ -71,62 +71,85 @@ function HomePage({ message, user }) {
   return (
     <main>
       <section className="hero">
-        <img 
-          src="/logo.png" 
-          alt="Kha-Boom Logo" 
-          className="hero-logo" 
-          style={{ maxWidth: '300px', marginBottom: '1rem' }}
-        />
-        <h1>Kha-Boom!</h1>
-        <p className="hero-subtitle">
-          Explore the world of knowledge with Kha-Boom! A colorful and creative online learning platform.
-        </p>
-        
-        {message && <div className="api-status">API Status: {message}</div>}
-        
-        {!user ? (
-          <div className="auth-buttons">
-            <Link to="/login" className="btn btn-primary">Login</Link>
-            <Link to="/register" className="btn btn-secondary">Register</Link>
+        <div className="hero-content-wrapper">
+          <img 
+            src="/logo.png" 
+            alt="Kha-Boom Logo" 
+            className="hero-logo" 
+            style={{ maxWidth: '180px', marginBottom: '1rem' }}
+          />
+          <h1>Kha-Boom!</h1>
+          <p className="hero-subtitle">
+            Unleash your learning potential with our creative and interactive platform!
+          </p>
+          
+          {message && <div className="api-status">API Status: {message}</div>}
+          
+          {!user ? (
+            <div className="auth-buttons">
+              <Link to="/login" className="btn btn-secondary">Login</Link>
+              <Link to="/register" className="btn btn-primary">Register Now</Link>
+            </div>
+          ) : (
+            <div className="welcome">
+              <h2>Welcome back, {user.fullName}!</h2>
+              <p>Continue your learning journey with us.</p>
+              <Link to="/dashboard" className="btn btn-primary start-learning-btn">Go to Dashboard</Link>
+            </div>
+          )}
+        </div>
+        <div className="hero-image">
+          <div className="floating-icon" style={{ top: '20%', left: '10%', animationDelay: '0s' }}>
+            <span role="img" aria-label="Book">📚</span>
           </div>
-        ) : (
-          <div className="welcome">
-            <h2>Welcome, {user.fullName}!</h2>
-            <p>We're glad to see you again.</p>
-            <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+          <div className="floating-icon" style={{ top: '70%', left: '20%', animationDelay: '1.5s' }}>
+            <span role="img" aria-label="Idea">💡</span>
           </div>
-        )}
+          <div className="floating-icon" style={{ top: '30%', right: '15%', animationDelay: '0.7s' }}>
+            <span role="img" aria-label="Rocket">🚀</span>
+          </div>
+          <div className="floating-icon" style={{ top: '60%', right: '10%', animationDelay: '2.1s' }}>
+            <span role="img" aria-label="Brain">🧠</span>
+          </div>
+        </div>
       </section>
       
       <section className="features">
-        <h2>Key Features</h2>
+        <h2 className="section-title">Explore Our Features</h2>
         <div className="cards-container">
-          <div className="card">
-            <div className="card-header" style={{ backgroundColor: 'var(--primary-color)' }}>
-              <h3>Multimedia Learning</h3>
+          <div className="feature-card" style={{ backgroundColor: 'rgba(255, 64, 129, 0.05)' }}>
+            <div className="feature-icon" style={{ backgroundColor: 'rgba(255, 64, 129, 0.15)' }}>
+              <span role="img" aria-label="Video">🎬</span>
             </div>
-            <div className="card-body">
-              <p>Diverse learning content with videos, images, and interactive exercises to make learning more engaging and dynamic.</p>
-            </div>
+            <h3>Interactive Learning</h3>
+            <p>Engage with dynamic content designed to make learning fun and effective.</p>
           </div>
           
-          <div className="card">
-            <div className="card-header" style={{ backgroundColor: 'var(--secondary-color)' }}>
-              <h3>Learning Management</h3>
+          <div className="feature-card" style={{ backgroundColor: 'rgba(0, 188, 212, 0.05)' }}>
+            <div className="feature-icon" style={{ backgroundColor: 'rgba(0, 188, 212, 0.15)' }}>
+              <span role="img" aria-label="Chart">📊</span>
             </div>
-            <div className="card-body">
-              <p>Track your learning progress with detailed analytics and reporting tools.</p>
-            </div>
+            <h3>Track Progress</h3>
+            <p>Monitor your achievements and learning journey with detailed analytics.</p>
           </div>
           
-          <div className="card">
-            <div className="card-header" style={{ backgroundColor: 'var(--accent-color)' }}>
-              <h3>Community Support</h3>
+          <div className="feature-card" style={{ backgroundColor: 'rgba(124, 77, 255, 0.05)' }}>
+            <div className="feature-icon" style={{ backgroundColor: 'rgba(124, 77, 255, 0.15)' }}>
+              <span role="img" aria-label="People">👥</span>
             </div>
-            <div className="card-body">
-              <p>Connect with fellow students and teachers to exchange knowledge and get answers to your questions.</p>
-            </div>
+            <h3>Community Support</h3>
+            <p>Connect with fellow learners and instructors to enhance your knowledge.</p>
           </div>
+        </div>
+      </section>
+      
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2>Ready to Begin Your Learning Journey?</h2>
+          <p>Join thousands of students already learning with Kha-Boom!</p>
+          <Link to={user ? "/dashboard" : "/register"} className="btn btn-primary cta-button">
+            {user ? "Continue Learning" : "Start Learning Now"}
+          </Link>
         </div>
       </section>
     </main>

@@ -13,23 +13,17 @@ const Navbar = ({ user, onLogout }) => {
       <div className="navbar-brand">
         <Link to="/" className="navbar-logo">
           <img 
-            src="/favicon.svg" 
-            alt="Kha-Boom" 
-            style={{ height: '30px', marginRight: '8px' }} 
+            src="/logo.png" 
+            alt="Kha-Boom!" 
+            style={{ height: '40px', marginRight: '10px', borderRadius: '8px' }} 
           />
-          Kha-Boom!
+          <span>Kha-Boom!</span>
         </Link>
       </div>
       
       <button 
         className="mobile-menu-button" 
         onClick={toggleMenu}
-        style={{
-          display: 'none',
-          '@media (max-width: 768px)': {
-            display: 'block'
-          }
-        }}
       >
         <span></span>
         <span></span>
@@ -42,32 +36,30 @@ const Navbar = ({ user, onLogout }) => {
         {user ? (
           <>
             <Link to="/dashboard" className="navbar-item">Dashboard</Link>
-            <button 
-              onClick={onLogout} 
-              className="btn btn-outline navbar-item logout-btn"
-              style={{ marginLeft: '8px' }}
-            >
-              Logout
-            </button>
-            <span className="navbar-item user-name">
-              <img 
-                src={user.avatar} 
-                alt={user.name} 
-                style={{ 
-                  width: '24px', 
-                  height: '24px', 
-                  borderRadius: '50%',
-                  marginRight: '8px' 
-                }} 
-              />
-              {user.fullName}
-            </span>
+            <div className="navbar-user">
+              <span className="user-name">
+                {user.avatar && (
+                  <img 
+                    src={user.avatar} 
+                    alt={user.fullName} 
+                    className="user-avatar"
+                  />
+                )}
+                <span>{user.fullName}</span>
+              </span>
+              <button 
+                onClick={onLogout} 
+                className="btn btn-outline logout-btn"
+              >
+                Logout
+              </button>
+            </div>
           </>
         ) : (
-          <>
+          <div className="auth-nav-buttons">
             <Link to="/login" className="navbar-item">Login</Link>
-            <Link to="/register" className="btn btn-primary navbar-item" style={{ marginLeft: '8px' }}>Register</Link>
-          </>
+            <Link to="/register" className="btn btn-primary navbar-item">Register</Link>
+          </div>
         )}
       </div>
     </nav>

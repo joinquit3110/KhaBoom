@@ -48,40 +48,51 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <main>
-      <div className="form-container">
-        <h2>Login</h2>
+    <main className="auth-page">
+      <div className="form-container login-form">
+        <div className="form-header">
+          <h2>Welcome Back!</h2>
+          <p className="form-subheading">Log in to continue your learning journey</p>
+        </div>
         
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-with-icon">
+              <i className="input-icon">📧</i>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="form-input"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="your@email.com"
+              />
+            </div>
           </div>
           
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-input"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-with-icon">
+              <i className="input-icon">🔒</i>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className="form-input"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="Your password"
+              />
+            </div>
           </div>
           
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
@@ -89,6 +100,12 @@ const Login = ({ setUser }) => {
         <p className="form-footer">
           Don't have an account? <Link to="/register">Register now</Link>
         </p>
+      </div>
+
+      <div className="auth-decoration">
+        <div className="decoration-circle circle-1"></div>
+        <div className="decoration-circle circle-2"></div>
+        <div className="decoration-circle circle-3"></div>
       </div>
     </main>
   );

@@ -64,76 +64,102 @@ const Register = ({ setUser }) => {
   };
 
   return (
-    <main>
-      <div className="form-container">
-        <h2>Register Account</h2>
+    <main className="auth-page">
+      <div className="form-container register-form">
+        <div className="form-header">
+          <h2>Create Account</h2>
+          <p className="form-subheading">Join our learning community</p>
+        </div>
         
-        {error && <div className="error-message" style={{ color: 'var(--primary-color)', marginBottom: '1rem' }}>{error}</div>}
+        {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name" className="form-label">Username</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className="form-input"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name" className="form-label">Username</label>
+              <div className="input-with-icon">
+                <i className="input-icon">👤</i>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  className="form-input"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Choose a username"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="fullName" className="form-label">Full Name</label>
+              <div className="input-with-icon">
+                <i className="input-icon">📝</i>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  className="form-input"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Your full name"
+                />
+              </div>
+            </div>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="fullName" className="form-label">Full Name</label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              className="form-input"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="class" className="form-label">Class</label>
-            <input
-              type="text"
-              id="class"
-              name="class"
-              className="form-input"
-              value={formData.class}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="birthdate" className="form-label">Birth Date</label>
-            <input
-              type="date"
-              id="birthdate"
-              name="birthdate"
-              className="form-input"
-              value={formData.birthdate}
-              onChange={handleChange}
-              required
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="class" className="form-label">Class</label>
+              <div className="input-with-icon">
+                <i className="input-icon">🏫</i>
+                <input
+                  type="text"
+                  id="class"
+                  name="class"
+                  className="form-input"
+                  value={formData.class}
+                  onChange={handleChange}
+                  required
+                  placeholder="Your class/grade"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="birthdate" className="form-label">Birth Date</label>
+              <div className="input-with-icon">
+                <i className="input-icon">🎂</i>
+                <input
+                  type="date"
+                  id="birthdate"
+                  name="birthdate"
+                  className="form-input"
+                  value={formData.birthdate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
           </div>
           
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-with-icon">
+              <i className="input-icon">📧</i>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="form-input"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="your@email.com"
+              />
+            </div>
           </div>
           
           <div className="form-group">
@@ -175,42 +201,57 @@ const Register = ({ setUser }) => {
             </div>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-input"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength={6}
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">Password</label>
+              <div className="input-with-icon">
+                <i className="input-icon">🔒</i>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  className="form-input"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                  placeholder="Min. 6 characters"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+              <div className="input-with-icon">
+                <i className="input-icon">🔐</i>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  className="form-input"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Re-enter password"
+                />
+              </div>
+            </div>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              className="form-input"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              minLength={6}
-            />
-          </div>
-          
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Processing...' : 'Register'}
+          <button type="submit" className="btn btn-primary register-btn" disabled={loading}>
+            {loading ? 'Registering...' : 'Create Account'}
           </button>
         </form>
         
         <p className="form-footer">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account? <Link to="/login">Login here</Link>
         </p>
+      </div>
+
+      <div className="auth-decoration">
+        <div className="decoration-circle circle-1"></div>
+        <div className="decoration-circle circle-2"></div>
+        <div className="decoration-circle circle-3"></div>
       </div>
     </main>
   );
