@@ -16,29 +16,37 @@ export default function Dashboard({ user }) {
     try {
       setLoading(true);
       
-      // First check localStorage for saved course data with progress
-      const savedCoursesData = localStorage.getItem('courses-data');
-      if (savedCoursesData) {
-        const parsedCourses = JSON.parse(savedCoursesData);
-        setCourses(parsedCourses);
-        setLoading(false);
-        return;
-      }
-      
-      // If no saved data found, use the getCourseList utility from contentLoader
+      // Always get the latest course list
       const courseList = getCourseList();
       
       if (!courseList || courseList.length === 0) {
         throw new Error('No courses found');
       }
       
-      // Initialize courses with default progress of 0
+      // Check localStorage for saved progress data
+      const savedCoursesData = localStorage.getItem('courses-data');
+      let progressMap = {};
+      
+      if (savedCoursesData) {
+        try {
+          // Extract progress data from saved courses
+          const savedCourses = JSON.parse(savedCoursesData);
+          progressMap = savedCourses.reduce((map, course) => {
+            map[course.id] = course.progress || 0;
+            return map;
+          }, {});
+        } catch (e) {
+          console.warn('Error parsing saved courses data:', e);
+        }
+      }
+      
+      // Merge the latest course list with saved progress data
       const coursesWithProgress = courseList.map(course => ({
         ...course,
-        progress: 0
+        progress: progressMap[course.id] || 0
       }));
       
-      // Save the courses with progress to localStorage
+      // Save the updated courses with progress to localStorage
       localStorage.setItem('courses-data', JSON.stringify(coursesWithProgress));
       
       setCourses(coursesWithProgress);
@@ -64,6 +72,16 @@ export default function Dashboard({ user }) {
 
     return () => clearTimeout(timeoutId);
   }, [fetchCourses]);
+
+  // Function to force refresh courses by clearing localStorage cache
+  const forceRefreshCourses = () => {
+    try {
+      localStorage.removeItem('courses-data');
+      fetchCourses();
+    } catch (error) {
+      console.error('Error refreshing courses:', error);
+    }
+  };
 
   // Get unique categories from courses
   const categories = useMemo(() => {
@@ -104,6 +122,16 @@ export default function Dashboard({ user }) {
     
     return sorted;
   }, [courses, categoryFilter, sortOrder]);
+
+  // Debug information about courses
+  const courseDebugInfo = useMemo(() => {
+    return {
+      totalCourses: courses.length,
+      filteredCourses: filteredAndSortedCourses.length,
+      categoryFilter,
+      categories: categories.length
+    };
+  }, [courses, filteredAndSortedCourses, categoryFilter, categories]);
 
   // Function to generate correct thumbnail URLs with API base URL
   const getThumbnailUrl = useCallback((course) => {
@@ -258,6 +286,21 @@ export default function Dashboard({ user }) {
         ) : (
           renderedCourseGrid
         )}
+      </div>
+
+      {/* Debug Utility */}
+      <div className="debug-section">
+        <h3>Debug Information</h3>
+        <p>This section shows information about course loading and filtering. If you're not seeing all expected courses, try refreshing:</p>
+        
+        <button onClick={forceRefreshCourses} className="btn btn-secondary">Force Refresh Courses</button>
+        
+        <div className="debug-info">
+          <p>Total courses: {courses.length}</p>
+          <p>Filtered courses: {filteredAndSortedCourses.length}</p>
+          <p>Selected category: {categoryFilter}</p>
+          <p>Available categories: {categories.length}</p>
+        </div>
       </div>
     </div>
   );

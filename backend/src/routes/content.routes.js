@@ -427,20 +427,8 @@ router.get("/:courseId/:fileName", (req, res) => {
   }
 });
 
-// ROUTE: Get content for a specific course
-router.get("/:courseId", (req, res) => {
-  const { courseId } = req.params;
-  const content = readCourseContent(courseId);
-  
-  if (!content) {
-    return res.status(404).json({ error: "Course not found" });
-  }
-  
-  res.json(content);
-});
-
-// ROUTE: Get available translations for a course
-router.get("/translations/:courseId", (req, res) => {
+// ROUTE: Get available translations for a course (languages endpoint)
+router.get("/translations/:courseId/languages", (req, res) => {
   const { courseId } = req.params;
   const translations = getTranslations(courseId);
   res.json(translations);
@@ -449,10 +437,28 @@ router.get("/translations/:courseId", (req, res) => {
 // ROUTE: Get translated content for a course
 router.get("/translations/:courseId/:langCode", (req, res) => {
   const { courseId, langCode } = req.params;
+  
+  // Special handling for the languages endpoint, which should be handled by the route above
+  if (langCode === 'languages') {
+    return res.status(404).json({ error: "Use /translations/:courseId/languages endpoint instead" });
+  }
+  
   const content = getTranslatedContent(courseId, langCode);
   
   if (!content) {
     return res.status(404).json({ error: "Course or translation not found" });
+  }
+  
+  res.json(content);
+});
+
+// ROUTE: Get content for a specific course
+router.get("/:courseId", (req, res) => {
+  const { courseId } = req.params;
+  const content = readCourseContent(courseId);
+  
+  if (!content) {
+    return res.status(404).json({ error: "Course not found" });
   }
   
   res.json(content);

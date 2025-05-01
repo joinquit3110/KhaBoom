@@ -597,62 +597,50 @@ export const getCourseContent = async (courseId) => {
   if (!course) return null;
   
   try {
-    // Use a direct fetch from the server API to get the course markdown content
-    // This should match the path where your backend serves content files
-    const contentPath = `/content/${courseId}/content.md`;
+    // Use the API endpoint to get the course content instead of direct file access
+    const apiPath = getApiUrl(`/api/content/${courseId}`);
     
     try {
-      const response = await fetch(contentPath);
+      console.log(`Fetching course content from: ${apiPath}`);
+      const response = await fetch(apiPath);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
       }
       
-      // Get the raw markdown content
-      const markdownContent = await response.text();
+      // Get the content as JSON from the API
+      const contentData = await response.json();
       
-      if (!markdownContent) {
-        throw new Error('No markdown content found');
+      if (!contentData || !contentData.content) {
+        throw new Error('No valid course content provided');
       }
       
-      // Process the markdown content
+      // Extract the necessary information
+      const { metadata, content } = contentData;
+      
       console.log(`Successfully loaded content for ${courseId}`);
       
-      // Create a properly structured content object directly
-      // Extract metadata
-      const metadata = {};
-      const metadataRegex = /> ([\w-]+): (.+)/g;
-      let match;
-      let contentCopy = markdownContent.slice();
-      while ((match = metadataRegex.exec(contentCopy)) !== null) {
-        metadata[match[1]] = match[2];
+      // Create sections from the content sections
+      const sections = content.sections || [];
+      
+      // Process content to get HTML if needed
+      let html = '';
+      if (sections.length > 0) {
+        // Join all section content together for rendering
+        html = sections.map(section => section.content).join('\n\n');
       }
       
-      // Extract sections
-      const sectionRegex = /## ([^\n]+)\s*\n+> section: ([^\n]+)/g;
-      const sections = [];
-      let sectionMatch;
-      while ((sectionMatch = sectionRegex.exec(markdownContent)) !== null) {
-        sections.push({
-          title: sectionMatch[1].trim(),
-          id: sectionMatch[2].trim(),
-          content: sectionMatch[0] // Include section header
-        });
-      }
-      
-      // Process content with parseMathigonMd to get HTML
-      const parsedContent = parseMathigonMd(markdownContent);
-      
+      // Create the properly structured content object
       return {
         course,
         content: {
-          metadata,
+          metadata: metadata || {},
           sections,
-          html: parsedContent.html // Use the HTML from parsed content
+          html: parseMathigonMd(html).html  // Process the HTML
         }
       };
     } catch (err) {
-      console.error(`Error fetching course content from ${contentPath}:`, err);
+      console.error(`Error fetching course content from ${apiPath}:`, err);
       
       // Provide a properly structured fallback content that matches the expected format
       console.log(`Using simple fallback content for ${courseId}`);
@@ -699,9 +687,10 @@ export const getGlossaryDefinition = (term) => {
 export const getAvailableTranslations = async (courseId) => {
   try {
     // First try to fetch translations from the API
-    const apiPath = `/translations/${courseId}/languages`;
+    const apiPath = getApiUrl(`/api/content/translations/${courseId}/languages`);
     
     try {
+      console.log(`Fetching translations from: ${apiPath}`);
       const response = await fetch(apiPath);
       if (response.ok) {
         const languages = await response.json();
@@ -709,6 +698,8 @@ export const getAvailableTranslations = async (courseId) => {
           console.log(`Found ${languages.length} translations for ${courseId} from API`);
           return languages;
         }
+      } else {
+        console.warn(`Translation request failed with status: ${response.status}`);
       }
     } catch (err) {
       console.warn(`Could not fetch translations from ${apiPath}`, err);
@@ -751,32 +742,47 @@ export const loadTranslation = async (courseId, languageCode) => {
       return await getCourseContent(courseId);
     }
     
-    // Path to translated content
-    const translationPath = `/api/translations/${courseId}/${languageCode}/content.md`;
+    // Use proper API path for translated content
+    const apiPath = getApiUrl(`/api/content/translations/${courseId}/${languageCode}`);
     
     try {
-      // First try to fetch the translated content from the API
-      const response = await fetch(translationPath);
+      console.log(`Fetching translation from: ${apiPath}`);
+      const response = await fetch(apiPath);
       
       if (response.ok) {
-        // Get the raw markdown content
-        const translatedContent = await response.text();
+        // Get the content as JSON from the API
+        const translatedData = await response.json();
         
-        // Process the markdown content using parseMathigonMd
-        const parsedContent = parseMathigonMd(translatedContent);
+        if (!translatedData) {
+          throw new Error('No translation data found');
+        }
         
         // Get the original course info to combine with translated content
         const courseInfo = getCourseById(courseId);
         
         console.log(`Successfully loaded translation for ${courseId} in ${languageCode}`);
         
+        // Extract sections from the translated content
+        const sections = translatedData.content?.sections || [];
+        
+        // Process content to get HTML
+        let html = '';
+        if (sections.length > 0) {
+          // Join all section content together for rendering
+          html = sections.map(section => section.content).join('\n\n');
+        }
+        
         return {
           course: courseInfo,
-          content: parsedContent
+          content: {
+            metadata: translatedData.metadata || {},
+            sections: sections,
+            html: parseMathigonMd(html).html // Process the HTML
+          }
         };
       }
     } catch (e) {
-      console.warn(`Failed to fetch translation from ${translationPath}`, e);
+      console.warn(`Failed to fetch translation from ${apiPath}`, e);
     }
     
     // If we reach here, we couldn't load the translated content
