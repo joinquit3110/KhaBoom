@@ -173,7 +173,8 @@ const availableCourses = [
     description: 'Learn about randomness, games, and chance',
     color: '#CD0E66',
     level: 'Foundations',
-    thumbnail: '/content/probability/images/thumbnail.jpg',
+    category: 'Statistics',
+    thumbnail: '/api/content/probability/hero.jpg',
     sections: [
       { id: 'intro', title: 'Introduction' },
       { id: 'computing', title: 'Computing Probabilities' },
@@ -187,7 +188,8 @@ const availableCourses = [
     description: 'Unpredictable mathematics',
     color: '#0F82F2',
     level: 'Advanced',
-    thumbnail: '/content/chaos/images/thumbnail.jpg',
+    category: 'Applied Mathematics',
+    thumbnail: '/api/content/chaos/hero.jpg',
     sections: [
       { id: 'intro', title: 'Introduction' },
       { id: 'pendulum', title: 'Mathematical Billiard' },
@@ -202,7 +204,8 @@ const availableCourses = [
     description: 'Round shapes and transcendental numbers',
     color: '#6D3BBF',
     level: 'Intermediate',
-    thumbnail: '/content/circles/images/thumbnail.jpg',
+    category: 'Geometry',
+    thumbnail: '/api/content/circles/hero.jpg',
     sections: [
       { id: 'intro', title: 'Introduction' },
       { id: 'degrees', title: 'Degrees and Radians' },
@@ -219,7 +222,8 @@ const availableCourses = [
     description: 'Cryptography and secret messages',
     color: '#C4158B',
     level: 'Intermediate',
-    thumbnail: '/content/codes/images/thumbnail.jpg',
+    category: 'Computer Science',
+    thumbnail: '/api/content/codes/hero.jpg',
     sections: [
       { id: 'intro', title: 'Introduction' },
       { id: 'binary', title: 'Binary Numbers' },
@@ -313,129 +317,133 @@ export const getCourseContent = async (courseId) => {
   if (!course) return null;
   
   try {
-    // In a production environment, we would fetch this from the server
-    // For demonstration purposes, let's generate some sample content for the Introduction section
-    // that matches the original Mathigon course format
+    // Use a direct fetch from the server API to get the course markdown content
+    // This should match the path where your backend serves content files
+    const contentPath = `/api/content/${courseId}/content.md`;
     
-    // Use the course ID to determine which content to serve
-    let html = '';
-    
-    if (courseId === 'probability') {
-      html = `
-        <h1>Introduction to Probability</h1>
-        <div class="section" data-section="introduction">
-          <h2 id="intro">Introduction</h2>
-          <div class="subsection" id="intro">
-            <p>In previous courses, we have seen how we can use science and mathematics to try to predict the future. For example, we can predict when a car will arrive at its destination if it is driving at a constant speed.</p>
-            
-            <p>However, there are many examples in life where it is impossible to predict exactly what will happen. This could be because we don't have all the information we need, because the decisions of other people might influence the result, or just because it is incredibly complicated.</p>
-            
-            <div class="column" style="width: 200px;">
-              <img src="/content/probability/images/weather.jpg" width="200" height="150" class="mathigon-image" />
-              <p class="caption">The atmosphere consists of billions of molecules that interact with each other. That's why it is impossible to exactly predict the weather.</p>
-            </div>
-            
-            <div class="column" style="width: 200px;">
-              <img src="/content/probability/images/election.jpg" width="200" height="150" class="mathigon-image" />
-              <p class="caption">You don't know how people are going to vote in an election. That's why it is impossible to exactly predict the outcome.</p>
-            </div>
-            
-            <div class="column" style="width: 200px;">
-              <img src="/content/probability/images/cards.jpg" width="200" height="150" class="mathigon-image" />
-              <p class="caption">After shuffling, you don't know the order of the cards in a deck. That's why it is impossible to exactly predict the colour of the next card.</p>
-            </div>
-          </div>
-          
-          <div class="interactive-element geopad" data-params="id: 'dartboard'">
-            <div class="placeholder-text">Dart Board Interactive Element</div>
-          </div>
-          
-          <p>Our language has many words we can use to describe the answer to these questions, without knowing exactly what will happen. Try to move each of these events to the best possible description:</p>
-          
-          <p>From this, you might deduce that the next throw has a 5/20=0.25 chance to also land in the center. We say that 0.25 is the probability of hitting the center.</p>
-          
-          <p>For many centuries, mathematicians have struggled to deal with these uncertain situations – until the development of probability theory. In this course, we will explore what probability is, and give you some amazing new tools to be able to predict the future.</p>
-          
-          <p>If you move the sliders above, you might notice that the probability is always between <span class="math-inline">0</span> (if you never hit the center) and <span class="math-inline">1</span> (if you always hit the center).</p>
-          
-          <p>Probabilities always lie between 0 and 1. An event with a smaller probability (like 0.2) is always less likely than an event with a larger probability (like 0.8). If an outcome is impossible, we say it has probability 0. If it is certain, we say it has probability 1. If an event is equally likely to happen or not happen, its probability is exactly in the middle: <span class="math-inline">0.5</span>.</p>
-        </div>
-      `;
-    } else if (courseId === 'chaos') {
-      html = `
-        <h1>Chaos Theory</h1>
-        <div class="section" data-section="introduction">
-          <h2 id="intro">Introduction</h2>
-          <div class="subsection" id="intro">
-            <p>Chaos theory is a branch of mathematics that deals with complex systems whose behavior is highly sensitive to slight changes in conditions. Small differences in initial conditions yield widely diverging outcomes, rendering long-term prediction impossible.</p>
-            
-            <p>The butterfly effect is one of the most commonly used examples of chaos theory. It describes how a small change, like the flap of a butterfly's wings in Brazil, might cause a tornado in Texas. This isn't meant to be taken literally, but rather as a metaphor for how small changes can lead to big effects.</p>
-            
-            <div class="interactive-element simulation" data-params="id: 'pendulum'">
-              <div class="placeholder-text">Double Pendulum Simulation</div>
-            </div>
-            
-            <p>One of the simplest systems that demonstrates chaotic behavior is the double pendulum. Unlike a regular pendulum that swings back and forth in a predictable manner, the double pendulum's movement quickly becomes chaotic and impossible to predict over longer periods.</p>
-          </div>
-        </div>
-      `;
-    } else if (courseId === 'circles') {
-      html = `
-        <h1>Circles and Pi</h1>
-        <div class="section" data-section="introduction">
-          <h2 id="intro">Introduction</h2>
-          <div class="subsection" id="intro">
-            <p>Circles are among the most fundamental shapes in geometry. They appear everywhere in nature, from ripples in water to celestial bodies. The principles of circles underpin countless aspects of science, engineering, and mathematics.</p>
-            
-            <p>The ratio of a circle's circumference to its diameter is always the same value, which we call <span class="term" data-gloss="pi">π</span>. This number is approximately 3.14159, but its decimal expansion goes on forever without repeating.</p>
-            
-            <div class="interactive-element geopad" data-params="id: 'circle'">
-              <div class="placeholder-text">Interactive Circle</div>
-            </div>
-            
-            <p>Understanding circles and pi is essential for many areas of mathematics, including trigonometry, calculus, and even number theory.</p>
-          </div>
-        </div>
-      `;
-    } else if (courseId === 'codes') {
-      html = `
-        <h1>Codes and Ciphers</h1>
-        <div class="section" data-section="introduction">
-          <h2 id="intro">Introduction</h2>
-          <div class="subsection" id="intro">
-            <p>Cryptography is the science of secret communication. Throughout history, people have developed ways to encrypt messages so that only the intended recipient could read them.</p>
-            
-            <p>One of the simplest ciphers is the Caesar cipher, where each letter in the plaintext is shifted a certain number of places down the alphabet. For example, with a shift of 1, A would be replaced by B, B would become C, and so on.</p>
-            
-            <div class="interactive-element code" data-params="id: 'caesar'">
-              <div class="placeholder-text">Caesar Cipher Interactive</div>
-            </div>
-            
-            <p>Modern cryptography relies on complex mathematical problems that are easy to compute in one direction but very difficult to reverse, making it the foundation of secure communication in the digital age.</p>
-          </div>
-        </div>
-      `;
-    } else {
-      // Default for any other course ID
-      html = `
-        <h1>${course.title}</h1>
-        <div class="section" data-section="introduction">
-          <h2 id="intro">Introduction</h2>
-          <div class="subsection" id="intro">
-            <p>This course is currently under development. Please check back later for content.</p>
-          </div>
-        </div>
-      `;
-    }
-    
-    // Parse the HTML content
-    const parsed = parseMathigonMd(html);
-    
-    return {
-      course,
-      content: parsed
-    };
+    try {
+      const response = await fetch(contentPath);
       
+      if (!response.ok) {
+        throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
+      }
+      
+      // Get the raw markdown content
+      const markdownContent = await response.text();
+      
+      // Process the markdown content using parseMathigonMd
+      const parsedContent = parseMathigonMd(markdownContent);
+      
+      console.log(`Successfully loaded content for ${courseId}`);
+      
+      return {
+        course,
+        content: parsedContent
+      };
+    } catch (err) {
+      console.error(`Error fetching course content from ${contentPath}:`, err);
+      
+      // Fallback: If we can't fetch from the API, use the hardcoded content
+      let fallbackHtml = '';
+      
+      switch(courseId) {
+        case 'probability':
+          fallbackHtml = `
+            <h1>Introduction to Probability</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="intro">Introduction</h2>
+              <div class="subsection" id="intro">
+                <p>In previous courses, we have seen how we can use science and mathematics to try to predict the future. For example, we can predict when a car will arrive at its destination if it is driving at a constant speed.</p>
+                
+                <p>However, there are many examples in life where it is impossible to predict exactly what will happen. This could be because we don't have all the information we need, because the decisions of other people might influence the result, or just because it is incredibly complicated.</p>
+                
+                <div class="column" style="width: 200px;">
+                  <img src="/api/content/probability/images/weather.jpg" width="200" height="150" class="mathigon-image" />
+                  <p class="caption">The atmosphere consists of billions of molecules that interact with each other. That's why it is impossible to exactly predict the weather.</p>
+                </div>
+                
+                <div class="column" style="width: 200px;">
+                  <img src="/api/content/probability/images/election.jpg" width="200" height="150" class="mathigon-image" />
+                  <p class="caption">You don't know how people are going to vote in an election. That's why it is impossible to exactly predict the outcome.</p>
+                </div>
+                
+                <div class="column" style="width: 200px;">
+                  <img src="/api/content/probability/images/cards.jpg" width="200" height="150" class="mathigon-image" />
+                  <p class="caption">After shuffling, you don't know the order of the cards in a deck. That's why it is impossible to exactly predict the colour of the next card.</p>
+                </div>
+              </div>
+              
+              <p>Our language has many words we can use to describe the answer to these questions, without knowing exactly what will happen. Try to move each of these events to the best possible description.</p>
+              
+              <p>From this, you might deduce that the next throw has a 5/20=0.25 chance to also land in the center. We say that 0.25 is the probability of hitting the center.</p>
+              
+              <p>For many centuries, mathematicians have struggled to deal with these uncertain situations – until the development of probability theory. In this course, we will explore what probability is, and give you some amazing new tools to be able to predict the future.</p>
+            </div>
+          `;
+          break;
+          
+        case 'chaos':
+          fallbackHtml = `
+            <h1>Chaos Theory</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="intro">Introduction</h2>
+              <div class="subsection" id="intro">
+                <p>Chaos theory is a branch of mathematics that deals with complex systems whose behavior is highly sensitive to slight changes in conditions.</p>
+                
+                <p>The butterfly effect is one of the most commonly used examples of chaos theory. It describes how a small change, like the flap of a butterfly's wings in Brazil, might cause a tornado in Texas.</p>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'circles':
+          fallbackHtml = `
+            <h1>Circles and Pi</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="intro">Introduction</h2>
+              <div class="subsection" id="intro">
+                <p>Circles are among the most fundamental shapes in geometry. They appear everywhere in nature, from ripples in water to celestial bodies.</p>
+                
+                <p>The ratio of a circle's circumference to its diameter is always the same value, which we call π. This number is approximately 3.14159, but its decimal expansion goes on forever without repeating.</p>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'codes':
+          fallbackHtml = `
+            <h1>Codes and Ciphers</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="intro">Introduction</h2>
+              <div class="subsection" id="intro">
+                <p>Cryptography is the science of secret communication. Throughout history, people have developed ways to encrypt messages so that only the intended recipient could read them.</p>
+                
+                <p>One of the simplest ciphers is the Caesar cipher, where each letter in the plaintext is shifted a certain number of places down the alphabet.</p>
+              </div>
+            </div>
+          `;
+          break;
+          
+        default:
+          fallbackHtml = `
+            <h1>${course.title}</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="intro">Introduction</h2>
+              <div class="subsection" id="intro">
+                <p>This course is currently under development. Please check back later for content.</p>
+              </div>
+            </div>
+          `;
+      }
+      
+      const fallbackParsed = parseMathigonMd(fallbackHtml);
+      console.log(`Using fallback content for ${courseId}`);
+      
+      return {
+        course,
+        content: fallbackParsed
+      };
+    }
   } catch (error) {
     console.error(`Error getting course content for ${courseId}:`, error);
     return null;
@@ -449,25 +457,44 @@ export const getGlossaryDefinition = (term) => {
 // Get available translations for a course
 export const getAvailableTranslations = async (courseId) => {
   try {
-    // In a real app, we'd fetch this from an API endpoint
-    // For now, hardcode available languages to match the original Mathigon site
+    // First try to fetch translations from the API
+    const apiPath = `/api/translations/${courseId}/languages`;
     
-    // Standard set of languages available for all courses
+    try {
+      const response = await fetch(apiPath);
+      if (response.ok) {
+        const languages = await response.json();
+        if (Array.isArray(languages) && languages.length > 0) {
+          console.log(`Found ${languages.length} translations for ${courseId} from API`);
+          return languages;
+        }
+      }
+    } catch (err) {
+      console.warn(`Could not fetch translations from ${apiPath}`, err);
+    }
+    
+    // Fallback to hardcoded languages based on what's available in the translations directory
+    // These match the actual language folders in the translations directory
     const languages = [
       { code: 'en', name: 'English' },
-      { code: 'de', name: 'Deutsch' },
-      { code: 'es', name: 'Español' },
-      { code: 'fr', name: 'Français' },
-      { code: 'it', name: 'Italiano' },
-      { code: 'pt', name: 'Português' },
-      { code: 'ru', name: 'Русский' },
-      { code: 'zh', name: '中文' },
-      { code: 'ko', name: '한국어' },
-      { code: 'ja', name: '日本語' }
+      { code: 'ar', name: 'العربية' },  // Arabic
+      { code: 'cn', name: '中文' },      // Chinese
+      { code: 'de', name: 'Deutsch' },   // German
+      { code: 'es', name: 'Español' },   // Spanish
+      { code: 'fr', name: 'Français' },  // French
+      { code: 'hi', name: 'हिन्दी' },     // Hindi
+      { code: 'hr', name: 'Hrvatski' },  // Croatian
+      { code: 'it', name: 'Italiano' },  // Italian
+      { code: 'ja', name: '日本語' },     // Japanese
+      { code: 'pt', name: 'Português' }, // Portuguese
+      { code: 'ro', name: 'Română' },    // Romanian
+      { code: 'ru', name: 'Русский' },   // Russian
+      { code: 'sv', name: 'Svenska' },   // Swedish
+      { code: 'tr', name: 'Türkçe' },    // Turkish
+      { code: 'vi', name: 'Tiếng Việt' } // Vietnamese
     ];
     
-    // Different courses might have different available translations
-    // You could customize this based on courseId if needed
+    console.log(`Using ${languages.length} hardcoded translations for ${courseId}`);
     return languages;
   } catch (error) {
     console.error('Error getting available translations:', error);
@@ -483,21 +510,90 @@ export const loadTranslation = async (courseId, languageCode) => {
       return await getCourseContent(courseId);
     }
     
-    // Only need to check one path now
-    const path = `/api/translations/${courseId}/${languageCode}`;
+    // Path to translated content
+    const translationPath = `/api/translations/${courseId}/${languageCode}/content.md`;
     
     try {
-      const response = await fetch(path);
+      // First try to fetch the translated content from the API
+      const response = await fetch(translationPath);
+      
       if (response.ok) {
-        return await response.json();
+        // Get the raw markdown content
+        const translatedContent = await response.text();
+        
+        // Process the markdown content using parseMathigonMd
+        const parsedContent = parseMathigonMd(translatedContent);
+        
+        // Get the original course info to combine with translated content
+        const courseInfo = getCourseById(courseId);
+        
+        console.log(`Successfully loaded translation for ${courseId} in ${languageCode}`);
+        
+        return {
+          course: courseInfo,
+          content: parsedContent
+        };
       }
     } catch (e) {
-      console.log(`Failed to fetch translation from ${path}`, e);
+      console.warn(`Failed to fetch translation from ${translationPath}`, e);
     }
     
-    // Fall back to English if translation not available
-    console.log(`No translation available for ${courseId} in ${languageCode}, falling back to English`);
-    return await getCourseContent(courseId);
+    // If we reach here, we couldn't load the translated content
+    // Fall back to loading a simulated translated version
+    try {
+      // Get the original course content
+      const originalContent = await getCourseContent(courseId);
+      
+      if (!originalContent) {
+        throw new Error('Failed to get original content for fallback translation');
+      }
+      
+      console.log(`No translation API available for ${courseId} in ${languageCode}, using simulated translation`);
+      
+      // Create a simulated translated version (in a real app, this would be properly translated content)
+      // This just adds a language indicator to the title to show it's "translated"
+      const languageNames = {
+        'ar': 'Arabic',
+        'cn': 'Chinese',
+        'de': 'German',
+        'es': 'Spanish',
+        'fr': 'French',
+        'hi': 'Hindi',
+        'hr': 'Croatian',
+        'it': 'Italian',
+        'ja': 'Japanese',
+        'pt': 'Portuguese',
+        'ro': 'Romanian',
+        'ru': 'Russian',
+        'sv': 'Swedish',
+        'tr': 'Turkish',
+        'vi': 'Vietnamese'
+      };
+      
+      const languageName = languageNames[languageCode] || languageCode.toUpperCase();
+      
+      // Create a simulated translated version by modifying the HTML content
+      // In a real app, this would be properly translated content
+      if (originalContent.content && originalContent.content.html) {
+        let html = originalContent.content.html;
+        
+        // Add language indicator to the title
+        html = html.replace(/<h1>([^<]+)<\/h1>/, `<h1>$1 (${languageName})</h1>`);
+        
+        return {
+          course: originalContent.course,
+          content: {
+            metadata: originalContent.content.metadata,
+            html: html
+          }
+        };
+      }
+      
+      return originalContent;
+    } catch (fallbackError) {
+      console.error('Error creating fallback translation:', fallbackError);
+      return await getCourseContent(courseId);
+    }
   } catch (error) {
     console.error(`Error loading translation for ${languageCode}:`, error);
     return await getCourseContent(courseId);

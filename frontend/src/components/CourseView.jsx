@@ -55,6 +55,12 @@ const CourseView = () => {
   // Progress tracking
   const [progress, setProgress] = useState(0);
   const [completedSections, setCompletedSections] = useState([]);
+  
+  // Function to calculate progress percentage based on completed sections
+  const calculateProgress = useCallback((completedSecs, totalSections) => {
+    if (!totalSections || totalSections === 0) return 0;
+    return Math.round((completedSecs.length / totalSections) * 100);
+  }, []);
 
   // Parse course content from Mathigon markdown
   const renderCourseContent = useCallback((rawContent) => {
@@ -111,6 +117,22 @@ const CourseView = () => {
         
         // Get progress info
         try {
+          // Load progress data from localStorage
+          const savedProgress = localStorage.getItem(`course-progress-${courseId}`);
+          if (savedProgress) {
+            const progressData = JSON.parse(savedProgress);
+            setCompletedSections(progressData.completedSections || []);
+            
+            // Calculate and set progress percentage
+            const progressPercentage = calculateProgress(
+              progressData.completedSections || [], 
+              courseInfo.sections?.length || 0
+            );
+            setProgress(progressPercentage);
+            
+            // Update course progress in localStorage courses list
+            updateCourseProgressInList(courseId, progressPercentage);
+          }
           const userId = localStorage.getItem('userId');
           if (userId) {
             const progressResponse = await axios.get(`${import.meta.env.VITE_API_BASE}/api/progress/${userId}/${courseId}`);
@@ -271,13 +293,64 @@ const CourseView = () => {
       setActiveGlossary(null);
     };
     
-    if (activeGlossary) {
-      document.addEventListener('click', handleClickOutside);
-      return () => {
-        document.removeEventListener('click', handleClickOutside);
-      };
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
+  // Update progress when section changes or a section is completed
+  useEffect(() => {
+    if (!course.sections || course.sections.length === 0) return;
+    
+    // Calculate new progress based on completed sections
+    const newProgress = calculateProgress(completedSections, course.sections.length);
+    setProgress(newProgress);
+    
+    // Save progress to localStorage
+    saveProgressToLocalStorage();
+    
+    // Update the course progress in the courses list
+    updateCourseProgressInList(courseId, newProgress);
+  }, [completedSections, course.sections, courseId, calculateProgress]);
+
+  // Function to save progress to localStorage
+  const saveProgressToLocalStorage = useCallback(() => {
+    if (!courseId) return;
+    
+    const progressData = {
+      courseId,
+      completedSections,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    localStorage.setItem(`course-progress-${courseId}`, JSON.stringify(progressData));
+  }, [courseId, completedSections]);
+
+  // Function to update progress in the courses list
+  const updateCourseProgressInList = useCallback((id, progressValue) => {
+    // Get courses from localStorage
+    const savedCourses = localStorage.getItem('courses-data');
+    if (!savedCourses) return;
+    
+    try {
+      const coursesData = JSON.parse(savedCourses);
+      
+      // Update the progress value for the specific course
+      const updatedCourses = coursesData.map(course => {
+        if (course.id === id) {
+          return { ...course, progress: progressValue };
+        }
+        return course;
+      });
+      
+      // Save the updated courses back to localStorage
+      localStorage.setItem('courses-data', JSON.stringify(updatedCourses));
+    } catch (error) {
+      console.error('Error updating course progress in list:', error);
     }
-  }, [activeGlossary]);
+  }, []);
 
   // Add notification to the notifications array
   const addNotification = (notification) => {
@@ -446,14 +519,9 @@ const CourseView = () => {
           transition={{ delay: 0.3, duration: 0.5 }}
         >
           <h3>Course Sections</h3>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ 
-                width: `${progress}%`,
-                backgroundColor: course.color
-              }}
-            ></div>
+          <div className="section-progress">
+            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: course.color }}></div>
+            <div className="progress-text">{progress}% Complete</div>
           </div>
           <ul className="section-list">
             {course.sections && Array.isArray(course.sections) && course.sections.length > 0 ? (
@@ -590,7 +658,14 @@ const CourseView = () => {
                  currentSection < course.sections.length - 1 && (
                   <motion.button 
                     className="btn btn-primary"
-                    onClick={() => setCurrentSection(currentSection + 1)}
+                    onClick={() => {
+                      // Mark current section as completed if it's not already
+                      if (!completedSections.includes(currentSection)) {
+                        setCompletedSections(prev => [...prev, currentSection]);
+                      }
+                      // Move to next section
+                      setCurrentSection(currentSection + 1);
+                    }}
                     style={{ backgroundColor: course.color }}
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}

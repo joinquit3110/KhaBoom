@@ -8,28 +8,45 @@ export default function Dashboard({ user }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [sortOrder, setSortOrder] = useState('default');
 
   // Memoize course fetching to prevent unnecessary re-fetches
   const fetchCourses = useCallback(async () => {
     try {
-      // Use the hardcoded course data from contentLoader.js
-      const courseList = getCourseList();
+      setLoading(true);
       
-      if (!courseList || courseList.length === 0) {
-        console.error("No courses available");
-        setError("No courses available. Please try again later.");
-        setCourses([]);
+      // First check localStorage for saved course data with progress
+      const savedCoursesData = localStorage.getItem('courses-data');
+      if (savedCoursesData) {
+        const parsedCourses = JSON.parse(savedCoursesData);
+        setCourses(parsedCourses);
         setLoading(false);
         return;
       }
       
-      console.log("Loaded courses:", courseList);
-      setCourses(courseList);
-    } catch (err) {
-      console.error("Error fetching courses:", err);
-      setError("Failed to load courses. Please try again later.");
+      // If no saved data found, use the getCourseList utility from contentLoader
+      const courseList = getCourseList();
+      
+      if (!courseList || courseList.length === 0) {
+        throw new Error('No courses found');
+      }
+      
+      // Initialize courses with default progress of 0
+      const coursesWithProgress = courseList.map(course => ({
+        ...course,
+        progress: 0
+      }));
+      
+      // Save the courses with progress to localStorage
+      localStorage.setItem('courses-data', JSON.stringify(coursesWithProgress));
+      
+      setCourses(coursesWithProgress);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setError('Failed to load courses. Please try again later.');
       setCourses([]);
-    } finally {
       setLoading(false);
     }
   }, []);
@@ -48,9 +65,49 @@ export default function Dashboard({ user }) {
     return () => clearTimeout(timeoutId);
   }, [fetchCourses]);
 
+  // Get unique categories from courses
+  const categories = useMemo(() => {
+    if (!courses || courses.length === 0) return ['All'];
+    
+    const uniqueCategories = ['All', ...new Set(courses.map(course => course.category).filter(Boolean))];
+    return uniqueCategories;
+  }, [courses]);
+
+  // Filter and sort courses based on selected category and sort order
+  const filteredAndSortedCourses = useMemo(() => {
+    // First filter by category
+    let filtered = courses;
+    if (categoryFilter !== 'All') {
+      filtered = courses.filter(course => course.category === categoryFilter);
+    }
+    
+    // Then sort based on the selected sort order
+    let sorted = [...filtered];
+    switch (sortOrder) {
+      case 'alphabetical':
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'level':
+        // Define a level order priority
+        const levelPriority = { 'Foundations': 1, 'Intermediate': 2, 'Advanced': 3 };
+        sorted.sort((a, b) => 
+          (levelPriority[a.level] || 99) - (levelPriority[b.level] || 99)
+        );
+        break;
+      case 'category':
+        sorted.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+        break;
+      default:
+        // Keep original order
+        break;
+    }
+    
+    return sorted;
+  }, [courses, categoryFilter, sortOrder]);
+
   // Use useMemo to prevent unnecessary re-renders of the course grid
   const renderedCourseGrid = useMemo(() => {
-    if (!courses || courses.length === 0) {
+    if (!filteredAndSortedCourses || filteredAndSortedCourses.length === 0) {
       return (
         <div className="no-courses">No courses available at this time.</div>
       );
@@ -58,47 +115,69 @@ export default function Dashboard({ user }) {
 
     return (
       <div className="courses-grid mathigon-style">
-        {courses.map(course => (
-          <div 
-            key={course.id} 
-            className="course-card hardware-accelerated"
-            style={{
-              '--card-color': course.color || '#6366F1',
-              borderTop: `4px solid ${course.color || '#6366F1'}`
-            }}
-          >
-            <div className="course-image">
-              <LazyImage
-                src={course.thumbnail || `/content/${course.id}/images/thumbnail.jpg`}
-                alt={course.title}
-                width="100%"
-                height="160px"
-              />
-              {course.level && (
-                <span className="level-badge">{course.level}</span>
-              )}
-            </div>
-            <div className="course-info">
-              <h3 style={{ color: course.color }}>{course.title}</h3>
-              <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
-              <div className="course-footer">
-                {course.category && (
-                  <span className="category-tag">{course.category}</span>
+        {filteredAndSortedCourses.map(course => {
+          // Calculate the course progress
+          let progress = 0;
+          // Check if course has a progress value (to be set later from API)
+          if (course.progress !== undefined) {
+            progress = course.progress;
+          }
+
+          return (
+            <div 
+              key={course.id} 
+              className="course-card hardware-accelerated"
+              style={{
+                '--card-color': course.color || '#6366F1',
+                borderTop: `4px solid ${course.color || '#6366F1'}`
+              }}
+            >
+              <div className="course-image">
+                <LazyImage
+                  src={course.thumbnail || `/api/content/${course.id}/hero.jpg`}
+                  alt={course.title}
+                  width="100%"
+                  height="160px"
+                />
+                {course.level && (
+                  <span className="level-badge">{course.level}</span>
                 )}
-                <Link 
-                  to={`/courses/${course.id}`} 
-                  className="btn btn-primary btn-sm"
-                  style={{ backgroundColor: course.color }}
-                >
-                  Start Learning
-                </Link>
+              </div>
+              <div className="course-info">
+                <h3 style={{ color: course.color }}>{course.title}</h3>
+                <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
+                
+                {/* Progress bar */}
+                <div className="course-progress-container">
+                  <div 
+                    className="course-progress-bar" 
+                    style={{ 
+                      width: `${progress}%`,
+                      backgroundColor: course.color || '#6366F1' 
+                    }}
+                  ></div>
+                  <span className="course-progress-text">{progress}% Complete</span>
+                </div>
+                
+                <div className="course-footer">
+                  {course.category && (
+                    <span className="category-tag">{course.category}</span>
+                  )}
+                  <Link 
+                    to={`/courses/${course.id}`} 
+                    className="btn btn-primary btn-sm"
+                    style={{ backgroundColor: course.color }}
+                  >
+                    Start Learning
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
-  }, [courses]);
+  }, [filteredAndSortedCourses]);
 
   if (!user) {
     return (
@@ -117,6 +196,36 @@ export default function Dashboard({ user }) {
 
       <div className="courses-section">
         <h2>Available Courses</h2>
+        
+        {/* Category and Sort Controls */}
+        <div className="course-filters">
+          <div className="filter-group">
+            <label>Category:</label>
+            <select 
+              value={categoryFilter} 
+              onChange={(e) => setCategoryFilter(e.target.value)} 
+              className="filter-select"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Sort by:</label>
+            <select 
+              value={sortOrder} 
+              onChange={(e) => setSortOrder(e.target.value)} 
+              className="filter-select"
+            >
+              <option value="default">Default</option>
+              <option value="alphabetical">A-Z</option>
+              <option value="level">Level</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+        </div>
         
         {loading ? (
           <div className="loading-indicator">
