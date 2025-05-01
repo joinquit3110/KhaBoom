@@ -835,4 +835,42 @@ export const loadTranslation = async (courseId, languageCode) => {
   }
 };
 
+// Function to get AI assistant response based on course content
+const getAssistantResponse = (courseId, userMessage) => {
+  try {
+    // In a real implementation, this would call an AI service
+    // For now, we'll return a simple response based on the query
+    
+    // Check if we have message about specific terms
+    for (const term of Object.keys(glossaryTerms)) {
+      if (userMessage.toLowerCase().includes(term)) {
+        return `${term}: ${getGlossaryContent(term)}`;
+      }
+    }
+    
+    // Generic responses based on course ID
+    const courseResponses = {
+      'probability': 'Probability involves measuring the likelihood of events occurring. Can I help explain a specific probability concept?',
+      'chaos': 'Chaos Theory explores how small changes in initial conditions can lead to vastly different outcomes in complex systems.',
+      'circles': 'Circles are fundamental shapes with countless applications in mathematics and the real world.',
+      'codes': 'Cryptography has been used throughout history to securely transmit information.',
+      'complex': 'Complex numbers extend our number system to solve equations that have no real solutions.'
+    };
+    
+    if (courseId && courseResponses[courseId]) {
+      return courseResponses[courseId];
+    }
+    
+    // Default responses
+    if (userMessage.includes('?')) {
+      return `That's a good question about ${courseId || 'mathematics'}. I recommend reviewing the current section for more information.`;
+    }
+    
+    return `I'm your learning assistant for this course. How can I help you understand the concepts in ${courseId || 'this topic'} better?`;
+  } catch (error) {
+    console.error('Error generating assistant response:', error);
+    return "I'm sorry, I couldn't process your request. Please try again.";
+  }
+};
+
 export { getAssistantResponse, parseMathigonMd };
