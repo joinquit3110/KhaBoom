@@ -2,25 +2,29 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import LazyImage from './LazyImage';
+import { getCourseList } from '../utils/contentLoader';
 
 export default function Dashboard({ user }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Memoize API call to prevent unnecessary re-fetches
+  // Memoize course fetching to prevent unnecessary re-fetches
   const fetchCourses = useCallback(async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`);
-      if (!res.data || !res.data.courses) {
-        console.error("Invalid course data format:", res.data);
-        setError("Received invalid course data. Please try again later.");
+      // Use the hardcoded course data from contentLoader.js
+      const courseList = getCourseList();
+      
+      if (!courseList || courseList.length === 0) {
+        console.error("No courses available");
+        setError("No courses available. Please try again later.");
         setCourses([]);
         setLoading(false);
         return;
       }
-      console.log("Loaded courses:", res.data.courses);
-      setCourses(res.data.courses || []);
+      
+      console.log("Loaded courses:", courseList);
+      setCourses(courseList);
     } catch (err) {
       console.error("Error fetching courses:", err);
       setError("Failed to load courses. Please try again later.");
@@ -53,12 +57,19 @@ export default function Dashboard({ user }) {
     }
 
     return (
-      <div className="courses-grid">
+      <div className="courses-grid mathigon-style">
         {courses.map(course => (
-          <div key={course.id} className="course-card hardware-accelerated">
+          <div 
+            key={course.id} 
+            className="course-card hardware-accelerated"
+            style={{
+              '--card-color': course.color || '#6366F1',
+              borderTop: `4px solid ${course.color || '#6366F1'}`
+            }}
+          >
             <div className="course-image">
               <LazyImage
-                src={course.image || `/content/${course.id}/hero.jpg`}
+                src={course.thumbnail || `/content/${course.id}/images/thumbnail.jpg`}
                 alt={course.title}
                 width="100%"
                 height="160px"
@@ -68,13 +79,17 @@ export default function Dashboard({ user }) {
               )}
             </div>
             <div className="course-info">
-              <h3>{course.title}</h3>
+              <h3 style={{ color: course.color }}>{course.title}</h3>
               <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
               <div className="course-footer">
                 {course.category && (
                   <span className="category-tag">{course.category}</span>
                 )}
-                <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
+                <Link 
+                  to={`/courses/${course.id}`} 
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: course.color }}
+                >
                   Start Learning
                 </Link>
               </div>
