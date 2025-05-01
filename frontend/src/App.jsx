@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
+import CourseView from "./components/CourseView";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/dashboard" element={
             <Dashboard user={user} />
           } />
+          <Route path="/courses/:courseId" element={<CourseView />} />
           <Route path="/" element={
             <HomePage message={message} user={user} />
           } />

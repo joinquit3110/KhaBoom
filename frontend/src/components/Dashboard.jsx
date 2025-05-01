@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 const Dashboard = ({ user }) => {
@@ -236,7 +236,7 @@ const Dashboard = ({ user }) => {
                   <p>{course.description}</p>
                   <div className="course-footer">
                     <span className="category-tag">{course.category}</span>
-                    <a href={`/courses/${course.id}`} className="btn btn-sm">Start Learning</a>
+                    <Link to={`/courses/${course.id}`} className="btn btn-sm">Start Learning</Link>
                   </div>
                 </div>
               </div>

@@ -40,3 +40,6 @@ _*.yaml
 
 # Private Keys
 google-service-account.json
+
+# Learned Content
+learned/
