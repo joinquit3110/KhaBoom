@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses - Kha-Boom! - Interactive Math Learning</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="logo">
+        <h1>Kha-Boom!</h1>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/courses" class="active">Courses</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="courses-hero">
+      <div class="container">
+        <h2>Mathematics Courses</h2>
+        <p>Explore our interactive courses covering a range of mathematical topics</p>
+      </div>
+    </section>
+
+    <section class="courses-list">
+      <div class="container">
+        <div class="filter-bar">
+          <div class="search-box">
+            <input type="text" placeholder="Search courses...">
+            <button>Search</button>
+          </div>
+          <div class="filter-options">
+            <select>
+              <option value="">All Levels</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+            <select>
+              <option value="">All Topics</option>
+              <option value="algebra">Algebra</option>
+              <option value="geometry">Geometry</option>
+              <option value="calculus">Calculus</option>
+              <option value="statistics">Statistics</option>
+            </select>
+          </div>
+        </div>
+
+        <h3>Available Courses</h3>
+        <div class="course-grid" id="course-grid">
+          <!-- Course cards will be populated dynamically -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="tutor-panel" class="tutor-panel">
+    <div class="tutor-header">
+      <h3>Math Tutor</h3>
+      <button class="close-btn">×</button>
+    </div>
+    <div class="tutor-messages">
+      <!-- Messages will appear here -->
+    </div>
+    <div class="tutor-input">
+      <input type="text" placeholder="Ask a question...">
+      <button class="send-btn">Send</button>
+    </div>
+  </aside>
+
+  <div id="notification-container" class="notification-container"></div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2023 Kha-Boom! - Powered by Mathigon</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/scripts/courses.js"></script>
+</body>
+</html> 

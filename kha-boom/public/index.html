@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kha-Boom! - Interactive Math Learning</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="logo">
+        <h1>Kha-Boom!</h1>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/courses">Courses</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h2>Interactive Mathematics Learning</h2>
+        <p>Explore math through interactive lessons, visual examples, and personalized guidance.</p>
+        <a href="/courses" class="btn btn-primary">Start Learning</a>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="container">
+        <h2>Features</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>Interactive Content</h3>
+            <p>Engage with dynamic visualizations and simulations that bring mathematical concepts to life.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Personal Tutor</h3>
+            <p>Get help from our AI-powered chatbot that provides personalized guidance and hints.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Adaptive Learning</h3>
+            <p>Content that adapts to your learning style and pace, providing a customized experience.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="courses-preview">
+      <div class="container">
+        <h2>Featured Courses</h2>
+        <div class="course-grid">
+          <!-- Course cards will be populated dynamically -->
+        </div>
+        <x-step-bar total="3" mode="discrete"></x-step-bar>
+      </div>
+    </section>
+  </main>
+
+  <aside id="tutor-panel" class="tutor-panel">
+    <div class="tutor-header">
+      <h3>Math Tutor</h3>
+      <button class="close-btn">×</button>
+    </div>
+    <div class="tutor-messages">
+      <!-- Messages will appear here -->
+    </div>
+    <div class="tutor-input">
+      <input type="text" placeholder="Ask a question...">
+      <button class="send-btn">Send</button>
+    </div>
+  </aside>
+
+  <div id="notification-container" class="notification-container"></div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2023 Kha-Boom! - Powered by Mathigon</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/scripts/main.js"></script>
+</body>
+</html> 
