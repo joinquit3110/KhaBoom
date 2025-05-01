@@ -69,19 +69,16 @@ const parseMathigonMd = (content) => {
     // Process basic markdown
     .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/__([^_]+)__/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
     
-    // Process lists
+    // Convert unordered lists
     .replace(/^\* (.*)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n)+/g, '<ul>$&</ul>')
     
-    // Wrap lists in ul tags (simple approach)
-    .replace(/<li>(.*\n)+?(?=\n|$)/g, match => `<ul>${match}</ul>`)
-    
-    // Process paragraphs (non-HTML content)
-    .replace(/^([^<\n].*?)(?=\n|$)/gm, '<p>$1</p>')
-    
-    // Clean up empty paragraphs
-    .replace(/<p>\s*<\/p>/g, '');
+    // Convert ordered lists
+    .replace(/^\d+\. (.*)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n)+/g, '<ol>$&</ol>');
   
   return { metadata, html };
 };
@@ -89,15 +86,17 @@ const parseMathigonMd = (content) => {
 // Function to generate glossary tooltip content
 const glossaryTerms = {
   'circle': 'A shape where all points are the same distance from the center.',
-  'compass': 'A tool used to draw circles by keeping one arm fixed at the center and rotating the other arm which holds a pencil.',
-  'radius': 'The distance from the center of a circle to any point on its edge.',
-  'diameter': 'A straight line passing through the center of a circle and connecting two points on its edge.',
-  'circumference': 'The distance around the edge of a circle.',
-  'pi': 'The ratio of a circle\'s circumference to its diameter, approximately 3.14159...',
-  'tangent': 'A line that touches a circle at exactly one point.',
-  'arc': 'A portion of the circumference of a circle.',
-  'sector': 'A portion of a circle bounded by two radii and an arc.',
-  'chord': 'A line segment whose endpoints lie on a circle.',
+  'angle': 'The amount of rotation between two lines that share a common endpoint.',
+  'right-angle': 'An angle that measures exactly 90 degrees.',
+  'perpendicular': 'Two lines that intersect at a right angle.',
+  'parallel': 'Lines or planes that never intersect.',
+  'polygon': 'A closed shape with straight sides.',
+  'triangle': 'A polygon with three sides.',
+  'rectangle': 'A quadrilateral with four right angles.',
+  'square': 'A rectangle with all sides equal.',
+  'radius': 'The distance from the center of a circle to any point on the circle.',
+  'diameter': 'A straight line passing through the center of a circle.',
+  'circumference': 'The perimeter or boundary line of a circle.',
   'concentric': 'Circles that share the same center point.',
   'inscribed': 'A shape drawn inside another shape, touching at multiple points.',
   'circumscribed': 'A shape drawn outside another shape, touching at multiple points.'
@@ -105,34 +104,21 @@ const glossaryTerms = {
 
 // Function to get glossary information
 const getGlossaryContent = (id) => {
-  return glossaryTerms[id] || 'Definition not available';
+  return glossaryTerms[id] || `Definition for ${id} not found.`;
 };
 
 // Function to check if a file exists by path
 // Function to check if a file exists on the server
 const fileExists = async (path) => {
   try {
-    // First check if the course ID is in our predefined list
-    const courseId = path.split('/').filter(p => p).pop();
-    if (availableCourses.some(c => c.id === courseId)) {
-      return true;
-    }
+    // Use HEAD request to avoid downloading content
+    const response = await fetch(`/api/content/exists?path=${encodeURIComponent(path)}`, {
+      method: 'HEAD'
+    });
     
-    // Check both in main content directory and learned content directory
-    const checkPaths = [
-      `/api/content/exists?path=${encodeURIComponent(path)}`,
-      `/api/content/exists?path=${encodeURIComponent(`learned/textbooks-master/${path}`)}`
-    ];
-    
-    // Try both paths
-    for (const checkPath of checkPaths) {
-      const response = await fetch(checkPath, { method: 'HEAD' });
-      if (response.ok) return true;
-    }
-    
-    return false;
+    return response.status === 200;
   } catch (error) {
-    console.error('Error checking if file exists:', error);
+    console.error(`Error checking if file exists at ${path}:`, error);
     return false;
   }
 };
@@ -140,33 +126,38 @@ const fileExists = async (path) => {
 // Function to load content from markdown files
 const loadContentFile = async (courseId) => {
   try {
-    // Try to load the actual course content from the server
-    const response = await fetch(`/api/content/${courseId}`);
+    // Check if content directory exists
+    const courseExists = await fileExists(`${courseId}`);
     
-    if (response.ok) {
-      return await response.json();
+    if (!courseExists) {
+      console.error(`Course directory not found: ${courseId}`);
+      return null;
     }
     
-    // Fall back to hardcoded content if server request fails
-    if (courseId === 'circles') {
-      return circlesContent;
+    // Load course markdown content
+    const contentPath = `${courseId}/content.md`;
+    const contentExists = await fileExists(contentPath);
+    
+    if (contentExists) {
+      const response = await fetch(`/api/content/${contentPath}`);
+      const content = await response.text();
+      return parseMathigonMd(content);
     }
     
-    // For other courses, return a default structure with placeholder content
-    const course = availableCourses.find(c => c.id === courseId);
-    if (!course) return null;
+    // Fallback to index.md if content.md doesn't exist
+    const indexPath = `${courseId}/index.md`;
+    const indexExists = await fileExists(indexPath);
     
-    return {
-      sections: [
-        {
-          id: 'introduction',
-          title: 'Introduction',
-          content: `<p>This is placeholder content for the ${course.title} course.</p>`
-        }
-      ]
-    };
+    if (indexExists) {
+      const response = await fetch(`/api/content/${indexPath}`);
+      const content = await response.text();
+      return parseMathigonMd(content);
+    }
+    
+    console.error(`No content files found for course: ${courseId}`);
+    return null;
   } catch (error) {
-    console.error('Error loading content file:', error);
+    console.error(`Error loading content for ${courseId}:`, error);
     return null;
   }
 };
@@ -178,75 +169,50 @@ const availableCourses = [
   // No hardcoded courses
 ];
 
-
 // Function to get AI assistant response based on course content
-const getAssistantResponse = (courseId, userMessage) => {
-  const course = availableCourses.find(c => c.id === courseId);
-  if (!course) return "I'm sorry, I don't have information about that course.";
-  
-  // Convert user message to lowercase for easier matching
-  const lowerMessage = userMessage.toLowerCase();
-  
-  // Generic responses based on course title - these will work with any course
-  // Default responses if no specific content match is found
-  const defaultResponses = [
-    `That's an interesting question about ${course.title}! Could you be more specific about which aspect you'd like to learn about?`,
-    `I'd be happy to help you learn more about ${course.title}. Try exploring the interactive elements in the course to see how these concepts work in practice.`,
-    `In ${course.title}, we focus on understanding the fundamental principles and their applications. Is there a particular concept you're finding challenging?`,
-    `Great question! As you progress through the ${course.title} course, you'll discover how these ideas connect to many other areas of mathematics and science.`,
-    `I suggest working through the examples in the ${course.title} course step by step. The interactive demonstrations can really help build your intuition.`
-  ];
-  
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+const getAssistantResponse = async (courseId, userMessage) => {
+  try {
+    // In a real implementation, this would call an AI service
+    // For now, we'll return a simple response
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+    
+    // Check if we have message about specific terms
+    const glossaryTerms = Object.keys(glossaryTerms);
+    for (const term of glossaryTerms) {
+      if (userMessage.toLowerCase().includes(term)) {
+        return `${term}: ${getGlossaryContent(term)}`;
+      }
+    }
+    
+    return `I'm your learning assistant for this course. ${userMessage.endsWith('?') ? 'To answer your question, I recommend reviewing the current section.' : 'How can I help you understand this content better?'}`;
+  } catch (error) {
+    console.error('Error getting assistant response:', error);
+    return "I'm sorry, I couldn't process your request. Please try again.";
+  }
 };
 
 // Function to scan available courses from the content directory
 const scanAvailableCourses = async () => {
   try {
-    // Fetch courses from both content directories
-    const mainContentResponse = await fetch('/api/content/courses');
-    const learnedContentResponse = await fetch('/api/content/courses/learned');
+    // Fetch courses from the main content directory only
+    const contentResponse = await fetch('/api/content/courses');
     
-    const mergedCourses = [...availableCourses];
-    
-    // Process courses from main content
-    if (mainContentResponse.ok) {
-      const mainCourses = await mainContentResponse.json();
-      processCourses(mainCourses, mergedCourses);
-    }
-    
-    // Process courses from learned content
-    if (learnedContentResponse.ok) {
-      const learnedCourses = await learnedContentResponse.json();
-      processCourses(learnedCourses, mergedCourses);
-    }
-    
-    // Replace our availableCourses array with the merged data
+    // Reset available courses
     availableCourses.length = 0;
-    availableCourses.push(...mergedCourses);
     
-    console.log(`Loaded ${availableCourses.length} courses in total`);
+    // Process courses from content
+    if (contentResponse.ok) {
+      const courses = await contentResponse.json();
+      // Add each course to our list
+      courses.forEach(course => {
+        availableCourses.push(course);
+      });
+    }
+    
+    console.log(`Loaded ${availableCourses.length} courses from content directory`);
   } catch (error) {
     console.error('Error scanning courses:', error);
   }
-};
-
-// Helper function to process and merge courses
-const processCourses = (coursesToAdd, mergedCourses) => {
-  coursesToAdd.forEach(course => {
-    const existingIndex = mergedCourses.findIndex(c => c.id === course.id);
-    
-    if (existingIndex >= 0) {
-      // Update existing course with new data
-      mergedCourses[existingIndex] = {
-        ...mergedCourses[existingIndex],
-        ...course
-      };
-    } else {
-      // Add new course
-      mergedCourses.push(course);
-    }
-  });
 };
 
 // Call this when the app initializes to populate courses
