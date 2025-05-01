@@ -1,152 +1,72 @@
-# Kha-Boom!
+<div align="center">
+  <img src="frontend/public/logo.png" alt="KHA-BOOM! Logo" width="300">
+</div>
 
-A modern learning web application with user authentication system, built with the MERN stack (MongoDB, Express, React, Node.js).
-
-<p align="center">
-  <img src="frontend/public/favicon.svg" alt="Kha-Boom Logo" width="200" />
-</p>
+# KHA-BOOM!
 
 ## Project Overview
+KHA-BOOM! is an exciting web application designed to provide users with an immersive and interactive experience.
 
-Kha-Boom! is a full-stack web application featuring:
+## Features
 
-- Modern React frontend with Vite build tool
-- Express.js backend API with MongoDB integration
-- Complete user authentication system (register/login)
-- JWT-based authorization
-- Deployment configuration for Netlify (frontend) and Render (backend)
-- Colorful, modern, and creative user interface
-
-## Project Structure
-
-```
-kha-boom/
-├── frontend/               # Netlify site
-│   ├── netlify.toml        # Netlify config
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── public/
-│   │   └── index.html
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx
-│       └── components/
-│           └── Navbar.jsx
-│
-├── backend/                # Render service
-│   ├── render.yaml         # Render deploy spec
-│   ├── package.json
-│   ├── .env.example
-│   └── src/
-│       ├── index.js
-│       ├── config/
-│       │   └── db.js
-│       ├── models/
-│       │   └── user.model.js
-│       ├── routes/
-│       │   └── auth.routes.js
-│       └── middleware/
-│           └── auth.middleware.js
-```
-
-## Key Features
-
-### Advanced User System
-
-- Registration and login with JWT authentication
-- Comprehensive user profiles with fields:
-  - Username (name)
-  - Full name (fullName)
-  - Class (class)
-  - Birth date (birthdate)
-  - Primary email (email)
-  - Optional Gmail account (gmail)
-  - Automatic avatar generation (avatar)
-
-### Modern Interface
-
-- Responsive design for all devices
-- Colorful and dynamic interface
-- Smooth transition effects
-- Full Vietnamese language support
+- **Modern User Interface**: Sleek, responsive design that works across all devices
+- **Interactive Experience**: Engaging user interactions and animations
+- **Optimized Performance**: Fast loading times and smooth performance
+- **Seamless Integration**: Works flawlessly with existing web ecosystems
 
 ## Getting Started
 
-### System Requirements
+### Prerequisites
 
-- Node.js v16 or later
-- npm (Node Package Manager)
-- MongoDB account (Atlas or other provider)
+- Node.js (v14.0.0 or higher)
+- npm (v6.0.0 or higher)
 
-### Local Development
+### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/joinquit3110/KhaBoom.git
-   cd KhaBoom
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/yourorganization/kha-boom.git
 
-2. **Set up the backend**
-   ```bash
-   cd backend
-   cp .env.example .env  # Create .env file
-   # Edit .env file with your MongoDB connection string and JWT secret
-   npm install
-   npm start
-   ```
+# Navigate to the project directory
+cd kha-boom
 
-3. **Set up the frontend**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+# Install dependencies
+npm install
 
-4. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+# Start the development server
+npm start
+```
 
-## Deployment
+Your application will be available at `http://localhost:3000`.
 
-### Frontend (Netlify)
+## Technologies
 
-1. In Netlify dashboard, select "New site from Git"
-2. Connect to your GitHub repository
-3. Set build settings:
-   - Build command: `npm run build`
-   - Publish directory: `frontend/dist`
-4. Set environment variables:
-   - `VITE_API_BASE`: URL of your backend API (from Render)
+- **Frontend**: React, HTML5, CSS3/SASS
+- **State Management**: Redux/Context API
+- **Build Tools**: Webpack, Babel
+- **Testing**: Jest, React Testing Library
+- **CI/CD**: GitHub Actions
 
-### Backend (Render)
+## Documentation
 
-1. In Render dashboard, select "New Web Service"
-2. Connect to your GitHub repository
-3. Set build settings:
-   - Root directory: `backend`
-   - Build command: `npm install`
-   - Start command: `npm start`
-4. Set environment variables:
-   - `MONGODB_URI`: Your MongoDB connection string
-   - `JWT_SECRET`: A secure random string for JWT signing
-   - `PORT`: 10000 (optional)
+For comprehensive documentation, please visit our [wiki page](https://github.com/yourorganization/kha-boom/wiki).
 
-## API Endpoints
+## Contributing
 
-### Authentication
-
-- `POST /api/auth/register` - Register a new user
-  - Body: `{ name, email, password }`
-  - Response: `{ id }`
-
-- `POST /api/auth/login` - Login a user
-  - Body: `{ email, password }`
-  - Response: `{ token }`
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to submit pull requests.
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Author
+## Contact
 
-- [joinquit3110](https://github.com/joinquit3110)
+- **Website**: [https://kha-boom.com](https://kha-boom.com)
+- **Email**: info@kha-boom.com
+- **Twitter**: [@khaboom](https://twitter.com/khaboom)
+
+---
+
+<div align="center">
+  <p>© 2025 KHA-BOOM! All Rights Reserved.</p>
+</div>

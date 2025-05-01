@@ -2,13 +2,23 @@
   "name": "kha-boom-backend",
   "version": "0.1.0",
   "type": "module",
-  "scripts": { "start": "node src/index.js" },
+  "scripts": { 
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "server": "mgon-serve"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16",
     "express": "^4.19",
     "jsonwebtoken": "^9",
-    "mongoose": "^8"
+    "mongoose": "^8",
+    "@mathigon/boost": "1.2.27",
+    "@mathigon/core": "1.1.19",
+    "@mathigon/studio": "0.1.43"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
