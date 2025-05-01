@@ -1,0 +1,42 @@
+{
+  "name": "@mathigon/textbooks",
+  "version": "0.7.4",
+  "description": "Mathigon Textbooks",
+  "homepage": "https://mathigon.org/",
+  "repository": "mathigon/textbooks",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "server": "mgon-serve",
+    "assets": "mgon-build --assets --locales en",
+    "watch": "mgon-build --assets --watch --locales en",
+    "start": "npm-run-all --parallel watch server",
+    "translate": "mgon-build --translate --key google-service-account.json",
+    "lint": "eslint content --ext .ts",
+    "lint-fix": "eslint content --ext .ts --fix"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "@mathigon/boost": "1.2.27",
+    "@mathigon/core": "1.1.19",
+    "@mathigon/euclid": "1.2.0",
+    "@mathigon/fermat": "1.1.20",
+    "@mathigon/hilbert": "1.1.20",
+    "@mathigon/studio": "0.1.43",
+    "@types/d3": "6.3.0",
+    "@types/three": "0.91.14",
+    "@types/topojson": "3.2.3",
+    "npm-run-all2": "6.2.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.5.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "6.21.0",
+    "@typescript-eslint/parser": "6.21.0",
+    "eslint": "8.57.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-plugin-import": "2.29.1"
+  }
+}

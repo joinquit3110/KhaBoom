@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kha-boom-backend
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    rootDir: backend
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: MONGODB_URI
+        sync: false         # set in Render dashboard (link to Mongo Atlas/Render Mongo)
+      - key: JWT_SECRET
+        sync: false
