@@ -568,15 +568,14 @@ p {
   line-height: 2;
 }
 
-/* Additional styling for courses and learning components */
-.course-container {
-  position: relative;
-  width: 100%;
+/* Additional styling for courses and/* Improved course content */
+.course-content {
+  background: var(--bg-white);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  padding: var(--spacing-lg);
   box-shadow: var(--shadow-md);
-  margin: var(--spacing-xl) 0;
-  background-color: var(--card-bg);
+  margin-bottom: var(--spacing-lg);
+  transition: all var(--transition);
 }
 
 .course-header {
@@ -2159,3 +2158,181 @@ main {
   margin-bottom: 1rem;
 }
 
+/* Mathigon Content Styling */
+.mathigon-content {
+  font-family: var(--font-family);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: var(--spacing-lg);
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.mathigon-content h1, 
+.mathigon-content h2, 
+.mathigon-content h3, 
+.mathigon-content h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.mathigon-content h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mathigon-content h2 {
+  font-size: 2rem;
+  margin-top: 2rem;
+}
+
+.mathigon-content h3 {
+  font-size: 1.5rem;
+}
+
+.mathigon-content p {
+  margin-bottom: 1rem;
+}
+
+.mathigon-content .section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.mathigon-content .subsection {
+  margin: 1.5rem 0;
+}
+
+/* Column layout styles */
+.mathigon-content .column {
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 1rem;
+}
+
+.mathigon-content .column.grow {
+  flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+  .mathigon-content .column {
+    width: 100% !important;
+    padding: 0 0 1rem 0;
+  }
+}
+
+/* Interactive elements */
+.mathigon-content .interactive-element {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.mathigon-content .interactive-element:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mathigon-content .interactive-element .placeholder-text {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Glossary terms */
+.mathigon-content .term {
+  color: var(--primary-color);
+  border-bottom: 1px dashed var(--primary-color);
+  cursor: help;
+}
+
+/* Math formatting */
+.mathigon-content .math-block {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  font-style: italic;
+  text-align: center;
+  font-family: serif;
+}
+
+.mathigon-content .math-inline {
+  font-style: italic;
+  font-family: serif;
+}
+
+/* Images */
+.mathigon-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  margin: 1rem 0;
+}
+
+/* Loading and error states */
+.content-loading-state,
+.content-error-state {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.content-loading-state .spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(var(--primary-rgb), 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.content-error-state h3 {
+  color: var(--error-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Course container */
+.course-content-container {
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  min-height: 400px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Fix for course view layout */
+.course-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-lg);
+}
+
+.course-menu {
+  flex-shrink: 0;
+}
+
+.course-main {
+  flex-grow: 1;
+}

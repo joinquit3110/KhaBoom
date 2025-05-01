@@ -336,4 +336,4 @@ export const loadTranslation = async (courseId, languageCode) => {
   }
 };
 
-export { getAssistantResponse };
+export { getAssistantResponse, parseMathigonMd };

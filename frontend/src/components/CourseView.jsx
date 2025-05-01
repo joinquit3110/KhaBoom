@@ -7,7 +7,8 @@ import {
   getGlossaryDefinition, 
   getAssistantResponse,
   getAvailableTranslations,
-  loadTranslation
+  loadTranslation,
+  parseMathigonMd
 } from '../utils/contentLoader';
 import Notification from '../components/Notification';
 import ChatBot from '../components/ChatBot';
@@ -27,6 +28,7 @@ const CourseView = () => {
     color: '#6366F1',
     sections: []
   });
+  const [courseContent, setCourseContent] = useState(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const messagesEndRef = useRef(null);
@@ -54,129 +56,110 @@ const CourseView = () => {
   const [progress, setProgress] = useState(0);
   const [completedSections, setCompletedSections] = useState([]);
 
+  // Parse course content from Mathigon markdown
+  const renderCourseContent = useCallback((rawContent) => {
+    if (!rawContent) return '';
+    
+    // Use the parseMathigonMd function from contentLoader utility
+    try {
+      // We'll directly render content in the container div
+      return { __html: parseMathigonMd(rawContent).html || '' };
+    } catch (error) {
+      console.error('Error parsing course content:', error);
+      setError('Failed to parse course content. Please try again later.');
+      return { __html: '<div class="error-message">Failed to load course content</div>' };
+    }
+  }, []);
+
   // Memoize the iframe setup to prevent unnecessary re-renders
   const setupIframe = useCallback(() => {
-    // Set up Mathigon course content iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = `${import.meta.env.VITE_API_BASE}/course/${courseId}`;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '8px';
-    
-    // Improved error handling and loading state management
-    iframe.onload = () => {
-      console.log("Course iframe loaded successfully");
-      setLoading(false);
-    };
-    
-    iframe.onerror = (error) => {
-      console.error("Failed to load course content:", error);
-      setError("Failed to load course content. Please try again later.");
-      setLoading(false);
-    };
-    
-    // Create container if it doesn't exist
-    let container = document.getElementById('course-container');
-    if (!container) {
-      console.log("Course container not found, creating one");
-      container = document.createElement('div');
-      container.id = 'course-container';
-      container.style.width = '100%';
-      container.style.height = '600px';
-      container.style.border = '1px solid #eee';
-      container.style.borderRadius = '8px';
-      container.style.overflow = 'hidden';
-      container.style.marginBottom = '20px';
-      
-      // Find a suitable place to append the container
-      const mainContent = document.querySelector('.dashboard') || document.querySelector('main');
-      if (mainContent) {
-        mainContent.prepend(container);
-      } else {
-        // As a last resort, append to body
-        document.body.prepend(container);
-      }
-    }
-    
-    // Clear previous content and append iframe
-    if (container) {
-      container.innerHTML = '';
-      container.appendChild(iframe);
-    } else {
-      console.error("Course container element not found and couldn't be created");
-      setError("An error occurred while preparing the course view.");
-      setLoading(false);
-    }
-    
-    return container;
-  }, [courseId]);
+    // No iframe setup needed
+  }, []);
 
   useEffect(() => {
-    // Set a timeout to prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn("Loading timeout reached - forcing loading state to complete");
-        setLoading(false);
-      }
-    }, 10000); // 10 second timeout
-    
-    const container = setupIframe();
-    
-    // Fetch course metadata with better error handling and retry mechanism
+    // Fetch course data when component mounts or courseId changes
     const fetchCourseData = async () => {
-      let retries = 3;
-      while (retries > 0) {
-        try {
-          const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`);
-          
-          if (!res.data || !res.data.courses) {
-            console.error("Invalid course data format:", res.data);
-            throw new Error("Received invalid course data format");
-          }
-          
-          const foundCourse = res.data.courses.find(c => c.id === courseId);
-          if (foundCourse) {
-            console.log("Found course data:", foundCourse);
-            // Make sure the foundCourse has a sections array
-            if (!foundCourse.sections) {
-              foundCourse.sections = [];
-            }
-            setCourse(foundCourse);
-            // Fetch available translations for the course
-            try {
-              const translations = await getAvailableTranslations(courseId);
-              setAvailableLanguages(translations);
-            } catch (translationError) {
-              console.warn("Failed to load translations:", translationError);
-            }
-            break;
-          } else {
-            throw new Error("Course not found");
-          }
-        } catch (err) {
-          console.error(`Error fetching course data (retry ${3 - retries + 1}/3):`, err);
-          retries--;
-          if (retries === 0) {
-            setError("Failed to load course information. Please check your connection and try again.");
-            setLoading(false);
-          }
-          // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, 1500));
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Get course info
+        const courseInfo = getCourseById(courseId);
+        if (!courseInfo) {
+          throw new Error(`Course not found: ${courseId}`);
         }
+        
+        // Update course state
+        setCourse({
+          ...courseInfo,
+          sections: courseInfo.sections || []
+        });
+        
+        // Get language availability
+        const langs = await getAvailableTranslations(courseId);
+        setAvailableLanguages(langs);
+        
+        // Fetch course content
+        const contentData = await getCourseContent(courseId);
+        if (!contentData) {
+          throw new Error(`Could not load content for course: ${courseId}`);
+        }
+        
+        // Set the content directly in the state
+        setCourseContent(contentData.content);
+        setLoading(false);
+        
+        // Get progress info
+        try {
+          const userId = localStorage.getItem('userId');
+          if (userId) {
+            const progressResponse = await axios.get(`${import.meta.env.VITE_API_BASE}/api/progress/${userId}/${courseId}`);
+            if (progressResponse.data && progressResponse.data.completed) {
+              setCompletedSections(progressResponse.data.completed);
+              
+              // Set progress percentage
+              if (courseInfo.sections && courseInfo.sections.length > 0) {
+                const percentage = Math.round((progressResponse.data.completed.length / courseInfo.sections.length) * 100);
+                setProgress(percentage);
+              }
+            }
+          }
+        } catch (progressError) {
+          console.warn('Could not fetch progress data:', progressError);
+          // Don't fail the whole load due to progress fetch failing
+        }
+      } catch (err) {
+        console.error('Failed to fetch course data:', err);
+        setError(err.message || 'Failed to load course data');
+        setLoading(false);
+        
+        // Add retry notification
+        addNotification({
+          id: 'retry-course-load',
+          message: 'Failed to load course. Click to retry.',
+          type: 'error',
+          action: fetchCourseData
+        });
       }
     };
     
     fetchCourseData();
-      
-    // Cleanup function
+    
+    document.title = `${course.title} | Kha-Boom Learning`;
+    
+    // Set up events when content container is ready
+    if (contentRef.current) {
+      // Set up listeners for glossary terms
+      contentRef.current.addEventListener('click', handleGlossaryClick);
+    }
+    
+    // Clean up event listeners
     return () => {
-      clearTimeout(loadingTimeout);
-      if (container) {
-        container.innerHTML = '';
+      if (contentRef.current) {
+        contentRef.current.removeEventListener('click', handleGlossaryClick);
       }
     };
-  }, [courseId, loading, setupIframe]);
+  }, [courseId, currentSection]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -216,7 +199,7 @@ const CourseView = () => {
     
     setInteractiveElements(interactives);
   }, []);
-  
+
   // Handle interactions with content elements with error boundaries
   useEffect(() => {
     if (!contentRef.current || !course || !course.sections) return;
@@ -281,7 +264,7 @@ const CourseView = () => {
       console.error("Error handling content interactions:", err);
     }
   }, [currentSection, course, processInteractiveElements, completedSections]);
-  
+
   // Close glossary popup when clicking elsewhere
   useEffect(() => {
     const handleClickOutside = () => {
@@ -519,17 +502,31 @@ const CourseView = () => {
                  course.sections[currentSection].title : 
                  'Content Loading...'}
               </h2>
-              <div 
-                className="content-html"
-                ref={contentRef}
-                dangerouslySetInnerHTML={{ 
-                  __html: course.sections && 
-                          Array.isArray(course.sections) && 
-                          course.sections[currentSection] ? 
-                          course.sections[currentSection].content : 
-                          '<p>Loading course content...</p>' 
-                }}
-              />
+              <div className="course-content-container" ref={contentRef}>
+                {loading ? (
+                  <div className="content-loading-state">
+                    <div className="spinner"></div>
+                    <p>Loading course content...</p>
+                  </div>
+                ) : error ? (
+                  <div className="content-error-state">
+                    <h3>Error</h3>
+                    <p>{error}</p>
+                    <button 
+                      className="btn btn-outline" 
+                      onClick={fetchCourseData}
+                      style={{ borderColor: course.color, color: course.color }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <div 
+                    className="mathigon-content" 
+                    dangerouslySetInnerHTML={renderCourseContent(courseContent)}
+                  />
+                )}
+              </div>
               
               {/* Interactive component modal */}
               <AnimatePresence>
