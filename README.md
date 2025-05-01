@@ -1,123 +1,128 @@
 # Kha-Boom!
 
-![](https://mathigon.org/images/hero.jpg)
+A modern web application with user authentication system, built with the MERN stack (MongoDB, Express, React, Node.js).
 
-Welcome to [Mathigon](https://mathigon.org), an award-winning mathematics education platform for
-students aged 12 to 18. Part textbook and part virtual personal tutor, it uses cutting-edge
-technology and an innovative new curriculum to make learning mathematics more fun and more
-interactive and engaging than ever before. [Learn more…](https://www.youtube.com/watch?v=vwyIZsi0b98)
+![Kha-Boom Logo](frontend/public/favicon.svg)
 
-This repository contains the source code and assets for all our courses.
+## Project Overview
 
-## Setup
+Kha-Boom! is a full-stack web application that demonstrates:
 
-![CI Tests](https://github.com/mathigon/textbooks/workflows/CI%20Tests/badge.svg)
-![Code Quality](https://github.com/mathigon/textbooks/workflows/Code%20Quality/badge.svg)
-![GitHub repo size](https://img.shields.io/github/repo-size/mathigon/textbooks)
-![GitHub issues](https://img.shields.io/github/issues-raw/mathigon/textbooks)
+- Modern React frontend with Vite build tool
+- Express.js backend API with MongoDB integration
+- Complete user authentication system (register/login)
+- JWT-based authorization
+- Deployment configuration for Netlify (frontend) and Render (backend)
 
-If you want to make changes or additions to this content, you can run a local Node.js server for
-development. First, make sure you have NPM and Node.js (version 14+) installed on your computer,
-or download them from the [official page](https://nodejs.org).
+## Project Structure
 
-Next, clone this repository, install all dependencies, and then start a local server using these
-commands:
-
-```bash
-git clone https://github.com/mathigon/textbooks
-cd textbooks
-npm install
-npm start
+```
+kha-boom/
+├── frontend/               # Netlify site
+│   ├── netlify.toml        # Netlify config
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── public/
+│   │   └── index.html
+│   └── src/
+│       ├── main.jsx
+│       ├── App.jsx
+│       └── components/
+│           └── Navbar.jsx
+│
+├── backend/                # Render service
+│   ├── render.yaml         # Render deploy spec
+│   ├── package.json
+│   ├── .env.example
+│   └── src/
+│       ├── index.js
+│       ├── config/
+│       │   └── db.js
+│       ├── models/
+│       │   └── user.model.js
+│       ├── routes/
+│       │   └── auth.routes.js
+│       └── middleware/
+│           └── auth.middleware.js
 ```
 
-Running `npm start` for the first time may take a few minutes, as it compiles all existing courses.
-Later, it should use cached versions whenever possible. Finally, you can visit
-[localhost:5000](http://localhost:5000) and select any of the chapters.
+## Getting Started
 
-The server will watch for changes to any of the files and recompile automatically whenever
-necessary (with a few exceptions like shared or YAML files).
+### Prerequisites
 
+- Node.js v16 or later
+- npm (Node Package Manager)
+- MongoDB account (Atlas or other provider)
 
-### Contributing
+### Local Development
 
-We welcome any contributions to Mathigon – from bug fixes and correcting typos to creating entirely
-new courses. If you find any bugs or mistakes, please [file an issue](https://github.com/mathigon/textbooks/issues).
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/joinquit3110/KhaBoom.git
+   cd KhaBoom
+   ```
 
-When writing new content, make sure you follow our [content development
-guide](https://www.notion.so/718073cf25bf468b9d717735884803da), which contains pedagogical
-principles, style recommendations, and descriptions of interactive elements.
+2. **Set up the backend**
+   ```bash
+   cd backend
+   cp .env.example .env  # Create .env file
+   # Edit .env file with your MongoDB connection string and JWT secret
+   npm install
+   npm start
+   ```
 
-If you want to help us translate Mathigon into more languages, take a look at our [localisation
-documentation](docs/translations.md).
+3. **Set up the frontend**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-Before submitting a pull request, you have to sign our [Individual Contributor
-License Agreement](https://gist.github.com/plegner/5ad5b7be2948a4ad073c50b15ac01d39).
+4. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
 
-If you want to work for Mathigon, visit our [careers page](https://mathigon.org/careers), and
-[contact us](mailto:dev@mathigon.org) if you have any questions.
+## Deployment
 
+### Frontend (Netlify)
 
-## Documentation
+1. In Netlify dashboard, select "New site from Git"
+2. Connect to your GitHub repository
+3. Set build settings:
+   - Build command: `npm run build`
+   - Publish directory: `frontend/dist`
+4. Set environment variables:
+   - `VITE_API_BASE`: URL of your backend API (from Render)
 
-### Course Structure
+### Backend (Render)
 
-Every course is a subfolder in the [content](content) directory, and consists of these components:
+1. In Render dashboard, select "New Web Service"
+2. Connect to your GitHub repository
+3. Set build settings:
+   - Root directory: `backend`
+   - Build command: `npm install`
+   - Start command: `npm start`
+4. Set environment variables:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `JWT_SECRET`: A secure random string for JWT signing
+   - `PORT`: 10000 (optional)
 
-* `content.md` contains the source code and metadata for a course. It is written in a custom
-  extension of Markdown. [More documentation…](docs/markdown.md)
-* `functions.ts` contains all the TypeScript code for all the interactive elements in this course.
-  [More documentation…](docs/interactives.md)
-* `styles.scss` contains all course-specific styles, written in [SCSS](https://sass-lang.com/).
-* `hints.yaml` (optional) contains any messages that can be sent by Mathigon's virtual tutor.
+## API Endpoints
 
-The [content/shared](content/shared) directory contains biographies, glossary, web components, and
-assets used by multiple courses.
+### Authentication
 
-### Dependencies
+- `POST /api/auth/register` - Register a new user
+  - Body: `{ name, email, password }`
+  - Response: `{ id }`
 
-This repository contains all the code and content for our interactive courses. Its dependencies
-include a number of separate libraries that are published on NPM. In most cases, you should not have
-to make changes to these libraries directly, but it may be helpful to look at their documentation:
+- `POST /api/auth/login` - Login a user
+  - Body: `{ email, password }`
+  - Response: `{ token }`
 
-- [@mathigon/core](https://github.com/mathigon/core.js) contains JavaScript utilities such as
-  array and string manipulation, promises, function caching, and event handling.
-- [@mathigon/fermat](https://github.com/mathigon/fermat.js) is a powerful mathematics library for
-  TypeScript. It contains everything from number theory to random numbers and linear algebra classes.
-- [@mathigon/hilbert](https://github.com/mathigon/hilbert.js) handles expression parsing,
-  simplification, and MathML rendering.
-- [@mathigon/euclid](https://github.com/mathigon/euclid.js) contains Geometry classes as well as
-  SVG and Canvas drawing utilities.
-- [@mathigon/boost](https://github.com/mathigon/boost.js) contains browser utilities such as DOM
-  selections, web components, gesture recognisers, animations, routing, multi-threading and AJAX
-  requests.
-- [@mathigon/studio](https://github.com/mathigon/studio) contains the base NodeJS server, TypeScript
-  components and markdown parser for our interactive courses.
+## License
 
-### Testing and Linting
+This project is open source and available under the [MIT License](LICENSE).
 
-Before submitting a pull request, make sure to run `npm run lint-fix`, to ensure a consistent coding
-style across all files.
+## Author
 
-TODO: _Unit and screendiff tests_
-
-
-## Translations and Localisation
-
-Translations are powered by [GitLocalize](https://gitlocalize.com/repo/5711). In order to help us
-translate content, you have to create a GitHub account and then [contact us](mailto:contact@mathigon.org)
-to be added to the list of editors. [This blog post](https://blog.gitlocalize.com/posts/introducing-gitlocalize.html)
-explains how you can use the GitLocalize platform to add new languages, translate new courses, or
-fix bugs in existing translations.
-
-
-## Audio Narrations
-
-To generate audio narration files for the text in all courses, using the Google Cloud TTS API, you
-first need to install [FFmpeg](https://ffmpeg.org), for example using `brew install ffmpeg`. Then
-simply run `node utilities/audio.js`.
-
----
-
-[![Twitter Follow](https://img.shields.io/twitter/follow/MathigonOrg?style=social)](https://twitter.com/intent/follow?screen_name=MathigonOrg)
-
-© Mathigon 2016–2022, All rights reserved
+- [joinquit3110](https://github.com/joinquit3110)
