@@ -105,11 +105,22 @@ export default function Dashboard({ user }) {
     return sorted;
   }, [courses, categoryFilter, sortOrder]);
 
-  // Function to generate correct thumbnail URLs with API base
+  // Function to generate correct thumbnail URLs with API base URL
   const getThumbnailUrl = useCallback((course) => {
     const apiBase = import.meta.env.VITE_API_BASE || '';
-    return course.thumbnail ? `${apiBase}${course.thumbnail.replace(/^\/api/, '')}` : 
-      `${apiBase}/content/${course.id}/icon.png`;
+    if (!course || !course.id) return '';
+    
+    if (course.thumbnail) {
+      // If thumbnail already starts with the API base URL, return it as is
+      if (course.thumbnail.startsWith(apiBase)) {
+        return course.thumbnail;
+      }
+      // Otherwise, append the API base URL
+      return `${apiBase}${course.thumbnail.startsWith('/') ? course.thumbnail : `/${course.thumbnail}`}`;
+    }
+    
+    // Default thumbnail URL - use hero.jpg instead of icon.png
+    return `${apiBase}/content/${course.id}/hero.jpg`;
   }, []);
 
   // Use useMemo to prevent unnecessary re-renders of the course grid

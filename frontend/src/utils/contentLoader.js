@@ -124,12 +124,24 @@ const getGlossaryContent = (id) => {
   return glossaryTerms[id] || `Definition for ${id} not found.`;
 };
 
-// Function to check if a file exists by path
+// Function to generate correct API URLs
+const getApiUrl = (path) => {
+  const apiBase = import.meta.env.VITE_API_BASE || '';
+  // Clean up path by removing any double slashes
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${apiBase}${cleanPath}`;
+};
+
+// Function to generate proper thumbnail URLs using hero images
+const generateThumbnailUrl = (courseId) => {
+  return getApiUrl(`/content/${courseId}/hero.jpg`);
+};
+
 // Function to check if a file exists on the server
 const fileExists = async (path) => {
   try {
-    // Use HEAD request to avoid downloading content
-    const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/exists?path=${encodeURIComponent(path)}`, {
+    // Use HEAD request to check if file exists
+    const response = await fetch(getApiUrl(`/api/content/exists?path=${encodeURIComponent(path)}`), {
       method: 'HEAD'
     });
     
@@ -156,7 +168,7 @@ const loadContentFile = async (courseId) => {
     const contentExists = await fileExists(contentPath);
     
     if (contentExists) {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/${contentPath}`);
+      const response = await fetch(getApiUrl(`/api/content/${contentPath}`));
       const content = await response.text();
       return parseMathigonMd(content);
     }
@@ -166,7 +178,7 @@ const loadContentFile = async (courseId) => {
     const indexExists = await fileExists(indexPath);
     
     if (indexExists) {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/${indexPath}`);
+      const response = await fetch(getApiUrl(`/api/content/${indexPath}`));
       const content = await response.text();
       return parseMathigonMd(content);
     }
@@ -181,48 +193,283 @@ const loadContentFile = async (courseId) => {
 
 // Map of available courses from the content directory
 // This will be dynamically generated based on the filesystem content with hardcoded fallback
-// Only keeping minimal fallback courses in case API fails completely
-const availableCourses = [
-  // One fallback course as an example
-  {
-    id: 'probability',
-    title: 'Introduction to Probability',
-    description: 'Learn about randomness, games, and chance',
-    color: '#CD0E66',
-    level: 'Foundations',
-    category: 'Statistics',
-    thumbnail: '/api/content/probability/icon.png',
-    sections: [
-      { id: 'intro', title: 'Introduction' }
-    ]
-  }
-];
+const availableCourses = [];
 
-// Function to generate correct thumbnail URLs that include the API base
-const generateThumbnailUrl = (courseId) => {
-  const apiBase = import.meta.env.VITE_API_BASE || '';
-  return `${apiBase}/content/${courseId}/icon.png`;
+// Function to load all available courses from the content directory
+const addFallbackCourses = async () => {
+  console.log('Loading courses from the content directory structure');
+  
+  // Clear existing courses first to avoid duplicates
+  availableCourses.length = 0;
+  
+  try {
+    // Define course data based on the content directory structure
+    // This is based on the originalweb/textbooks-master organization
+    const allCourses = [
+      {
+        id: 'probability',
+        title: 'Introduction to Probability',
+        description: 'Learn about randomness, games, and chance',
+        color: '#CD0E66',
+        level: 'Foundations',
+        category: 'Statistics'
+      },
+      {
+        id: 'chaos',
+        title: 'Chaos Theory',
+        description: 'Explore the mathematics of unpredictable systems',
+        color: '#009EA6',
+        level: 'Advanced',
+        category: 'Mathematics'
+      },
+      {
+        id: 'circles',
+        title: 'Circles and Pi',
+        description: 'Discover the properties of circles and the famous number Pi',
+        color: '#5A49C9',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'codes',
+        title: 'Codes and Ciphers',
+        description: 'Explore encryption, encoding, and data security',
+        color: '#1F7AED',
+        level: 'Intermediate',
+        category: 'Computer Science'
+      },
+      {
+        id: 'combinatorics',
+        title: 'Combinatorics',
+        description: 'Master the art of counting and arrangement',
+        color: '#AD1D84',
+        level: 'Foundations',
+        category: 'Mathematics'
+      },
+      {
+        id: 'complex',
+        title: 'Complex Numbers',
+        description: 'Understand the fascinating world of imaginary numbers',
+        color: '#6D3BBF',
+        level: 'Advanced',
+        category: 'Mathematics'
+      },
+      {
+        id: 'data',
+        title: 'Data Analysis',
+        description: 'Learn how to analyze and interpret data',
+        color: '#8D2CA1',
+        level: 'Foundations',
+        category: 'Statistics'
+      },
+      {
+        id: 'divisibility',
+        title: 'Number Theory',
+        description: 'Explore the fascinating properties of numbers',
+        color: '#1AA845',
+        level: 'Foundations',
+        category: 'Mathematics'
+      },
+      {
+        id: 'euclidean-geometry',
+        title: 'Euclidean Geometry',
+        description: 'Study the classical geometry of Euclid',
+        color: '#0F82F2',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'exploding-dots',
+        title: 'Exploding Dots',
+        description: 'A revolutionary way to learn arithmetic and algebra',
+        color: '#2A7B23',
+        level: 'Foundations',
+        category: 'Mathematics'
+      },
+      {
+        id: 'exponentials',
+        title: 'Exponential Functions',
+        description: 'Understand growth, decay, and patterns of change',
+        color: '#CD0E66',
+        level: 'Intermediate',
+        category: 'Algebra'
+      },
+      {
+        id: 'fractals',
+        title: 'Fractals',
+        description: 'Explore infinite patterns and self-similarity',
+        color: '#1F7AED',
+        level: 'Advanced',
+        category: 'Mathematics'
+      },
+      {
+        id: 'functions',
+        title: 'Functions and Equations',
+        description: 'Master the building blocks of mathematics',
+        color: '#CE2016',
+        level: 'Foundations',
+        category: 'Algebra'
+      },
+      {
+        id: 'game-theory',
+        title: 'Game Theory',
+        description: 'Learn strategic decision making and competitive behavior',
+        color: '#CE2016',
+        level: 'Advanced',
+        category: 'Mathematics'
+      },
+      {
+        id: 'graph-theory',
+        title: 'Graph Theory',
+        description: 'Discover the mathematics of networks and connections',
+        color: '#0F82F2',
+        level: 'Intermediate',
+        category: 'Discrete Mathematics'
+      },
+      {
+        id: 'linear-functions',
+        title: 'Linear Functions',
+        description: 'Master the foundations of algebra and coordinate geometry',
+        color: '#1F7AED',
+        level: 'Foundations',
+        category: 'Algebra'
+      },
+      {
+        id: 'logic',
+        title: 'Logic and Proof',
+        description: 'Learn the language of mathematical reasoning',
+        color: '#CD0E66',
+        level: 'Intermediate',
+        category: 'Discrete Mathematics'
+      },
+      {
+        id: 'matrices',
+        title: 'Matrices and Transformations',
+        description: 'Understand linear algebra and its applications',
+        color: '#6D3BBF',
+        level: 'Advanced',
+        category: 'Algebra'
+      },
+      {
+        id: 'non-euclidean-geometry',
+        title: 'Non-Euclidean Geometry',
+        description: 'Explore geometries beyond flat space',
+        color: '#009EA6',
+        level: 'Advanced',
+        category: 'Geometry'
+      },
+      {
+        id: 'polygons',
+        title: 'Polygons and Polyhedra',
+        description: 'Discover the properties of 2D and 3D shapes',
+        color: '#5A49C9',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'polyhedra',
+        title: 'Polyhedra',
+        description: 'Study 3D geometric solids and their properties',
+        color: '#5A49C9',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'quadratics',
+        title: 'Quadratic Equations',
+        description: 'Master parabolas and second-degree equations',
+        color: '#1AA845',
+        level: 'Intermediate',
+        category: 'Algebra'
+      },
+      {
+        id: 'sequences',
+        title: 'Sequences and Patterns',
+        description: 'Discover mathematical patterns and series',
+        color: '#0F82F2',
+        level: 'Intermediate',
+        category: 'Algebra'
+      },
+      {
+        id: 'shapes',
+        title: 'Shapes and Solids',
+        description: 'Explore fundamental geometry and measurement',
+        color: '#009EA6',
+        level: 'Foundations',
+        category: 'Geometry'
+      },
+      {
+        id: 'statistics',
+        title: 'Statistics',
+        description: 'Learn to analyze data and draw conclusions',
+        color: '#CD0E66',
+        level: 'Intermediate',
+        category: 'Statistics'
+      },
+      {
+        id: 'transformations',
+        title: 'Geometric Transformations',
+        description: 'Study movements and changes in geometric space',
+        color: '#5A49C9',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'triangles',
+        title: 'Triangles and Trigonometry',
+        description: 'Master angles, ratios, and triangle relationships',
+        color: '#5A49C9',
+        level: 'Intermediate',
+        category: 'Geometry'
+      },
+      {
+        id: 'vectors',
+        title: 'Vectors',
+        description: 'Understand quantities with direction and magnitude',
+        color: '#6D3BBF',
+        level: 'Advanced',
+        category: 'Mathematics'
+      }
+    ];
+
+    // Process and add each course
+    allCourses.forEach(course => {
+      // Add thumbnail and dynamically identify sections if possible
+      availableCourses.push({
+        ...course,
+        thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
+        // We'll get actual sections from the content file when a course is selected
+        sections: course.sections || extractSectionsFromStructure(course.id) || [
+          { id: 'introduction', title: 'Introduction' }
+        ]
+      });
+    });
+    
+    console.log(`Added ${availableCourses.length} courses from content directory`);
+  } catch (error) {
+    console.error('Error loading courses from content directory:', error);
+    
+    // If all else fails, add at least one default course
+    if (availableCourses.length === 0) {
+      availableCourses.push({
+        id: 'probability',
+        title: 'Introduction to Probability',
+        description: 'Learn about randomness, games, and chance',
+        color: '#CD0E66',
+        level: 'Foundations',
+        category: 'Statistics',
+        thumbnail: getApiUrl('/content/probability/hero.jpg'),
+        sections: [{ id: 'introduction', title: 'Introduction' }]
+      });
+    }
+  }
 };
 
-// Function to get AI assistant response based on course content
-const getAssistantResponse = async (courseId, userMessage) => {
-  try {
-    // In a real implementation, this would call an AI service
-    // For now, we'll return a simple response
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-    
-    // Check if we have message about specific terms
-    for (const term of Object.keys(glossaryTerms)) {
-      if (userMessage.toLowerCase().includes(term)) {
-        return `${term}: ${getGlossaryContent(term)}`;
-      }
-    }
-    
-    return `I'm your learning assistant for this course. ${userMessage.endsWith('?') ? 'To answer your question, I recommend reviewing the current section.' : 'How can I help you understand this content better?'}`;
-  } catch (error) {
-    console.error('Error getting assistant response:', error);
-    return "I'm sorry, I couldn't process your request. Please try again.";
-  }
+// Helper function to extract sections from content structure
+const extractSectionsFromStructure = (courseId) => {
+  // This is a placeholder. In a real implementation, you would
+  // parse the content.md file from the course directory to extract sections
+  return null;
 };
 
 // Function to scan available courses from the content directory
@@ -234,7 +481,7 @@ const scanAvailableCourses = async () => {
     console.log('Available courses before scan:', availableCourses.length);
     
     // Use the specific scan endpoint for enhanced course information
-    const apiUrl = `${import.meta.env.VITE_API_BASE || ''}/api/content/scan`;
+    const apiUrl = getApiUrl('/api/content/scan');
     console.log('API URL:', apiUrl);
     
     const contentResponse = await fetch(apiUrl, {
@@ -296,66 +543,15 @@ const scanAvailableCourses = async () => {
     
     // If we reach here, something went wrong with API or parsing
     // Fallback to local directory scanning if available
-    console.log('API fetch failed, trying to scan content directory directly...');
+    console.log('API fetch failed, loading courses from content directory structure...');
     
-    try {
-      // Attempt to scan content directory directly using a different API endpoint
-      console.log('Using fallback courses endpoint...');
-      const fallbackUrl = `${import.meta.env.VITE_API_BASE || ''}/api/content/courses`;
-      console.log('Fallback URL:', fallbackUrl);
-      
-      const fallbackResponse = await fetch(fallbackUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'omit'
-      });
-      
-      if (fallbackResponse.ok) {
-        const responseText = await fallbackResponse.text();
-        console.log('Fallback Response:', responseText);
-        
-        try {
-          const coursesData = JSON.parse(responseText);
-          if (Array.isArray(coursesData) && coursesData.length > 0) {
-            // Success! Clear existing courses and add the new ones from content directory
-            console.log(`Found ${coursesData.length} courses from fallback endpoint`);
-            availableCourses.length = 0;
-            
-            coursesData.forEach(course => {
-              availableCourses.push({
-                ...course,
-                thumbnail: generateThumbnailUrl(course.id)
-              });
-            });
-            
-            console.log(`Loaded ${availableCourses.length} courses from fallback API endpoint`);
-            return;
-          } else {
-            console.error('Empty or invalid courses array from fallback endpoint:', coursesData);
-          }
-        } catch (parseError) {
-          console.error('Error parsing fallback course data:', parseError);
-        }
-      } else {
-        console.error(`Fallback request failed: ${fallbackResponse.status} ${fallbackResponse.statusText}`);
-      }
-    } catch (fallbackError) {
-      console.error('Fallback content scan failed:', fallbackError);
-    }
-    
-    // If we still have fallback courses, log that we're using them
-    if (availableCourses.length > 0) {
-      console.log(`Using ${availableCourses.length} hardcoded fallback courses`);
-    } else {
-      console.error('No courses available from any source!');
-    }
+    // Use our new function that loads courses from the content directory
+    await addFallbackCourses();
     
   } catch (error) {
     console.error('Error scanning courses:', error);
+    // Ensure we have courses even if API scan fails
+    await addFallbackCourses();
   }
 };
 

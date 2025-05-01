@@ -106,8 +106,14 @@ const CourseView = () => {
     // No iframe setup needed
   }, []);
 
-  // Function to fetch course data properly using the API base URL
-  const fetchCourseData2 = async () => {
+  // Function to generate correct icon and content URLs
+  const getResourceUrl = useCallback((path) => {
+    const apiBase = import.meta.env.VITE_API_BASE || '';
+    return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
+  }, []);
+
+  // Fetch course data with improved error handling
+  const fetchCourseData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -118,21 +124,21 @@ const CourseView = () => {
         throw new Error(`Course not found: ${courseId}`);
       }
       
-      // Update course state
+      // Update course state with properly formatted hero image URL
       setCourse({
         ...courseInfo,
-        sections: courseInfo.sections || []
+        sections: courseInfo.sections || [],
+        thumbnail: getResourceUrl(courseInfo.thumbnail || `/content/${courseId}/hero.jpg`)
       });
       
       // Get language availability
       const langs = await getAvailableTranslations(courseId);
       setAvailableLanguages(langs);
       
-      // Fetch course content
-      const contentPath = `${import.meta.env.VITE_API_BASE || ''}/content/${courseId}/content.md`;
-      
       try {
-        const response = await fetch(contentPath);
+        // Fetch course content using the API base URL
+        const contentPath = `content/${courseId}/content.md`;
+        const response = await fetch(getResourceUrl(contentPath));
         
         if (!response.ok) {
           throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
@@ -153,54 +159,18 @@ const CourseView = () => {
         setCourseContent(parsedContent);
         setLoading(false);
         
-        // Get progress info
-        try {
-          // Load progress data from localStorage
-          const savedProgress = localStorage.getItem(`course-progress-${courseId}`);
-          if (savedProgress) {
-            const progressData = JSON.parse(savedProgress);
-            setCompletedSections(progressData.completedSections || []);
-            
-            // Calculate and set progress percentage
-            const progressPercentage = calculateProgress(
-              progressData.completedSections || [], 
-              courseInfo.sections?.length || 0
-            );
-            setProgress(progressPercentage);
-            
-            // Update course progress in localStorage courses list
-            updateCourseProgressInList(courseId, progressPercentage);
-          }
-          
-          const userId = localStorage.getItem('userId');
-          if (userId) {
-            const progressResponse = await axios.get(`${import.meta.env.VITE_API_BASE}/api/progress/${userId}/${courseId}`);
-            if (progressResponse.data && progressResponse.data.completed) {
-              setCompletedSections(progressResponse.data.completed);
-              
-              // Set progress percentage
-              if (courseInfo.sections && courseInfo.sections.length > 0) {
-                const percentage = Math.round((progressResponse.data.completed.length / courseInfo.sections.length) * 100);
-                setProgress(percentage);
-              }
-            }
-          }
-        } catch (progressError) {
-          console.warn('Could not fetch progress data:', progressError);
-          // Don't fail the whole load due to progress fetch failing
-        }
+        // Try to load progress data
+        loadProgressData(courseInfo);
       } catch (err) {
-        console.error(`Error fetching course content from ${contentPath}:`, err);
+        console.error(`Error fetching course content: ${err.message}`);
         
-        // Try fallback approach using getCourseContent
-        console.log(`Trying fallback content loading for ${courseId}`);
+        // Try fallback content loading approach
         const contentData = await getCourseContent(courseId);
         if (!contentData) {
           throw new Error(`Could not load content for course: ${courseId}`);
         }
         
-        // Set the content directly in the state
-        setCourseContent(contentData);
+        setCourseContent(contentData.content);
         setLoading(false);
       }
     } catch (err) {
@@ -213,14 +183,54 @@ const CourseView = () => {
         id: 'retry-course-load',
         message: 'Failed to load course. Click to retry.',
         type: 'error',
-        action: fetchCourseData2
+        action: fetchCourseData
       });
+    }
+  };
+  
+  // Helper function to load progress data
+  const loadProgressData = async (courseInfo) => {
+    try {
+      // Load progress data from localStorage
+      const savedProgress = localStorage.getItem(`course-progress-${courseId}`);
+      if (savedProgress) {
+        const progressData = JSON.parse(savedProgress);
+        setCompletedSections(progressData.completedSections || []);
+        
+        // Calculate and set progress percentage
+        const progressPercentage = calculateProgress(
+          progressData.completedSections || [], 
+          courseInfo.sections?.length || 0
+        );
+        setProgress(progressPercentage);
+        
+        // Update course progress in localStorage courses list
+        updateCourseProgressInList(courseId, progressPercentage);
+      }
+      
+      const userId = localStorage.getItem('userId');
+      if (userId) {
+        const apiBase = import.meta.env.VITE_API_BASE || '';
+        const progressResponse = await axios.get(`${apiBase}/api/progress/${userId}/${courseId}`);
+        if (progressResponse.data && progressResponse.data.completed) {
+          setCompletedSections(progressResponse.data.completed);
+          
+          // Set progress percentage
+          if (courseInfo.sections && courseInfo.sections.length > 0) {
+            const percentage = Math.round((progressResponse.data.completed.length / courseInfo.sections.length) * 100);
+            setProgress(percentage);
+          }
+        }
+      }
+    } catch (progressError) {
+      console.warn('Could not fetch progress data:', progressError);
+      // Don't fail the whole load due to progress fetch failing
     }
   };
 
   useEffect(() => {
     // Fetch course data when component mounts or courseId changes
-    fetchCourseData2();
+    fetchCourseData();
     
     document.title = `${course.title} | Kha-Boom Learning`;
     
@@ -637,7 +647,7 @@ const CourseView = () => {
                     <p>{error}</p>
                     <button 
                       className="btn btn-outline" 
-                      onClick={fetchCourseData2}
+                      onClick={fetchCourseData}
                       style={{ borderColor: course.color, color: course.color }}
                     >
                       Retry
