@@ -105,6 +105,13 @@ export default function Dashboard({ user }) {
     return sorted;
   }, [courses, categoryFilter, sortOrder]);
 
+  // Function to generate correct thumbnail URLs with API base
+  const getThumbnailUrl = useCallback((course) => {
+    const apiBase = import.meta.env.VITE_API_BASE || '';
+    return course.thumbnail ? `${apiBase}${course.thumbnail.replace(/^\/api/, '')}` : 
+      `${apiBase}/content/${course.id}/icon.png`;
+  }, []);
+
   // Use useMemo to prevent unnecessary re-renders of the course grid
   const renderedCourseGrid = useMemo(() => {
     if (!filteredAndSortedCourses || filteredAndSortedCourses.length === 0) {
@@ -135,7 +142,7 @@ export default function Dashboard({ user }) {
               <div className="course-image" 
                 style={{
                   backgroundColor: course.color || '#6366F1',
-                  backgroundImage: `url(${course.thumbnail || `/api/content/${course.id}/icon.png`})`
+                  backgroundImage: `url(${getThumbnailUrl(course)})`
                 }}
               >
                 {course.level && (
@@ -166,13 +173,6 @@ export default function Dashboard({ user }) {
                     to={`/courses/${course.id}`} 
                     className="btn btn-primary btn-sm"
                     style={{ backgroundColor: course.color }}
-                    onClick={(e) => {
-                      // Prevent the default link behavior to avoid module loading errors
-                      e.preventDefault();
-                      // Use window.location for a full page navigation instead of React Router
-                      // This avoids the problematic module loading that's causing MIME type errors
-                      window.location.href = `/courses/${course.id}`;
-                    }}
                   >
                     Start Learning
                   </Link>
@@ -183,7 +183,7 @@ export default function Dashboard({ user }) {
         })}
       </div>
     );
-  }, [filteredAndSortedCourses]);
+  }, [filteredAndSortedCourses, getThumbnailUrl]);
 
   if (!user) {
     return (

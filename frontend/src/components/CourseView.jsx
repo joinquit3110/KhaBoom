@@ -63,17 +63,41 @@ const CourseView = () => {
   }, []);
 
   // Parse course content from Mathigon markdown
-  const renderCourseContent = useCallback((rawContent) => {
-    if (!rawContent) return '';
+  const renderCourseContent = useCallback((courseData) => {
+    if (!courseData || !courseData.content) {
+      console.error('No valid course content provided');
+      setError('Failed to load course content. Please try again later.');
+      return { __html: '<div class="error-message">Failed to load course content</div>' };
+    }
     
-    // Use the parseMathigonMd function from contentLoader utility
     try {
-      // We'll directly render content in the container div
-      return { __html: parseMathigonMd(rawContent).html || '' };
+      // Handle different content formats - courseData.content could already be structured
+      if (courseData.content.html) {
+        // We already have HTML content
+        return { __html: courseData.content.html };
+      } else if (typeof courseData.content === 'string') {
+        // If we somehow still have a raw string, use parseMathigonMd
+        return { __html: parseMathigonMd(courseData.content).html || '' };
+      } else if (courseData.content.sections && Array.isArray(courseData.content.sections)) {
+        // If we have sections, construct HTML
+        let html = `<h1>${courseData.course.title || 'Course Content'}</h1>\n`;
+        
+        courseData.content.sections.forEach(section => {
+          html += `<div class="section" data-section="${section.id}">
+            <h2 id="${section.id}">${section.title}</h2>
+            <div class="section-content">${section.content || ''}</div>
+          </div>\n`;
+        });
+        
+        return { __html: html };
+      }
+      
+      // Fallback for empty content
+      return { __html: `<h1>${courseData.course.title || 'Course Content'}</h1><p>This course is currently under development.</p>` };
     } catch (error) {
       console.error('Error parsing course content:', error);
       setError('Failed to parse course content. Please try again later.');
-      return { __html: '<div class="error-message">Failed to load course content</div>' };
+      return { __html: '<div class="error-message">Failed to parse course content</div>' };
     }
   }, []);
 
@@ -82,37 +106,51 @@ const CourseView = () => {
     // No iframe setup needed
   }, []);
 
-  useEffect(() => {
-    // Fetch course data when component mounts or courseId changes
-    const fetchCourseData = async () => {
+  // Function to fetch course data properly using the API base URL
+  const fetchCourseData2 = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get course info
+      const courseInfo = getCourseById(courseId);
+      if (!courseInfo) {
+        throw new Error(`Course not found: ${courseId}`);
+      }
+      
+      // Update course state
+      setCourse({
+        ...courseInfo,
+        sections: courseInfo.sections || []
+      });
+      
+      // Get language availability
+      const langs = await getAvailableTranslations(courseId);
+      setAvailableLanguages(langs);
+      
+      // Fetch course content
+      const contentPath = `${import.meta.env.VITE_API_BASE || ''}/content/${courseId}/content.md`;
+      
       try {
-        setLoading(true);
-        setError(null);
+        const response = await fetch(contentPath);
         
-        // Get course info
-        const courseInfo = getCourseById(courseId);
-        if (!courseInfo) {
-          throw new Error(`Course not found: ${courseId}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
         }
         
-        // Update course state
-        setCourse({
-          ...courseInfo,
-          sections: courseInfo.sections || []
-        });
+        // Get the raw markdown content
+        const markdownContent = await response.text();
         
-        // Get language availability
-        const langs = await getAvailableTranslations(courseId);
-        setAvailableLanguages(langs);
-        
-        // Fetch course content
-        const contentData = await getCourseContent(courseId);
-        if (!contentData) {
-          throw new Error(`Could not load content for course: ${courseId}`);
+        if (!markdownContent) {
+          throw new Error('No markdown content found');
         }
+        
+        // Process the markdown content
+        console.log(`Successfully loaded content for ${courseId}`);
+        const parsedContent = parseMathigonMd(markdownContent);
         
         // Set the content directly in the state
-        setCourseContent(contentData.content);
+        setCourseContent(parsedContent);
         setLoading(false);
         
         // Get progress info
@@ -133,6 +171,7 @@ const CourseView = () => {
             // Update course progress in localStorage courses list
             updateCourseProgressInList(courseId, progressPercentage);
           }
+          
           const userId = localStorage.getItem('userId');
           if (userId) {
             const progressResponse = await axios.get(`${import.meta.env.VITE_API_BASE}/api/progress/${userId}/${courseId}`);
@@ -151,21 +190,37 @@ const CourseView = () => {
           // Don't fail the whole load due to progress fetch failing
         }
       } catch (err) {
-        console.error('Failed to fetch course data:', err);
-        setError(err.message || 'Failed to load course data');
-        setLoading(false);
+        console.error(`Error fetching course content from ${contentPath}:`, err);
         
-        // Add retry notification
-        addNotification({
-          id: 'retry-course-load',
-          message: 'Failed to load course. Click to retry.',
-          type: 'error',
-          action: fetchCourseData
-        });
+        // Try fallback approach using getCourseContent
+        console.log(`Trying fallback content loading for ${courseId}`);
+        const contentData = await getCourseContent(courseId);
+        if (!contentData) {
+          throw new Error(`Could not load content for course: ${courseId}`);
+        }
+        
+        // Set the content directly in the state
+        setCourseContent(contentData);
+        setLoading(false);
       }
-    };
-    
-    fetchCourseData();
+    } catch (err) {
+      console.error('Failed to fetch course data:', err);
+      setError(err.message || 'Failed to load course data');
+      setLoading(false);
+      
+      // Add retry notification
+      addNotification({
+        id: 'retry-course-load',
+        message: 'Failed to load course. Click to retry.',
+        type: 'error',
+        action: fetchCourseData2
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Fetch course data when component mounts or courseId changes
+    fetchCourseData2();
     
     document.title = `${course.title} | Kha-Boom Learning`;
     
@@ -582,7 +637,7 @@ const CourseView = () => {
                     <p>{error}</p>
                     <button 
                       className="btn btn-outline" 
-                      onClick={fetchCourseData}
+                      onClick={fetchCourseData2}
                       style={{ borderColor: course.color, color: course.color }}
                     >
                       Retry

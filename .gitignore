@@ -84,9 +84,8 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Original source files (no longer needed)
-/originalweb
 /public
-
+/originalweb
 # Temporary files
 .temp
 .cache

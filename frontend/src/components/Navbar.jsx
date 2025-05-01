@@ -15,9 +15,36 @@ const Navbar = ({ user, onLogout }) => {
           <img 
             src="/logo.png" 
             alt="Kha-Boom!" 
-            style={{ height: '45px', marginRight: '10px', borderRadius: '6px', boxShadow: '0 3px 10px rgba(0,0,0,0.2)' }} 
+            style={{ 
+              height: '55px', 
+              marginRight: '12px', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 15px rgba(0,0,0,0.25)', 
+              transition: 'transform 0.3s ease', 
+              transform: 'rotate(-2deg)' 
+            }} 
           />
-          <span className="logo-text">Kha-<span className="boom-text">Boom!</span></span>
+          <span className="logo-text">
+            <span className="kha-text" style={{
+              background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              fontWeight: 'bold',
+              letterSpacing: '-1px',
+              fontSize: '1.8rem'
+            }}>
+              Kha-
+            </span>
+            <span className="boom-text" style={{
+              color: '#5A49C9',
+              fontWeight: 'bold',
+              textShadow: '1px 1px 0 rgba(0,0,0,0.2)',
+              fontSize: '1.8rem'
+            }}>
+              Boom!
+            </span>
+          </span>
         </Link>
       </div>
       
@@ -49,7 +76,15 @@ const Navbar = ({ user, onLogout }) => {
               </span>
               <button 
                 onClick={onLogout} 
-                className="btn btn-sm btn-outline logout-btn"
+                className="btn btn-sm logout-btn"
+                style={{
+                  backgroundColor: '#e53935',
+                  color: 'white',
+                  border: 'none',
+                  boxShadow: '0 2px 5px rgba(229, 57, 53, 0.3)',
+                  transition: 'all 0.2s ease',
+                  fontWeight: '500'
+                }}
               >
                 Logout
               </button>

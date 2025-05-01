@@ -7,9 +7,12 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Root paths for content and translations - only using main folders
-const contentRoot = path.resolve(process.cwd(), "../content");
-const translationsRoot = path.resolve(process.cwd(), "../translations");
+// Root paths for content and translations - using relative paths for deployment compatibility
+const contentRoot = path.resolve(process.cwd(), '../content');
+const translationsRoot = path.resolve(process.cwd(), '../translations');
+
+console.log("Content root path:", contentRoot);
+console.log("Translations root path:", translationsRoot);
 
 // Helper to get content root (simplified to only use main folders)
 const getContentRoot = () => contentRoot;
@@ -393,6 +396,34 @@ router.get("/scan", (req, res) => {
   } catch (error) {
     console.error("Error scanning courses:", error);
     res.status(500).json({ error: "Failed to scan courses" });
+  }
+});
+
+// Make sure routes are registered in order of specificity (most specific first)
+
+// ROUTE: Get specific file from a course directory (like content.md, icon.png, etc.)
+router.get("/:courseId/:fileName", (req, res) => {
+  const { courseId, fileName } = req.params;
+  const filePath = path.join(contentRoot, courseId, fileName);
+  
+  console.log(`Attempting to serve file: ${filePath}`);
+  
+  if (fs.existsSync(filePath)) {
+    // Determine content type based on file extension
+    const ext = path.extname(fileName).toLowerCase();
+    let contentType = 'text/plain';
+    
+    if (ext === '.md') contentType = 'text/markdown';
+    else if (ext === '.json') contentType = 'application/json';
+    else if (ext === '.png') contentType = 'image/png';
+    else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+    else if (ext === '.svg') contentType = 'image/svg+xml';
+    
+    res.set('Content-Type', contentType);
+    return res.sendFile(filePath);
+  } else {
+    console.error(`File not found: ${filePath}`);
+    return res.status(404).json({ error: "File not found" });
   }
 });
 

@@ -18,63 +18,6 @@ export default defineConfig({
     fs: {
       strict: false,
     },
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      loader: {
-        '.js': 'jsx',
-        '.jsx': 'jsx'
-      }
-    }
-  },
-  build: {
-    // Ensure modules are handled correctly
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-  },
-  plugins: [
-    react(),
-    splitVendorChunkPlugin(),
-    compression({
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    compression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
-    process.env.ANALYZE && visualizer({
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-    }),
-  ].filter(Boolean),
-  root: './',
-  build: {
-    outDir: 'dist',
-    cssCodeSplit: true,
-    reportCompressedSize: false, // Improves build speed
-    sourcemap: false, // Disable for production
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion'],
-          'utility-vendor': ['axios'],
-        },
-      },
-    },
-    chunkSizeWarningLimit: 1000,
-  },
-  server: {
     port: 3000,
     proxy: {
       '/api': {
@@ -93,7 +36,7 @@ export default defineConfig({
         target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
-      '/course': {
+      '/glossary': {
         target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
@@ -102,5 +45,63 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
-  }
-})
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+        '.jsx': 'jsx'
+      }
+    }
+  },
+  build: {
+    // Ensure modules are handled correctly
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    outDir: 'dist',
+    cssCodeSplit: true,
+    reportCompressedSize: false, // Improves build speed
+    sourcemap: false, // Disable for production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    rollupOptions: {
+      output: {
+        // Ensure correct MIME types in output
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['framer-motion'],
+          'utility-vendor': ['axios'],
+        },
+        // Configure correct output formats
+        assetFileNames: 'assets/[name].[ext]',
+        chunkFileNames: '[name].[hash].js',
+        entryFileNames: '[name].[hash].js',
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+  plugins: [
+    react(),
+    splitVendorChunkPlugin(),
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+    }),
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
+    process.env.ANALYZE && visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ].filter(Boolean),
+  root: './'
+});

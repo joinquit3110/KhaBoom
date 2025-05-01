@@ -76,9 +76,15 @@ function HomePage({ message, user }) {
             src="/logo.png" 
             alt="Kha-Boom Logo" 
             className="hero-logo" 
-            style={{ maxWidth: '300px', marginBottom: '1.5rem', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}
+            style={{ 
+              maxWidth: '400px', 
+              marginBottom: '2rem', 
+              filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.35))',
+              transform: 'scale(1.15)',
+              transition: 'transform 0.3s ease-in-out',
+            }}
           />
-          <h1 className="hero-title">Kha-<span className="hero-boom">Boom!</span></h1>
+          <h1 className="hero-title"><span className="hero-kha">Kha-</span><span className="hero-boom">Boom!</span></h1>
           <p className="hero-subtitle">
             Unleash your learning potential with our creative and interactive platform!
           </p>

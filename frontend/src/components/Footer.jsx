@@ -12,7 +12,15 @@ const Footer = () => {
             <img 
               src="/logo.png" 
               alt="Kha-Boom!" 
-              style={{ height: '30px', marginRight: '8px', borderRadius: '6px' }} 
+              style={{ 
+                height: '45px', 
+                marginRight: '10px', 
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                transition: 'transform 0.2s ease',
+              }} 
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             />
             <span style={{ fontSize: '0.9rem' }}>Kha-Boom!</span>
           </Link>

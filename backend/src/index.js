@@ -15,12 +15,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../');
 
-// Configure CORS to accept requests from all origins
+// Enable CORS for all routes with full configuration
 app.use(cors({
-  origin: '*',
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true,
+  maxAge: 86400 // Cache preflight request results for 24 hours (86400 seconds)
 }));
+
+// Set CORS headers for all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
+
 app.use(express.json());
 
 connectDB();
@@ -28,10 +40,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/content", contentRoutes);
 
 // Routes
-import apiRoutes from './routes/index.js';
-app.use('/api', apiRoutes);
+// We're handling API routes directly instead of using the index router
+// to avoid route conflicts
 
-// Serve Mathigon content
+// Serve Mathigon content directly (without API prefix for direct file access)
 app.use('/content', express.static(path.join(rootDir, 'content')));
 app.use('/translations', express.static(path.join(rootDir, 'translations')));
 app.use('/assets', express.static(path.join(rootDir, 'frontend/assets')));
@@ -53,6 +65,21 @@ app.get('/course/:id', (req, res) => {
 });
 
 app.get("/", (_, res) => res.json({ msg: "Kha-Boom API up" }));
+
+// SPA route handling - serve frontend for all non-API routes
+app.use(express.static(path.join(rootDir, 'frontend/dist')));
+
+// Catch-all route handler for client-side routing
+app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.url.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  
+  // For all other routes, serve the frontend application
+  res.sendFile(path.join(rootDir, 'frontend/dist/index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

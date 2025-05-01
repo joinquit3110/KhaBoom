@@ -29,3 +29,23 @@
   for = "/*.jsx"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+    
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+  for = "/main.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+  for = "/course.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+  for = "/dashboard.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"

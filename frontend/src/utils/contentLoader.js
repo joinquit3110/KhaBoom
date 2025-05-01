@@ -9,7 +9,23 @@
 
 // Utility functions for parsing Mathigon markdown format
 const parseMathigonMd = (content) => {
+  // Safely handle different types of content
   if (!content) return { metadata: {}, html: '' };
+  
+  // If content is already a structured object, return it as is
+  if (typeof content === 'object' && !Array.isArray(content)) {
+    return content;
+  }
+  
+  // Ensure content is a string to avoid 'includes is not a function' error
+  if (typeof content !== 'string') {
+    console.warn('Content is not a string or object:', typeof content);
+    // Return a safe fallback object
+    return {
+      metadata: {},
+      html: `<p>Error: Received invalid content type (${typeof content})</p>`
+    };
+  }
   
   // Extract metadata from content
   const metadata = {};
@@ -165,8 +181,9 @@ const loadContentFile = async (courseId) => {
 
 // Map of available courses from the content directory
 // This will be dynamically generated based on the filesystem content with hardcoded fallback
+// Only keeping minimal fallback courses in case API fails completely
 const availableCourses = [
-  // Fallback courses that match the original Mathigon courses
+  // One fallback course as an example
   {
     id: 'probability',
     title: 'Introduction to Probability',
@@ -174,66 +191,18 @@ const availableCourses = [
     color: '#CD0E66',
     level: 'Foundations',
     category: 'Statistics',
-    thumbnail: '/api/content/probability/hero.jpg',
+    thumbnail: '/api/content/probability/icon.png',
     sections: [
-      { id: 'intro', title: 'Introduction' },
-      { id: 'computing', title: 'Computing Probabilities' },
-      { id: 'trees', title: 'Probability Trees' },
-      { id: 'simulations', title: 'Venn Diagrams' }
-    ]
-  },
-  {
-    id: 'chaos',
-    title: 'Chaos Theory',
-    description: 'Unpredictable mathematics',
-    color: '#0F82F2',
-    level: 'Advanced',
-    category: 'Applied Mathematics',
-    thumbnail: '/api/content/chaos/hero.jpg',
-    sections: [
-      { id: 'intro', title: 'Introduction' },
-      { id: 'pendulum', title: 'Mathematical Billiard' },
-      { id: 'threebody', title: 'The Three Body Problem' },
-      { id: 'fractals', title: 'Phase Space and Strange Attractors' },
-      { id: 'logistic', title: 'The Logistic Map' }
-    ]
-  },
-  {
-    id: 'circles',
-    title: 'Circles and Pi',
-    description: 'Round shapes and transcendental numbers',
-    color: '#6D3BBF',
-    level: 'Intermediate',
-    category: 'Geometry',
-    thumbnail: '/api/content/circles/hero.jpg',
-    sections: [
-      { id: 'intro', title: 'Introduction' },
-      { id: 'degrees', title: 'Degrees and Radians' },
-      { id: 'tangets', title: 'Tangents, Chords and Arcs' },
-      { id: 'theorems', title: 'The Circle Theorems' },
-      { id: 'polygons', title: 'Cyclic Polygons' },
-      { id: 'spheres', title: 'Spheres, Cones and Cylinders' },
-      { id: 'conic', title: 'Conic Sections' }
-    ]
-  },
-  {
-    id: 'codes',
-    title: 'Codes and Ciphers',
-    description: 'Cryptography and secret messages',
-    color: '#C4158B',
-    level: 'Intermediate',
-    category: 'Computer Science',
-    thumbnail: '/api/content/codes/hero.jpg',
-    sections: [
-      { id: 'intro', title: 'Introduction' },
-      { id: 'binary', title: 'Binary Numbers' },
-      { id: 'detection', title: 'Error Detection' },
-      { id: 'secret', title: 'Secret Codes' },
-      { id: 'enigma', title: 'The Enigma' },
-      { id: 'encryption', title: 'Public Key Cryptography' }
+      { id: 'intro', title: 'Introduction' }
     ]
   }
 ];
+
+// Function to generate correct thumbnail URLs that include the API base
+const generateThumbnailUrl = (courseId) => {
+  const apiBase = import.meta.env.VITE_API_BASE || '';
+  return `${apiBase}/content/${courseId}/icon.png`;
+};
 
 // Function to get AI assistant response based on course content
 const getAssistantResponse = async (courseId, userMessage) => {
@@ -259,9 +228,12 @@ const getAssistantResponse = async (courseId, userMessage) => {
 // Function to scan available courses from the content directory
 const scanAvailableCourses = async () => {
   try {
-    // Use direct file system access via the API
-    // This will look in both content and translations directories
     console.log('Attempting to fetch courses from API...');
+    console.log('Current environment:', import.meta.env.MODE);
+    console.log('API Base URL:', import.meta.env.VITE_API_BASE || 'Not set');
+    console.log('Available courses before scan:', availableCourses.length);
+    
+    // Use the specific scan endpoint for enhanced course information
     const apiUrl = `${import.meta.env.VITE_API_BASE || ''}/api/content/scan`;
     console.log('API URL:', apiUrl);
     
@@ -271,7 +243,8 @@ const scanAvailableCourses = async () => {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      mode: 'cors'
+      mode: 'cors',
+      credentials: 'omit'
     });
     
     // Handle response
@@ -303,7 +276,7 @@ const scanAvailableCourses = async () => {
                 color: course.color || getRandomColor(),
                 level: course.level || 'Intermediate',
                 category: course.category || 'Mathematics',
-                thumbnail: course.thumbnail || `/api/content/${course.id}/icon.png`,
+                thumbnail: generateThumbnailUrl(course.id),
                 sections: course.sections || [{ id: 'default', title: 'Introduction' }]
               };
               
@@ -327,23 +300,48 @@ const scanAvailableCourses = async () => {
     
     try {
       // Attempt to scan content directory directly using a different API endpoint
-      const fallbackResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/courses`);
+      console.log('Using fallback courses endpoint...');
+      const fallbackUrl = `${import.meta.env.VITE_API_BASE || ''}/api/content/courses`;
+      console.log('Fallback URL:', fallbackUrl);
+      
+      const fallbackResponse = await fetch(fallbackUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      
       if (fallbackResponse.ok) {
-        const coursesData = await fallbackResponse.json();
-        if (Array.isArray(coursesData) && coursesData.length > 0) {
-          // Don't clear existing courses unless we have new ones
-          availableCourses.length = 0;
-          
-          coursesData.forEach(course => {
-            availableCourses.push({
-              ...course,
-              thumbnail: `/api/content/${course.id}/icon.png`
+        const responseText = await fallbackResponse.text();
+        console.log('Fallback Response:', responseText);
+        
+        try {
+          const coursesData = JSON.parse(responseText);
+          if (Array.isArray(coursesData) && coursesData.length > 0) {
+            // Success! Clear existing courses and add the new ones from content directory
+            console.log(`Found ${coursesData.length} courses from fallback endpoint`);
+            availableCourses.length = 0;
+            
+            coursesData.forEach(course => {
+              availableCourses.push({
+                ...course,
+                thumbnail: generateThumbnailUrl(course.id)
+              });
             });
-          });
-          
-          console.log(`Loaded ${availableCourses.length} courses from fallback API endpoint`);
-          return;
+            
+            console.log(`Loaded ${availableCourses.length} courses from fallback API endpoint`);
+            return;
+          } else {
+            console.error('Empty or invalid courses array from fallback endpoint:', coursesData);
+          }
+        } catch (parseError) {
+          console.error('Error parsing fallback course data:', parseError);
         }
+      } else {
+        console.error(`Fallback request failed: ${fallbackResponse.status} ${fallbackResponse.statusText}`);
       }
     } catch (fallbackError) {
       console.error('Fallback content scan failed:', fallbackError);
@@ -376,7 +374,24 @@ export const getCourseList = () => {
 };
 
 export const getCourseById = (courseId) => {
-  return availableCourses.find(course => course.id === courseId) || null;
+  // Log to debug course lookup
+  console.log(`Looking for course with ID: ${courseId}`);
+  console.log(`Available courses:`, availableCourses.map(c => c.id));
+  
+  // Case-insensitive lookup to handle edge cases
+  const normalizedCourseId = courseId.toLowerCase();
+  const course = availableCourses.find(course => 
+    course.id.toLowerCase() === normalizedCourseId ||
+    course.id.toLowerCase().replace(/[_-]/g, '') === normalizedCourseId.replace(/[_-]/g, '')
+  );
+  
+  if (!course) {
+    console.error(`Course not found for ID: ${courseId}`);
+    // Try to fetch this course directly from the API if not in the cached list
+    scanAvailableCourses(); // Refresh course list as a fallback
+  }
+  
+  return course || null;
 };
 
 export const getCourseContent = async (courseId) => {
@@ -387,7 +402,7 @@ export const getCourseContent = async (courseId) => {
   try {
     // Use a direct fetch from the server API to get the course markdown content
     // This should match the path where your backend serves content files
-    const contentPath = `/api/content/${courseId}/content.md`;
+    const contentPath = `/content/${courseId}/content.md`;
     
     try {
       const response = await fetch(contentPath);
@@ -399,117 +414,73 @@ export const getCourseContent = async (courseId) => {
       // Get the raw markdown content
       const markdownContent = await response.text();
       
-      // Process the markdown content using parseMathigonMd
-      const parsedContent = parseMathigonMd(markdownContent);
+      if (!markdownContent) {
+        throw new Error('No markdown content found');
+      }
       
+      // Process the markdown content
       console.log(`Successfully loaded content for ${courseId}`);
+      
+      // Create a properly structured content object directly
+      // Extract metadata
+      const metadata = {};
+      const metadataRegex = /> ([\w-]+): (.+)/g;
+      let match;
+      let contentCopy = markdownContent.slice();
+      while ((match = metadataRegex.exec(contentCopy)) !== null) {
+        metadata[match[1]] = match[2];
+      }
+      
+      // Extract sections
+      const sectionRegex = /## ([^\n]+)\s*\n+> section: ([^\n]+)/g;
+      const sections = [];
+      let sectionMatch;
+      while ((sectionMatch = sectionRegex.exec(markdownContent)) !== null) {
+        sections.push({
+          title: sectionMatch[1].trim(),
+          id: sectionMatch[2].trim(),
+          content: sectionMatch[0] // Include section header
+        });
+      }
       
       return {
         course,
-        content: parsedContent
+        content: {
+          metadata,
+          sections,
+          html: markdownContent // Include raw content as fallback
+        }
       };
     } catch (err) {
       console.error(`Error fetching course content from ${contentPath}:`, err);
       
-      // Fallback: If we can't fetch from the API, use the hardcoded content
-      let fallbackHtml = '';
+      // Provide a properly structured fallback content that matches the expected format
+      console.log(`Using simple fallback content for ${courseId}`);
       
-      switch(courseId) {
-        case 'probability':
-          fallbackHtml = `
-            <h1>Introduction to Probability</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="intro">Introduction</h2>
-              <div class="subsection" id="intro">
-                <p>In previous courses, we have seen how we can use science and mathematics to try to predict the future. For example, we can predict when a car will arrive at its destination if it is driving at a constant speed.</p>
-                
-                <p>However, there are many examples in life where it is impossible to predict exactly what will happen. This could be because we don't have all the information we need, because the decisions of other people might influence the result, or just because it is incredibly complicated.</p>
-                
-                <div class="column" style="width: 200px;">
-                  <img src="/api/content/probability/images/weather.jpg" width="200" height="150" class="mathigon-image" />
-                  <p class="caption">The atmosphere consists of billions of molecules that interact with each other. That's why it is impossible to exactly predict the weather.</p>
-                </div>
-                
-                <div class="column" style="width: 200px;">
-                  <img src="/api/content/probability/images/election.jpg" width="200" height="150" class="mathigon-image" />
-                  <p class="caption">You don't know how people are going to vote in an election. That's why it is impossible to exactly predict the outcome.</p>
-                </div>
-                
-                <div class="column" style="width: 200px;">
-                  <img src="/api/content/probability/images/cards.jpg" width="200" height="150" class="mathigon-image" />
-                  <p class="caption">After shuffling, you don't know the order of the cards in a deck. That's why it is impossible to exactly predict the colour of the next card.</p>
-                </div>
-              </div>
-              
-              <p>Our language has many words we can use to describe the answer to these questions, without knowing exactly what will happen. Try to move each of these events to the best possible description.</p>
-              
-              <p>From this, you might deduce that the next throw has a 5/20=0.25 chance to also land in the center. We say that 0.25 is the probability of hitting the center.</p>
-              
-              <p>For many centuries, mathematicians have struggled to deal with these uncertain situations – until the development of probability theory. In this course, we will explore what probability is, and give you some amazing new tools to be able to predict the future.</p>
-            </div>
-          `;
-          break;
-          
-        case 'chaos':
-          fallbackHtml = `
-            <h1>Chaos Theory</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="intro">Introduction</h2>
-              <div class="subsection" id="intro">
-                <p>Chaos theory is a branch of mathematics that deals with complex systems whose behavior is highly sensitive to slight changes in conditions.</p>
-                
-                <p>The butterfly effect is one of the most commonly used examples of chaos theory. It describes how a small change, like the flap of a butterfly's wings in Brazil, might cause a tornado in Texas.</p>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'circles':
-          fallbackHtml = `
-            <h1>Circles and Pi</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="intro">Introduction</h2>
-              <div class="subsection" id="intro">
-                <p>Circles are among the most fundamental shapes in geometry. They appear everywhere in nature, from ripples in water to celestial bodies.</p>
-                
-                <p>The ratio of a circle's circumference to its diameter is always the same value, which we call π. This number is approximately 3.14159, but its decimal expansion goes on forever without repeating.</p>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'codes':
-          fallbackHtml = `
-            <h1>Codes and Ciphers</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="intro">Introduction</h2>
-              <div class="subsection" id="intro">
-                <p>Cryptography is the science of secret communication. Throughout history, people have developed ways to encrypt messages so that only the intended recipient could read them.</p>
-                
-                <p>One of the simplest ciphers is the Caesar cipher, where each letter in the plaintext is shifted a certain number of places down the alphabet.</p>
-              </div>
-            </div>
-          `;
-          break;
-          
-        default:
-          fallbackHtml = `
-            <h1>${course.title}</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="intro">Introduction</h2>
-              <div class="subsection" id="intro">
-                <p>This course is currently under development. Please check back later for content.</p>
-              </div>
-            </div>
-          `;
-      }
-      
-      const fallbackParsed = parseMathigonMd(fallbackHtml);
-      console.log(`Using fallback content for ${courseId}`);
+      // Create a properly structured content object instead of trying to parse HTML
+      const fallbackContent = {
+        meta: {
+          id: courseId,
+          title: course.title || courseId
+        },
+        sections: [
+          {
+            id: 'introduction',
+            title: 'Introduction',
+            content: '<p>Error loading course content. Please try again later.</p>',
+            subsections: [
+              {
+                id: 'error',
+                content: '<p>Error loading course content. Please try again later.</p>'
+              }
+            ]
+          }
+        ]
+      };
       
       return {
         course,
-        content: fallbackParsed
+        content: fallbackContent
       };
     }
   } catch (error) {
@@ -526,7 +497,7 @@ export const getGlossaryDefinition = (term) => {
 export const getAvailableTranslations = async (courseId) => {
   try {
     // First try to fetch translations from the API
-    const apiPath = `/api/translations/${courseId}/languages`;
+    const apiPath = `/translations/${courseId}/languages`;
     
     try {
       const response = await fetch(apiPath);

@@ -992,13 +992,49 @@ p {
 }
 
 .welcome {
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
   padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--card-border);
-  max-width: 500px;
+  margin: 2rem 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  
+  /* Add decorative elements */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, rgba(255, 65, 108, 0.2), rgba(255, 75, 43, 0.1));
+    border-radius: 50%;
+    z-index: -1;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(45deg, rgba(99, 102, 241, 0.2), rgba(79, 70, 229, 0.1));
+    border-radius: 50%;
+    z-index: -1;
+  }
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .welcome h2 {
@@ -1035,6 +1071,23 @@ p {
 
 .section-title {
   text-align: center;
+  position: relative;
+  padding-bottom: 15px;
+  font-size: 2.2rem;
+  margin-bottom: 2.5rem;
+  
+  /* Add decorative elements */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    border-radius: 2px;
+  }
   margin-bottom: 3rem;
   position: relative;
   display: inline-block;
@@ -2060,15 +2113,28 @@ main {
 /* Enhanced hero title styling */
 .hero-title {
   font-family: 'Baloo 2', cursive;
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
-  background-clip: text;
+  font-size: 4.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.hero-kha {
+  background: linear-gradient(45deg, #ff416c, #ff4b2b);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  position: relative;
   display: inline-block;
+  transform: perspective(500px) rotateY(-15deg);
+  padding-right: 5px;
+  font-style: italic;
+  text-shadow: 1px 1px 0px rgba(255,65,108,0.3);
+  letter-spacing: -1px;
+  font-weight: 800;
 }
 
 .hero-boom {
