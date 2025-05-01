@@ -5,30 +5,40 @@
 # KHA-BOOM!
 
 ## Project Overview
-KHA-BOOM! is an exciting web application designed to provide users with an immersive and interactive experience.
+KHA-BOOM! is an interactive educational platform that brings mathematics to life through engaging, interactive content. Built on the foundation of Mathigon's educational framework, KHA-BOOM! transforms complex mathematical concepts into an immersive learning experience.
 
 ## Features
 
-- **Modern User Interface**: Sleek, responsive design that works across all devices
-- **Interactive Experience**: Engaging user interactions and animations
-- **Optimized Performance**: Fast loading times and smooth performance
-- **Seamless Integration**: Works flawlessly with existing web ecosystems
+- **Interactive Mathematics**: Dynamic and explorable mathematical content that responds to user interactions
+- **Multi-language Support**: Available in 16 languages including English, Spanish, French, Chinese, and more
+- **Responsive Design**: Optimized experience across all devices and screen sizes
+- **Guided Learning**: Interactive tutor functionality to assist learners through difficult concepts
+- **Visualizations**: Powerful mathematical visualization tools and animations
+
+## Project Structure
+
+- **`/frontend`**: React-based user interface built with Vite
+- **`/backend`**: Express.js API server with MongoDB integration
+- **`/content`**: Educational content and interactive course materials
+- **`/translations`**: Multilingual support files
+- **`/public`**: Static assets and resources
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14.0.0 or higher)
+- Node.js (v16.0.0 or higher)
 - npm (v6.0.0 or higher)
+- MongoDB (for backend development)
 
-### Installation
+### Installation & Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourorganization/kha-boom.git
+git clone https://github.com/joinquit3110/KhaBoom.git
 
 # Navigate to the project directory
-cd kha-boom
+cd KhaBoom
 
 # Install dependencies
 npm install
@@ -37,33 +47,53 @@ npm install
 npm start
 ```
 
-Your application will be available at `http://localhost:3000`.
+This will start both the frontend and backend in development mode. The application will be available at `http://localhost:3000`.
+
+### Development Workflow
+
+```bash
+# Frontend development only
+cd frontend
+npm run dev
+
+# Backend development only
+cd backend
+npm run dev
+
+# Building assets
+npm run assets
+```
 
 ## Technologies
 
-- **Frontend**: React, HTML5, CSS3/SASS
-- **State Management**: Redux/Context API
-- **Build Tools**: Webpack, Babel
-- **Testing**: Jest, React Testing Library
-- **CI/CD**: GitHub Actions
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Routing**: React Router
+- **Animation**: Framer Motion
+- **HTTP Client**: Axios
+- **Math Libraries**: Mathigon (Boost, Core, Euclid, Fermat, Hilbert)
+
+### Backend
+- **Server**: Express.js
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT & bcrypt
+- **Environment**: Node.js
 
 ## Documentation
 
-For comprehensive documentation, please visit our [wiki page](https://github.com/yourorganization/kha-boom/wiki).
+For more detailed documentation about the development and usage of KHA-BOOM!, please refer to the Mathigon documentation and resources:
+
+- [GitHub Repository](https://github.com/mathigon/textbooks)
+- [Live Website](https://mathigon.org/courses)
 
 ## Contributing
 
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to submit pull requests.
+We welcome contributions to improve KHA-BOOM! and make it even more impactful for learners worldwide.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-- **Website**: [https://kha-boom.com](https://kha-boom.com)
-- **Email**: info@kha-boom.com
-- **Twitter**: [@khaboom](https://twitter.com/khaboom)
+This project contains proprietary code and licensed components. Please refer to the specific license terms in the repository.
 
 ---
 
