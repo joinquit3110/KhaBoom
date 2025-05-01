@@ -1,18 +1,61 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
+import { motion } from 'framer-motion';
+import './ChatBot.css'; // Import our new CSS styles
 
 // Use memo to prevent unnecessary re-renders of the ChatMessage component
 const ChatMessage = memo(({ message, courseColor }) => {
+  // Determine message styling based on type
+  const getMessageStyle = () => {
+    if (message.sender === 'user') {
+      return { backgroundColor: courseColor + '22' }; // User message with transparency
+    }
+    
+    // Bot messages with different types
+    switch (message.type) {
+      case 'correct':
+        return { 
+          backgroundColor: '#e6f7e6', 
+          borderLeft: '3px solid #4CAF50' 
+        };
+      case 'incorrect':
+        return { 
+          backgroundColor: '#ffebee',
+          borderLeft: '3px solid #F44336' 
+        };
+      case 'hint':
+        return { 
+          backgroundColor: '#fff8e1',
+          borderLeft: '3px solid #FFC107' 
+        };
+      default:
+        return { backgroundColor: '#f5f5f5' };
+    }
+  };
+  
   return (
-    <div 
-      className={`chat-message ${message.sender === 'user' ? 'user' : 'bot'}`}
-      style={{
-        backgroundColor: message.sender === 'user' ? 
-          courseColor + '22' : // Add transparency to the color
-          '#f5f5f5'
-      }}
+    <motion.div
+      className={`chat-message ${message.sender === 'user' ? 'user' : 'bot'} ${message.type || ''}`}
+      style={getMessageStyle()}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      {message.text}
-    </div>
+      {message.type === 'correct' && (
+        <div className="message-icon correct">✓</div>
+      )}
+      
+      {message.type === 'incorrect' && (
+        <div className="message-icon incorrect">✗</div>
+      )}
+      
+      {message.type === 'hint' && (
+        <div className="message-icon hint">💡</div>
+      )}
+      
+      <div className="message-content">
+        {message.text}
+      </div>
+    </motion.div>
   );
 });
 

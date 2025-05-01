@@ -498,6 +498,7 @@ const scanAvailableCourses = async () => {
     if (!contentResponse.ok) {
       console.error(`Failed to scan courses: ${contentResponse.status} ${contentResponse.statusText}`);
       // Don't throw, continue with hardcoded fallback courses
+      await addFallbackCourses();
     } else {
       try {
         const responseText = await contentResponse.text();
@@ -515,12 +516,18 @@ const scanAvailableCourses = async () => {
           data.courses.forEach(course => {
             // Make sure each course has the required fields
             if (course && course.id) {
+              // Clean up potential JSON parsing issues with color values
+              let courseColor = course.color || getRandomColor();
+              if (typeof courseColor === 'string' && courseColor.includes('"')) {
+                courseColor = courseColor.replace(/"/g, '');
+              }
+              
               // Add default values for any missing fields
               const processedCourse = {
                 id: course.id,
                 title: course.title || `Course ${course.id}`,
                 description: course.description || 'No description available',
-                color: course.color || getRandomColor(),
+                color: courseColor,
                 level: course.level || 'Intermediate',
                 category: course.category || 'Mathematics',
                 thumbnail: generateThumbnailUrl(course.id),
@@ -535,19 +542,13 @@ const scanAvailableCourses = async () => {
           return; // Successfully loaded courses from API
         } else {
           console.error('Invalid or empty courses data:', data);
+          await addFallbackCourses();
         }
       } catch (parseError) {
         console.error('Error parsing course data:', parseError);
+        await addFallbackCourses();
       }
     }
-    
-    // If we reach here, something went wrong with API or parsing
-    // Fallback to local directory scanning if available
-    console.log('API fetch failed, loading courses from content directory structure...');
-    
-    // Use our new function that loads courses from the content directory
-    await addFallbackCourses();
-    
   } catch (error) {
     console.error('Error scanning courses:', error);
     // Ensure we have courses even if API scan fails

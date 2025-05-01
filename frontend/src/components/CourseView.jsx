@@ -448,14 +448,182 @@ const CourseView = () => {
     setMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
     setNewMessage(''); // Clear input immediately for better UX
     
-    // Generate bot response using the content loader utility
+    // Analyze message for potential answers to questions
     setTimeout(() => {
       try {
-        const response = getAssistantResponse(courseId, userMessage);
-        setMessages(prev => [...prev, { sender: 'bot', text: response }]);
+        // Check for question patterns like "What is X?"
+        if (userMessage.match(/^what\s+is|^how\s+do|^why\s+does|^explain/i)) {
+          // This is a question, not an answer
+          const response = getAssistantResponse(courseId, userMessage);
+          setMessages(prev => [...prev, { 
+            sender: 'bot', 
+            text: response 
+          }]);
+          return;
+        }
+        
+        // Simplistic answer checking - in a real app this would be more sophisticated
+        // Check against known answers for common questions in this course
+        const answers = {
+          'probability': {
+            'binomial distribution': {
+              correct: ['combination of n and k times p to k power times q to n minus k'],
+              alternatives: ['n choose k times p^k times q^(n-k)', 'combination formula with probability']
+            },
+            '0.5': {
+              correct: ['0.5', '1/2', 'one half', 'half', '0.50', '50%', 'fifty percent'],
+              context: 'probability of heads on a fair coin'
+            }
+          },
+          'circles': {
+            'pi': {
+              correct: ['3.14159', 'approximately 3.14', 'circumference divided by diameter'],
+              alternates: ['ratio of circumference to diameter']
+            }
+          },
+          'general': {
+            'pythagoras': {
+              correct: ['a squared plus b squared equals c squared', 'a^2 + b^2 = c^2'],
+              alternates: ['sum of squares of two sides equals square of hypotenuse']
+            }
+          }
+        };
+        
+        // Normalize user input for comparison
+        const normalizedInput = userMessage.toLowerCase()
+          .replace(/\s+/g, ' ')
+          .replace(/[.,;?!]/g, '');
+        
+        // Try to match user input against known answers
+        let isCorrect = false;
+        let matchedAnswer = null;
+        let topicContext = '';
+        
+        const courseAnswers = answers[courseId] || answers.general;
+        if (courseAnswers) {
+          // Check each potential answer topic
+          for (const [topic, answerObj] of Object.entries(courseAnswers)) {
+            // Check if user message contains this topic
+            if (normalizedInput.includes(topic)) {
+              topicContext = topic;
+              
+              // Check correct answers
+              for (const correct of answerObj.correct) {
+                if (normalizedInput.includes(correct.toLowerCase())) {
+                  isCorrect = true;
+                  matchedAnswer = topic;
+                  break;
+                }
+              }
+              
+              // Check alternative formulations
+              if (!isCorrect && answerObj.alternatives) {
+                for (const alt of answerObj.alternatives) {
+                  if (normalizedInput.includes(alt.toLowerCase())) {
+                    isCorrect = true;
+                    matchedAnswer = topic;
+                    break;
+                  }
+                }
+              }
+              
+              if (isCorrect) break;
+            }
+          }
+        }
+        
+        // Determine if this might be an answer to a previously asked question
+        const lastMessages = messages.slice(-3);
+        const hasRecentQuestion = lastMessages.some(msg => 
+          msg.sender === 'bot' && 
+          (msg.text.includes('?') || 
+           msg.text.toLowerCase().includes('what') ||
+           msg.text.toLowerCase().includes('how') ||
+           msg.text.toLowerCase().includes('calculate'))
+        );
+        
+        if (matchedAnswer || hasRecentQuestion) {
+          // This appears to be an answer to a question
+          if (isCorrect) {
+            // Correct answer response
+            const responses = [
+              `That's correct! Great job understanding ${matchedAnswer || 'this concept'}.`,
+              `Excellent! Your answer about ${matchedAnswer || 'this topic'} is spot on.`, 
+              `Perfect! You've mastered ${matchedAnswer || 'this concept'}.`,
+              `You got it right! ${matchedAnswer ? `The answer about ${matchedAnswer} is correct.` : ''}`
+            ];
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            
+            setMessages(prev => [...prev, { 
+              sender: 'bot', 
+              type: 'correct',
+              text: response
+            }]);
+            
+            // Add a random follow-up to extend the learning
+            if (Math.random() > 0.5) {
+              setTimeout(() => {
+                const followUps = [
+                  `Would you like to learn more about advanced applications of ${matchedAnswer || 'this concept'}?`,
+                  `Can you think of a real-world example where this would be applied?`,
+                  `Let me know if you want to explore this topic further.`
+                ];
+                const followUp = followUps[Math.floor(Math.random() * followUps.length)];
+                
+                setMessages(prev => [...prev, { 
+                  sender: 'bot', 
+                  text: followUp
+                }]);
+              }, 1000);
+            }
+          } else {
+            // Incorrect answer response
+            const incorrectResponses = [
+              `That's not quite right. Let me help clarify this concept.`,
+              `Almost there, but not exactly. Let's review this together.`,
+              `That's incorrect. Would you like a hint to guide you to the right answer?`,
+              `I think you might be mixing up some concepts. Let's break this down step by step.`
+            ];
+            const response = incorrectResponses[Math.floor(Math.random() * incorrectResponses.length)];
+            
+            setMessages(prev => [...prev, { 
+              sender: 'bot', 
+              type: 'incorrect',
+              text: response
+            }]);
+            
+            // After a short delay, provide a hint
+            setTimeout(() => {
+              const hints = [
+                `Hint: Review the formula discussed in this section.`,
+                `Hint: Consider the relationship between ${topicContext || 'the key variables'}.`,
+                `Hint: The correct approach involves ${matchedAnswer || 'applying the principles we discussed'}.`,
+                `Hint: Try thinking about this problem differently. What are the given values and what are we trying to find?`
+              ];
+              const hint = hints[Math.floor(Math.random() * hints.length)];
+              
+              setMessages(prev => [...prev, { 
+                sender: 'bot', 
+                type: 'hint',
+                text: hint
+              }]);
+            }, 1500);
+          }
+        } else {
+          // This doesn't seem to be an answer to a known question
+          // Get standard assistant response
+          const response = getAssistantResponse(courseId, userMessage);
+          setMessages(prev => [...prev, { 
+            sender: 'bot', 
+            text: response 
+          }]);
+        }
       } catch (err) {
         console.error("Error generating assistant response:", err);
-        setMessages(prev => [...prev, { sender: 'bot', text: "I'm sorry, I couldn't process your request at this time." }]);
+        setMessages(prev => [...prev, { 
+          sender: 'bot', 
+          text: "I'm sorry, I couldn't process your request at this time." 
+        }]);
       }
     }, 800);
   };
