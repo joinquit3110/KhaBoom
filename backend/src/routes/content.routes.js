@@ -333,6 +333,69 @@ router.get("/courses", (req, res) => {
   }
 });
 
+// ROUTE: Scan and get enhanced course information from both content and translations directories
+router.get("/scan", (req, res) => {
+  try {
+    // Get all course directories from content folder
+    const contentDirs = fs.existsSync(contentRoot) ? 
+      fs.readdirSync(contentRoot).filter(dir => 
+        fs.statSync(path.join(contentRoot, dir)).isDirectory()
+      ) : [];
+    
+    // Get all translation directories
+    const translationDirs = fs.existsSync(translationsRoot) ? 
+      fs.readdirSync(translationsRoot).filter(dir => 
+        fs.statSync(path.join(translationsRoot, dir)).isDirectory()
+      ) : [];
+      
+    // Get all unique course IDs including those in translations
+    const uniqueCourseIds = new Set(contentDirs);
+    
+    // Add courses that might only exist in translations
+    translationDirs.forEach(langCode => {
+      const langPath = path.join(translationsRoot, langCode);
+      if (fs.existsSync(langPath)) {
+        const coursesInLang = fs.readdirSync(langPath).filter(dir => 
+          fs.statSync(path.join(langPath, dir)).isDirectory()
+        );
+        coursesInLang.forEach(courseId => uniqueCourseIds.add(courseId));
+      }
+    });
+    
+    // Process each course
+    const courses = Array.from(uniqueCourseIds).map(courseId => {
+      // Get base metadata
+      const metadata = readCourseMetadata(courseId);
+      if (!metadata) return null;
+      
+      // Get course content to extract sections
+      const content = readCourseContent(courseId);
+      const sections = content?.content?.sections || [];
+      
+      // Get available translations
+      const translations = getTranslations(courseId);
+      
+      // Create a complete course object
+      return {
+        ...metadata,
+        sections: sections.map(section => ({
+          id: section.id,
+          title: section.title
+        })),
+        translations: translations.languages || [],
+        // Calculate a proper thumbnail URL
+        thumbnail: `/api/content/${courseId}/icon.png`
+      };
+    }).filter(Boolean);
+    
+    console.log(`Scanned ${courses.length} courses from content and translations directories`);
+    res.json({ courses });
+  } catch (error) {
+    console.error("Error scanning courses:", error);
+    res.status(500).json({ error: "Failed to scan courses" });
+  }
+});
+
 // ROUTE: Get content for a specific course
 router.get("/:courseId", (req, res) => {
   const { courseId } = req.params;

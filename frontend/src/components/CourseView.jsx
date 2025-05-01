@@ -287,12 +287,12 @@ const CourseView = () => {
     }
   }, [currentSection, course, processInteractiveElements, completedSections]);
 
-  // Close glossary popup when clicking elsewhere
+  // Handle clicks outside of glossary tooltip to close it
+  const handleClickOutside = useCallback(() => {
+    setActiveGlossary(null);
+  }, []);
+  
   useEffect(() => {
-    const handleClickOutside = () => {
-      setActiveGlossary(null);
-    };
-    
     document.addEventListener('click', handleClickOutside);
     
     return () => {

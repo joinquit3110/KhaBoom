@@ -259,45 +259,63 @@ const getAssistantResponse = async (courseId, userMessage) => {
 // Function to scan available courses from the content directory
 const scanAvailableCourses = async () => {
   try {
-    // Fetch courses from the main content directory only
-    const contentResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/courses`);
+    // Use direct file system access via the API
+    // This will look in both d:\sucvat\content and d:\sucvat\translations directories
+    const contentResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/scan`);
     
-    // Check if the response is valid and is JSON
+    // Handle response
     if (!contentResponse.ok) {
-      throw new Error(`Failed to fetch courses: ${contentResponse.status} ${contentResponse.statusText}`);
-    }
-    
-    // Try to parse response as JSON with safety checks
-    const contentType = contentResponse.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('Received non-JSON response:', await contentResponse.text());
-      return [];
-    }
-    
-    // Reset available courses
-    availableCourses.length = 0;
-    
-    // Process courses from content
-    try {
-      const data = await contentResponse.json();
-      // Make sure we have a valid courses array
-      const courses = data.courses || [];
-      // Add each course to our list
-      if (Array.isArray(courses)) {
-        courses.forEach(course => {
-          availableCourses.push(course);
-        });
-      } else {
-        console.error('Invalid courses format:', courses);
+      console.error(`Failed to scan courses: ${contentResponse.status} ${contentResponse.statusText}`);
+      // Don't throw, continue with hardcoded fallback courses
+    } else {
+      try {
+        const data = await contentResponse.json();
+        
+        if (data && Array.isArray(data.courses) && data.courses.length > 0) {
+          // Success! Clear existing courses and add the new ones
+          availableCourses.length = 0;
+          
+          // Process and add each course
+          data.courses.forEach(course => {
+            // Make sure each course has the required fields
+            if (course && course.id) {
+              // Add default values for any missing fields
+              const processedCourse = {
+                id: course.id,
+                title: course.title || `Course ${course.id}`,
+                description: course.description || 'No description available',
+                color: course.color || getRandomColor(),
+                level: course.level || 'Intermediate',
+                category: course.category || 'Mathematics',
+                thumbnail: course.thumbnail || `/api/content/${course.id}/icon.png`,
+                sections: course.sections || [{ id: 'default', title: 'Introduction' }]
+              };
+              
+              availableCourses.push(processedCourse);
+            }
+          });
+          
+          console.log(`Loaded ${availableCourses.length} courses from content directory`);
+          return;
+        }
+      } catch (parseError) {
+        console.error('Error parsing course data:', parseError);
       }
-    } catch (error) {
-      console.error('Error parsing course JSON:', error);
     }
-    console.log(`Loaded ${availableCourses.length} courses from content directory`);
+    
+    // If we reach here, something went wrong with API or parsing
+    // Don't clear the fallback courses - we'll use those instead
+    console.log(`Using ${availableCourses.length} fallback courses`);
   } catch (error) {
     console.error('Error scanning courses:', error);
   }
 };
+
+// Helper function to generate random colors for courses without defined colors
+function getRandomColor() {
+  const colors = ['#CD0E66', '#0F82F2', '#6D3BBF', '#C4158B', '#4CAF50', '#FF9800', '#607D8B'];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
 
 // Call this when the app initializes to populate courses
 scanAvailableCourses();

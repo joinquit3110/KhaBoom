@@ -132,13 +132,12 @@ export default function Dashboard({ user }) {
                 borderTop: `4px solid ${course.color || '#6366F1'}`
               }}
             >
-              <div className="course-image">
-                <LazyImage
-                  src={course.thumbnail || `/api/content/${course.id}/hero.jpg`}
-                  alt={course.title}
-                  width="100%"
-                  height="160px"
-                />
+              <div className="course-image" 
+                style={{
+                  backgroundColor: course.color || '#6366F1',
+                  backgroundImage: `url(${course.thumbnail || `/api/content/${course.id}/icon.png`})`
+                }}
+              >
                 {course.level && (
                   <span className="level-badge">{course.level}</span>
                 )}
@@ -167,6 +166,13 @@ export default function Dashboard({ user }) {
                     to={`/courses/${course.id}`} 
                     className="btn btn-primary btn-sm"
                     style={{ backgroundColor: course.color }}
+                    onClick={(e) => {
+                      // Prevent the default link behavior to avoid module loading errors
+                      e.preventDefault();
+                      // Use window.location for a full page navigation instead of React Router
+                      // This avoids the problematic module loading that's causing MIME type errors
+                      window.location.href = `/courses/${course.id}`;
+                    }}
                   >
                     Start Learning
                   </Link>
