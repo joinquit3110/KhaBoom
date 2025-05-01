@@ -415,7 +415,7 @@ const CourseView = () => {
             ></div>
           </div>
           <ul className="section-list">
-            {course.sections.map((section, index) => (
+            {course.sections && Array.isArray(course.sections) ? course.sections.map((section, index) => (
               <motion.li 
                 key={index} 
                 className={`${currentSection === index ? 'active' : ''} ${completedSections.includes(index) ? 'completed' : ''}`}
@@ -429,7 +429,9 @@ const CourseView = () => {
                   <span className="completion-mark">✓</span>
                 )}
               </motion.li>
-            ))}
+            )) : (
+              <li>No sections available</li>
+            )}
           </ul>
           <motion.button 
             className="chat-toggle" 
@@ -450,11 +452,19 @@ const CourseView = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="section-content">
-              <h2>{course.sections[currentSection].title}</h2>
+              <h2>
+                {course.sections && Array.isArray(course.sections) && course.sections[currentSection] 
+                 ? course.sections[currentSection].title 
+                 : 'Content Loading...'}
+              </h2>
               <div 
                 className="content-html"
                 ref={contentRef}
-                dangerouslySetInnerHTML={{ __html: course.sections[currentSection].content }}
+                dangerouslySetInnerHTML={{ 
+                  __html: course.sections && Array.isArray(course.sections) && course.sections[currentSection] 
+                          ? course.sections[currentSection].content 
+                          : '<p>Loading content...</p>' 
+                }}
               />
               
               {/* Interactive component modal */}
@@ -512,7 +522,7 @@ const CourseView = () => {
                     ← Previous Section
                   </motion.button>
                 )}
-                {currentSection < course.sections.length - 1 && (
+                {course.sections && Array.isArray(course.sections) && currentSection < course.sections.length - 1 && (
                   <motion.button 
                     className="btn btn-primary"
                     onClick={() => setCurrentSection(currentSection + 1)}

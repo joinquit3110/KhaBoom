@@ -15,9 +15,9 @@ const Navbar = ({ user, onLogout }) => {
           <img 
             src="/logo.png" 
             alt="Kha-Boom!" 
-            style={{ height: '40px', marginRight: '10px', borderRadius: '8px' }} 
+            style={{ height: '60px', marginRight: '15px', borderRadius: '8px' }} 
           />
-          <span>Kha-Boom!</span>
+          <span style={{ fontSize: '1.8rem', fontWeight: '700' }}>Kha-Boom!</span>
         </Link>
       </div>
       

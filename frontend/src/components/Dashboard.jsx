@@ -18,6 +18,7 @@ export default function Dashboard({ user }) {
           setLoading(false);
           return;
         }
+        console.log("Loaded courses:", res.data.courses);
         setCourses(res.data.courses || []);
         setLoading(false);
       })
@@ -48,7 +49,7 @@ export default function Dashboard({ user }) {
         <h2>Available Courses</h2>
         
         {loading ? (
-          <div className="loading">Loading courses...</div>
+          <div className="loading-indicator">Loading courses...</div>
         ) : error ? (
           <div className="error-message">{error}</div>
         ) : courses.length === 0 ? (
@@ -59,19 +60,29 @@ export default function Dashboard({ user }) {
               <div key={course.id} className="course-card">
                 <div className="course-image">
                   <img 
-                    src={`/content/${course.id}/hero.jpg`}
+                    src={course.image || `/content/${course.id}/hero.jpg`} 
                     alt={course.title} 
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = "/placeholder-course.jpg";
                     }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
+                  {course.level && (
+                    <span className="level-badge">{course.level}</span>
+                  )}
                 </div>
                 <div className="course-info">
                   <h3>{course.title}</h3>
-                  <Link to={`/courses/${course.id}`} className="btn btn-primary">
-                    Start Learning
-                  </Link>
+                  <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
+                  <div className="course-footer">
+                    {course.category && (
+                      <span className="category-tag">{course.category}</span>
+                    )}
+                    <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
+                      Start Learning
+                    </Link>
+                  </div>
                 </div>
               </div>
             )) : (
