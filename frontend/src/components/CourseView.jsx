@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -9,16 +9,24 @@ import {
   getAvailableTranslations,
   loadTranslation
 } from '../utils/contentLoader';
-import InteractiveComponent from '../interactive/InteractiveComponent';
 import Notification from '../components/Notification';
 import ChatBot from '../components/ChatBot';
+import LazyImage from './LazyImage';
 import axios from 'axios';
+
+// Lazy load the InteractiveComponent to reduce initial bundle size
+const InteractiveComponent = lazy(() => import('../interactive/InteractiveComponent'));
 
 const CourseView = () => {
   const { courseId } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [course, setCourse] = useState(null);
+  const [course, setCourse] = useState({
+    title: 'Loading...',
+    description: 'Course content is loading...',
+    color: '#6366F1',
+    sections: []
+  });
   const [currentSection, setCurrentSection] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const messagesEndRef = useRef(null);
@@ -46,7 +54,8 @@ const CourseView = () => {
   const [progress, setProgress] = useState(0);
   const [completedSections, setCompletedSections] = useState([]);
 
-  useEffect(() => {
+  // Memoize the iframe setup to prevent unnecessary re-renders
+  const setupIframe = useCallback(() => {
     // Set up Mathigon course content iframe
     const iframe = document.createElement('iframe');
     iframe.src = `${import.meta.env.VITE_API_BASE}/course/${courseId}`;
@@ -66,14 +75,6 @@ const CourseView = () => {
       setError("Failed to load course content. Please try again later.");
       setLoading(false);
     };
-    
-    // Set a timeout to prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn("Loading timeout reached - forcing loading state to complete");
-        setLoading(false);
-      }
-    }, 10000); // 10 second timeout
     
     // Create container if it doesn't exist
     let container = document.getElementById('course-container');
@@ -108,28 +109,65 @@ const CourseView = () => {
       setLoading(false);
     }
     
-    // Fetch course metadata
-    axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`)
-      .then(res => {
-        if (!res.data || !res.data.courses) {
-          console.error("Invalid course data format:", res.data);
-          setError("Received invalid course data format");
-          setLoading(false);
-          return;
-        }
-        const foundCourse = res.data.courses.find(c => c.id === courseId);
-        if (foundCourse) {
-          setCourse(foundCourse);
-        } else {
-          setError("Course not found");
-          setLoading(false);
-        }
-      })
-      .catch(err => {
-        console.error("Error fetching course data:", err);
-        setError("Failed to load course information. Please check your connection and try again.");
+    return container;
+  }, [courseId]);
+
+  useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn("Loading timeout reached - forcing loading state to complete");
         setLoading(false);
-      });
+      }
+    }, 10000); // 10 second timeout
+    
+    const container = setupIframe();
+    
+    // Fetch course metadata with better error handling and retry mechanism
+    const fetchCourseData = async () => {
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`);
+          
+          if (!res.data || !res.data.courses) {
+            console.error("Invalid course data format:", res.data);
+            throw new Error("Received invalid course data format");
+          }
+          
+          const foundCourse = res.data.courses.find(c => c.id === courseId);
+          if (foundCourse) {
+            console.log("Found course data:", foundCourse);
+            // Make sure the foundCourse has a sections array
+            if (!foundCourse.sections) {
+              foundCourse.sections = [];
+            }
+            setCourse(foundCourse);
+            // Fetch available translations for the course
+            try {
+              const translations = await getAvailableTranslations(courseId);
+              setAvailableLanguages(translations);
+            } catch (translationError) {
+              console.warn("Failed to load translations:", translationError);
+            }
+            break;
+          } else {
+            throw new Error("Course not found");
+          }
+        } catch (err) {
+          console.error(`Error fetching course data (retry ${3 - retries + 1}/3):`, err);
+          retries--;
+          if (retries === 0) {
+            setError("Failed to load course information. Please check your connection and try again.");
+            setLoading(false);
+          }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      }
+    };
+    
+    fetchCourseData();
       
     // Cleanup function
     return () => {
@@ -138,7 +176,7 @@ const CourseView = () => {
         container.innerHTML = '';
       }
     };
-  }, [courseId, loading]);
+  }, [courseId, loading, setupIframe]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -179,65 +217,69 @@ const CourseView = () => {
     setInteractiveElements(interactives);
   }, []);
   
-  // Handle interactions with content elements
+  // Handle interactions with content elements with error boundaries
   useEffect(() => {
-    if (!contentRef.current) return;
+    if (!contentRef.current || !course || !course.sections) return;
     
-    // Add event listeners to glossary terms
-    const glossaryTerms = contentRef.current.querySelectorAll('.term');
-    
-    const handleGlossaryClick = (e) => {
-      const term = e.target.getAttribute('data-gloss');
-      if (term) {
-        setActiveGlossary({
-          term,
-          definition: getGlossaryDefinition(term),
-          position: {
-            top: e.clientY + 10,
-            left: e.clientX - 100
-          }
-        });
-        
-        // Show a notification that a glossary term was viewed
-        addNotification({
-          type: 'info',
-          message: `Glossary: ${term}`,
-          duration: 3000
-        });
-      }
-    };
-    
-    // Add click handlers to all glossary terms
-    glossaryTerms.forEach(term => {
-      term.addEventListener('click', handleGlossaryClick);
-    });
-    
-    // Process interactive elements
-    processInteractiveElements();
-    
-    // Mark section as viewed after 10 seconds
-    const timer = setTimeout(() => {
-      if (!completedSections.includes(currentSection)) {
-        setCompletedSections(prev => [...prev, currentSection]);
-        const newProgress = Math.floor(((completedSections.length + 1) / (course?.sections?.length || 1)) * 100);
-        setProgress(newProgress);
-        
-        // Show progress notification
-        addNotification({
-          type: 'success',
-          message: `Progress: ${newProgress}% complete`,
-          duration: 3000
-        });
-      }
-    }, 10000);
-    
-    // Remove event listeners on cleanup
-    return () => {
+    try {
+      // Add event listeners to glossary terms
+      const glossaryTerms = contentRef.current.querySelectorAll('.term');
+      
+      const handleGlossaryClick = (e) => {
+        const term = e.target.getAttribute('data-gloss');
+        if (term) {
+          setActiveGlossary({
+            term,
+            definition: getGlossaryDefinition(term),
+            position: {
+              top: e.clientY + 10,
+              left: e.clientX - 100
+            }
+          });
+          
+          // Show a notification that a glossary term was viewed
+          addNotification({
+            type: 'info',
+            message: `Glossary: ${term}`,
+            duration: 3000
+          });
+        }
+      };
+      
+      // Add click handlers to all glossary terms
       glossaryTerms.forEach(term => {
-        term.removeEventListener('click', handleGlossaryClick);
+        term.addEventListener('click', handleGlossaryClick);
       });
-      clearTimeout(timer);
-    };
+      
+      // Process interactive elements
+      processInteractiveElements();
+      
+      // Mark section as viewed after 10 seconds
+      const timer = setTimeout(() => {
+        if (!completedSections.includes(currentSection)) {
+          setCompletedSections(prev => [...prev, currentSection]);
+          const newProgress = Math.floor(((completedSections.length + 1) / (course?.sections?.length || 1)) * 100);
+          setProgress(newProgress);
+          
+          // Show progress notification
+          addNotification({
+            type: 'success',
+            message: `Progress: ${newProgress}% complete`,
+            duration: 3000
+          });
+        }
+      }, 10000);
+      
+      // Remove event listeners on cleanup
+      return () => {
+        glossaryTerms.forEach(term => {
+          term.removeEventListener('click', handleGlossaryClick);
+        });
+        clearTimeout(timer);
+      };
+    } catch (err) {
+      console.error("Error handling content interactions:", err);
+    }
   }, [currentSection, course, processInteractiveElements, completedSections]);
   
   // Close glossary popup when clicking elsewhere
@@ -282,19 +324,24 @@ const CourseView = () => {
 
     const userMessage = newMessage.trim();
     // Add the user message
-    setMessages([...messages, { sender: 'user', text: userMessage }]);
+    setMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
+    setNewMessage(''); // Clear input immediately for better UX
     
     // Generate bot response using the content loader utility
     setTimeout(() => {
-      const response = getAssistantResponse(courseId, userMessage);
-      setMessages(prev => [...prev, { sender: 'bot', text: response }]);
-      setNewMessage('');
+      try {
+        const response = getAssistantResponse(courseId, userMessage);
+        setMessages(prev => [...prev, { sender: 'bot', text: response }]);
+      } catch (err) {
+        console.error("Error generating assistant response:", err);
+        setMessages(prev => [...prev, { sender: 'bot', text: "I'm sorry, I couldn't process your request at this time." }]);
+      }
     }, 800);
   };
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container hardware-accelerated">
         <motion.div 
           className="loading"
           animate={{ 
@@ -312,7 +359,7 @@ const CourseView = () => {
     );
   }
 
-  if (!course) {
+  if (error) {
     return (
       <motion.div 
         className="error"
@@ -320,14 +367,21 @@ const CourseView = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        Course not found
+        <h2>Error Loading Course</h2>
+        <p>{error}</p>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </button>
       </motion.div>
     );
   }
 
   return (
     <motion.main 
-      className="course-view" 
+      className="course-view hardware-accelerated" 
       style={{ "--course-color": course.color }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -356,8 +410,12 @@ const CourseView = () => {
           <p className="course-description">{course.description}</p>
           
           <div className="course-meta">
-            <span className="level">Level: {course.level}</span>
-            <span className="category">Category: {course.category}</span>
+            {course.level && (
+              <span className="level">Level: {course.level}</span>
+            )}
+            {course.category && (
+              <span className="category">Category: {course.category}</span>
+            )}
             <span className="progress">Progress: {progress}%</span>
             
             <div className="language-selector">
@@ -415,21 +473,23 @@ const CourseView = () => {
             ></div>
           </div>
           <ul className="section-list">
-            {course.sections && Array.isArray(course.sections) ? course.sections.map((section, index) => (
-              <motion.li 
-                key={index} 
-                className={`${currentSection === index ? 'active' : ''} ${completedSections.includes(index) ? 'completed' : ''}`}
-                onClick={() => setCurrentSection(index)}
-                whileHover={{ scale: 1.05, x: 5 }}
-                transition={{ duration: 0.2 }}
-              >
-                <span className="section-number">{index + 1}</span>
-                <span className="section-title">{section.title}</span>
-                {completedSections.includes(index) && (
-                  <span className="completion-mark">✓</span>
-                )}
-              </motion.li>
-            )) : (
+            {course.sections && Array.isArray(course.sections) && course.sections.length > 0 ? (
+              course.sections.map((section, index) => (
+                <motion.li 
+                  key={index} 
+                  className={`${currentSection === index ? 'active' : ''} ${completedSections.includes(index) ? 'completed' : ''}`}
+                  onClick={() => setCurrentSection(index)}
+                  whileHover={{ scale: 1.05, x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <span className="section-number">{index + 1}</span>
+                  <span className="section-title">{section.title}</span>
+                  {completedSections.includes(index) && (
+                    <span className="completion-mark">✓</span>
+                  )}
+                </motion.li>
+              ))
+            ) : (
               <li>No sections available</li>
             )}
           </ul>
@@ -445,7 +505,7 @@ const CourseView = () => {
           </motion.div>
 
           <motion.div 
-            className="course-content"
+            className="course-content hardware-accelerated"
             key={currentSection} // This forces re-animation when section changes
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -453,17 +513,21 @@ const CourseView = () => {
           >
             <div className="section-content">
               <h2>
-                {course.sections && Array.isArray(course.sections) && course.sections[currentSection] 
-                 ? course.sections[currentSection].title 
-                 : 'Content Loading...'}
+                {course.sections && 
+                 Array.isArray(course.sections) && 
+                 course.sections[currentSection] ? 
+                 course.sections[currentSection].title : 
+                 'Content Loading...'}
               </h2>
               <div 
                 className="content-html"
                 ref={contentRef}
                 dangerouslySetInnerHTML={{ 
-                  __html: course.sections && Array.isArray(course.sections) && course.sections[currentSection] 
-                          ? course.sections[currentSection].content 
-                          : '<p>Loading content...</p>' 
+                  __html: course.sections && 
+                          Array.isArray(course.sections) && 
+                          course.sections[currentSection] ? 
+                          course.sections[currentSection].content : 
+                          '<p>Loading course content...</p>' 
                 }}
               />
               
@@ -471,7 +535,7 @@ const CourseView = () => {
               <AnimatePresence>
                 {activeInteractive && (
                   <motion.div 
-                    className="interactive-modal"
+                    className="interactive-modal hardware-accelerated"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -480,11 +544,13 @@ const CourseView = () => {
                     <div className="interactive-modal-content">
                       <button className="close-button" onClick={() => setActiveInteractive(null)}>×</button>
                       <h3>Interactive Demonstration</h3>
-                      <InteractiveComponent 
-                        type={activeInteractive.type} 
-                        params={activeInteractive.params} 
-                        courseId={courseId}
-                      />
+                      <Suspense fallback={<div>Loading interactive content...</div>}>
+                        <InteractiveComponent 
+                          type={activeInteractive.type} 
+                          params={activeInteractive.params} 
+                          courseId={courseId}
+                        />
+                      </Suspense>
                     </div>
                   </motion.div>
                 )}
@@ -494,7 +560,7 @@ const CourseView = () => {
               <AnimatePresence>
                 {activeGlossary && (
                   <motion.div 
-                    className="glossary-tooltip" 
+                    className="glossary-tooltip hardware-accelerated" 
                     style={{
                       top: activeGlossary.position.top,
                       left: activeGlossary.position.left
@@ -522,7 +588,9 @@ const CourseView = () => {
                     ← Previous Section
                   </motion.button>
                 )}
-                {course.sections && Array.isArray(course.sections) && currentSection < course.sections.length - 1 && (
+                {course.sections && 
+                 Array.isArray(course.sections) && 
+                 currentSection < course.sections.length - 1 && (
                   <motion.button 
                     className="btn btn-primary"
                     onClick={() => setCurrentSection(currentSection + 1)}
@@ -540,7 +608,7 @@ const CourseView = () => {
           <AnimatePresence>
             {chatOpen && (
               <motion.div 
-                className="course-chat"
+                className="course-chat hardware-accelerated"
                 initial={{ x: 300, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 300, opacity: 0 }}

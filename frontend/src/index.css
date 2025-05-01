@@ -99,6 +99,7 @@ body {
 /* Mobile-first approach */
 html {
   font-size: 100%;
+  text-rendering: optimizeSpeed;
 }
 
 @media (min-width: 768px) {
@@ -2035,5 +2036,126 @@ main {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* LazyImage Component Styles */
+.lazy-image-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  border-radius: var(--radius-sm);
+}
+
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #f0f0f0, #f8f8f8, #f0f0f0);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.image-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f9f9f9;
+  color: #999;
+  font-size: 1.5rem;
+}
+
+.lazy-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.lazy-image.loading {
+  opacity: 0;
+}
+
+.lazy-image.loaded {
+  opacity: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Course Card Optimization */
+.course-card {
+  will-change: transform;
+  contain: layout paint style;
+}
+
+/* Performance optimization classes */
+.hardware-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Reduce animation complexity on mobile */
+@media (max-width: 768px) {
+  .reduced-motion {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Simplify complex operations on mobile */
+  .hero, .card:hover, .btn:hover, .feature-card:hover {
+    transform: none !important;
+    box-shadow: var(--shadow) !important;
+  }
+
+  /* Optimize image loading on mobile */
+  .course-image img {
+    height: auto;
+  }
+}
+
+/* Optimize animations for power saving */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Loading spinner for better UX */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 

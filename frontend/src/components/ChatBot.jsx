@@ -1,85 +1,104 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 
+// Use memo to prevent unnecessary re-renders of the ChatMessage component
+const ChatMessage = memo(({ message, courseColor }) => {
+  return (
+    <div 
+      className={`chat-message ${message.sender === 'user' ? 'user' : 'bot'}`}
+      style={{
+        backgroundColor: message.sender === 'user' ? 
+          courseColor + '22' : // Add transparency to the color
+          '#f5f5f5'
+      }}
+    >
+      {message.text}
+    </div>
+  );
+});
+
+ChatMessage.displayName = 'ChatMessage';
+
+// Main ChatBot component
 const ChatBot = ({ 
   courseId, 
   courseColor, 
-  initialMessages, 
+  initialMessages = [], 
   onSendMessage, 
   newMessage, 
-  setNewMessage, 
+  setNewMessage,
   messagesEndRef 
 }) => {
-  // Message animation variants
-  const messageVariants = {
-    initial: {
-      opacity: 0,
-      y: 10,
-      scale: 0.9,
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.3,
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.9,
-      transition: {
-        duration: 0.2,
-      }
+  // Memoize scroll to bottom function to prevent re-creation
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef?.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [messagesEndRef]);
+
+  // Efficient messages rendering with memoization
+  const renderedMessages = React.useMemo(() => {
+    return initialMessages.map((msg, index) => (
+      <ChatMessage 
+        key={index} 
+        message={msg} 
+        courseColor={courseColor} 
+      />
+    ));
+  }, [initialMessages, courseColor]);
+
+  // Throttle input changes to reduce rendering burden
+  const handleInputChange = useCallback((e) => {
+    setNewMessage(e.target.value);
+  }, [setNewMessage]);
+
+  // Handle form submission with custom event handler
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault();
+    if (newMessage.trim().length === 0) return;
+    
+    if (onSendMessage) {
+      onSendMessage(e);
+    }
+  }, [newMessage, onSendMessage]);
+
+  // Use requestAnimationFrame for smoother scrolling
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      window.requestAnimationFrame(scrollToBottom);
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [initialMessages, scrollToBottom]);
 
   return (
-    <>
+    <div className="chat-container hardware-accelerated">
       <div className="chat-header" style={{ backgroundColor: courseColor }}>
         <h3>Learning Assistant</h3>
-        <div className="chat-typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
       </div>
       
       <div className="chat-messages">
-        {initialMessages.map((message, index) => (
-          <motion.div 
-            key={index} 
-            className={`message ${message.sender}`}
-            variants={messageVariants}
-            initial="initial"
-            animate="animate"
-            transition={{ delay: index * 0.1 }}
-          >
-            {message.text}
-          </motion.div>
-        ))}
-        <div ref={messagesEndRef} /> {/* This element will be scrolled into view */}
+        {renderedMessages}
+        <div ref={messagesEndRef} />
       </div>
       
-      <form className="chat-input" onSubmit={onSendMessage}>
+      <form className="chat-input" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Ask a question about this course..."
           value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
+          onChange={handleInputChange}
+          placeholder="Ask a question..."
+          aria-label="Chat message"
         />
-        <motion.button 
+        <button 
           type="submit" 
           style={{ backgroundColor: courseColor }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
           disabled={!newMessage.trim()}
         >
           Send
-        </motion.button>
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 
-export default ChatBot;
+// Export memoized component to prevent unnecessary re-renders
+export default memo(ChatBot);

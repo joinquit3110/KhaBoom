@@ -1,34 +1,89 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import LazyImage from './LazyImage';
 
 export default function Dashboard({ user }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Fetch courses from backend API
-    axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`)
-      .then(res => {
-        if (!res.data || !res.data.courses) {
-          console.error("Invalid course data format:", res.data);
-          setError("Received invalid course data. Please try again later.");
-          setCourses([]);
-          setLoading(false);
-          return;
-        }
-        console.log("Loaded courses:", res.data.courses);
-        setCourses(res.data.courses || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching courses:", err);
-        setError("Failed to load courses. Please try again later.");
+  // Memoize API call to prevent unnecessary re-fetches
+  const fetchCourses = useCallback(async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/courses`);
+      if (!res.data || !res.data.courses) {
+        console.error("Invalid course data format:", res.data);
+        setError("Received invalid course data. Please try again later.");
         setCourses([]);
         setLoading(false);
-      });
+        return;
+      }
+      console.log("Loaded courses:", res.data.courses);
+      setCourses(res.data.courses || []);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      setError("Failed to load courses. Please try again later.");
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    // Set timeout to prevent infinite loading state
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn("Loading timeout reached - forcing loading state to complete");
+        setLoading(false);
+      }
+    }, 5000); // 5 second timeout
+
+    fetchCourses();
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchCourses]);
+
+  // Use useMemo to prevent unnecessary re-renders of the course grid
+  const renderedCourseGrid = useMemo(() => {
+    if (!courses || courses.length === 0) {
+      return (
+        <div className="no-courses">No courses available at this time.</div>
+      );
+    }
+
+    return (
+      <div className="courses-grid">
+        {courses.map(course => (
+          <div key={course.id} className="course-card hardware-accelerated">
+            <div className="course-image">
+              <LazyImage
+                src={course.image || `/content/${course.id}/hero.jpg`}
+                alt={course.title}
+                width="100%"
+                height="160px"
+              />
+              {course.level && (
+                <span className="level-badge">{course.level}</span>
+              )}
+            </div>
+            <div className="course-info">
+              <h3>{course.title}</h3>
+              <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
+              <div className="course-footer">
+                {course.category && (
+                  <span className="category-tag">{course.category}</span>
+                )}
+                <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
+                  Start Learning
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }, [courses]);
 
   if (!user) {
     return (
@@ -49,46 +104,14 @@ export default function Dashboard({ user }) {
         <h2>Available Courses</h2>
         
         {loading ? (
-          <div className="loading-indicator">Loading courses...</div>
+          <div className="loading-indicator">
+            <div className="loading-spinner"></div>
+            <p>Loading courses...</p>
+          </div>
         ) : error ? (
           <div className="error-message">{error}</div>
-        ) : courses.length === 0 ? (
-          <div className="no-courses">No courses available at this time.</div>
         ) : (
-          <div className="courses-grid">
-            {courses && courses.length > 0 ? courses.map(course => (
-              <div key={course.id} className="course-card">
-                <div className="course-image">
-                  <img 
-                    src={course.image || `/content/${course.id}/hero.jpg`} 
-                    alt={course.title} 
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/placeholder-course.jpg";
-                    }}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  {course.level && (
-                    <span className="level-badge">{course.level}</span>
-                  )}
-                </div>
-                <div className="course-info">
-                  <h3>{course.title}</h3>
-                  <p>{course.description ? (course.description.length > 100 ? course.description.substring(0, 100) + '...' : course.description) : ''}</p>
-                  <div className="course-footer">
-                    {course.category && (
-                      <span className="category-tag">{course.category}</span>
-                    )}
-                    <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
-                      Start Learning
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div className="no-courses">No courses available at this time.</div>
-            )}
-          </div>
+          renderedCourseGrid
         )}
       </div>
     </div>
