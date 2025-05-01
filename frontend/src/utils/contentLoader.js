@@ -112,7 +112,7 @@ const getGlossaryContent = (id) => {
 const fileExists = async (path) => {
   try {
     // Use HEAD request to avoid downloading content
-    const response = await fetch(`/api/content/exists?path=${encodeURIComponent(path)}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/exists?path=${encodeURIComponent(path)}`, {
       method: 'HEAD'
     });
     
@@ -139,7 +139,7 @@ const loadContentFile = async (courseId) => {
     const contentExists = await fileExists(contentPath);
     
     if (contentExists) {
-      const response = await fetch(`/api/content/${contentPath}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/${contentPath}`);
       const content = await response.text();
       return parseMathigonMd(content);
     }
@@ -149,7 +149,7 @@ const loadContentFile = async (courseId) => {
     const indexExists = await fileExists(indexPath);
     
     if (indexExists) {
-      const response = await fetch(`/api/content/${indexPath}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/${indexPath}`);
       const content = await response.text();
       return parseMathigonMd(content);
     }
@@ -177,8 +177,7 @@ const getAssistantResponse = async (courseId, userMessage) => {
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
     
     // Check if we have message about specific terms
-    const glossaryTerms = Object.keys(glossaryTerms);
-    for (const term of glossaryTerms) {
+    for (const term of Object.keys(glossaryTerms)) {
       if (userMessage.toLowerCase().includes(term)) {
         return `${term}: ${getGlossaryContent(term)}`;
       }
@@ -195,20 +194,39 @@ const getAssistantResponse = async (courseId, userMessage) => {
 const scanAvailableCourses = async () => {
   try {
     // Fetch courses from the main content directory only
-    const contentResponse = await fetch('/api/content/courses');
+    const contentResponse = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/content/courses`);
+    
+    // Check if the response is valid and is JSON
+    if (!contentResponse.ok) {
+      throw new Error(`Failed to fetch courses: ${contentResponse.status} ${contentResponse.statusText}`);
+    }
+    
+    // Try to parse response as JSON with safety checks
+    const contentType = contentResponse.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Received non-JSON response:', await contentResponse.text());
+      return [];
+    }
     
     // Reset available courses
     availableCourses.length = 0;
     
     // Process courses from content
-    if (contentResponse.ok) {
-      const courses = await contentResponse.json();
+    try {
+      const data = await contentResponse.json();
+      // Make sure we have a valid courses array
+      const courses = data.courses || [];
       // Add each course to our list
-      courses.forEach(course => {
-        availableCourses.push(course);
-      });
+      if (Array.isArray(courses)) {
+        courses.forEach(course => {
+          availableCourses.push(course);
+        });
+      } else {
+        console.error('Invalid courses format:', courses);
+      }
+    } catch (error) {
+      console.error('Error parsing course JSON:', error);
     }
-    
     console.log(`Loaded ${availableCourses.length} courses from content directory`);
   } catch (error) {
     console.error('Error scanning courses:', error);
@@ -234,7 +252,7 @@ export const getCourseContent = async (courseId) => {
   
   try {
     // Load content from the main API endpoint
-    const path = `/api/content/${courseId}`;
+    const path = `${import.meta.env.VITE_API_BASE || ''}/api/content/${courseId}`;
     
     try {
       const response = await fetch(path);

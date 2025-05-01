@@ -377,7 +377,7 @@ const CourseView = () => {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {availableLanguages.map(lang => (
+                  {Array.isArray(availableLanguages) && availableLanguages.map(lang => (
                     <button
                       key={lang.code}
                       className={`language-option ${lang.code === language ? 'active' : ''}`}
