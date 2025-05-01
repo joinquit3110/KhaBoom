@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
 
 [context.production.environment]
-  VITE_API_BASE = "https://<render-backend-url>"
+  VITE_API_BASE = "https://kha-boom-backend.onrender.com"
