@@ -93,4 +93,40 @@ router.get("/profile", async (req, res) => {
   }
 });
 
+// Update user preferences
+router.patch("/preferences", async (req, res) => {
+  try {
+    // Get token from headers
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ msg: "No token provided" });
+    
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Get user by id
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+    
+    // Update preferences
+    const { preferredLanguage } = req.body;
+    
+    // Only update fields that are provided
+    if (preferredLanguage) {
+      user.preferredLanguage = preferredLanguage;
+    }
+    
+    // Save updated user
+    await user.save();
+    
+    // Return updated user without password
+    const userData = user.toObject();
+    delete userData.password;
+    
+    res.json(userData);
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(401).json({ msg: "Invalid or expired token" });
+  }
+});
+
 export default router;

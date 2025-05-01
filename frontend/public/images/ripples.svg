@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f0f0f0"/>
+  
+  <!-- Ripples -->
+  <circle cx="150" cy="150" r="20" fill="none" stroke="rgba(33,150,243,0.9)" stroke-width="3"/>
+  <circle cx="150" cy="150" r="40" fill="none" stroke="rgba(33,150,243,0.7)" stroke-width="3"/>
+  <circle cx="150" cy="150" r="60" fill="none" stroke="rgba(33,150,243,0.5)" stroke-width="3"/>
+  <circle cx="150" cy="150" r="80" fill="none" stroke="rgba(33,150,243,0.3)" stroke-width="3"/>
+  <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(33,150,243,0.1)" stroke-width="3"/>
+  
+  <!-- Water surface -->
+  <rect width="300" height="300" fill="rgba(33,150,243,0.1)"/>
+  
+  <text x="150" y="270" font-family="Arial" font-size="14" text-anchor="middle" fill="#333">Circular ripples in water</text>
+</svg>

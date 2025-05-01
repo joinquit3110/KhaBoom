@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { getCourseList, getAvailableTranslations } from '../utils/contentLoader';
 
 const Dashboard = ({ user }) => {
   const [profile, setProfile] = useState(null);
@@ -8,89 +9,39 @@ const Dashboard = ({ user }) => {
   const [error, setError] = useState('');
   const [courses, setCourses] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [categories, setCategories] = useState(['All']);
+  const [preferredLanguage, setPreferredLanguage] = useState('en');
 
-  // Simulated courses based on content directory
+  // Load courses from the content loader
   useEffect(() => {
-    const sampleCourses = [
-      {
-        id: 'circles',
-        title: 'Circles and Pi',
-        description: 'Learn about circles, their properties, and the significance of Pi in mathematics.',
-        level: 'Intermediate',
-        category: 'Geometry',
-        image: '/images/circles-hero.jpg',
-        color: '#5A49C9'
-      },
-      {
-        id: 'graph-theory',
-        title: 'Graph Theory',
-        description: 'Explore the mathematical structures used to model relations between objects.',
-        level: 'Advanced',
-        category: 'Discrete Math',
-        image: '/images/graph-theory.jpg',
-        color: '#4DB94B'
-      },
-      {
-        id: 'probability',
-        title: 'Probability',
-        description: 'Understand the mathematics of chance and uncertainty.',
-        level: 'Intermediate',
-        category: 'Statistics',
-        image: '/images/probability.jpg',
-        color: '#F7672C'
-      },
-      {
-        id: 'codes',
-        title: 'Coding Theory',
-        description: 'Learn about error detection and correction in data transmission.',
-        level: 'Advanced',
-        category: 'Computer Science',
-        image: '/images/codes.jpg',
-        color: '#1094BC'
-      },
-      {
-        id: 'divisibility',
-        title: 'Divisibility',
-        description: 'Understand division and remainders in number theory.',
-        level: 'Beginner',
-        category: 'Number Theory',
-        image: '/images/divisibility.jpg',
-        color: '#E91E63'
-      },
-      {
-        id: 'polyhedra',
-        title: 'Polyhedra',
-        description: 'Discover the fascinating world of 3D geometric shapes.',
-        level: 'Intermediate',
-        category: 'Geometry',
-        image: '/images/polyhedra.jpg',
-        color: '#FF9800'
-      },
-      {
-        id: 'fractals',
-        title: 'Fractals',
-        description: 'Explore the beauty of self-similar patterns in mathematics.',
-        level: 'Advanced',
-        category: 'Chaos Theory',
-        image: '/images/fractals.jpg',
-        color: '#9C27B0'
-      },
-      {
-        id: 'triangles',
-        title: 'Triangles',
-        description: 'Learn about the fundamental shape in geometry.',
-        level: 'Beginner',
-        category: 'Geometry',
-        image: '/images/triangles.jpg',
-        color: '#00BCD4'
+    const loadCourses = async () => {
+      try {
+        // First check if the user has a preferred language setting
+        if (profile && profile.preferredLanguage) {
+          setPreferredLanguage(profile.preferredLanguage);
+        }
+        
+        // Get courses from the content loader - this now uses the enhanced loader that reads from filesystem
+        const availableCourses = getCourseList().map(course => {
+          return {
+            ...course,
+            image: course.coverImage || `/images/${course.id}.svg` // Use provided image or fallback to SVG
+          };
+        });
+        
+        setCourses(availableCourses);
+    
+        // Extract unique categories from courses
+        const uniqueCategories = ['All', ...new Set(availableCourses.map(course => course.category))].filter(Boolean);
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        setError('Failed to load courses. Please try again later.');
       }
-    ];
-
-    setCourses(sampleCourses);
-  }, []);
-
-  // Categories derived from courses
-  const categories = ['All', ...new Set(courses.map(course => course.category))].filter(Boolean);
+    };
+    
+    loadCourses();
+  }, [profile]);
 
   // Filtered courses based on active category
   const filteredCourses = activeCategory === 'All' 
@@ -199,6 +150,42 @@ const Dashboard = ({ user }) => {
                   {new Date(profile.createdAt).toLocaleDateString('en-US')}
                 </span>
               </div>
+              
+              <div className="detail-item">
+                <span className="detail-label">Preferred Language:</span>
+                <span className="detail-value">
+                  <select 
+                    value={preferredLanguage} 
+                    onChange={(e) => {
+                      const newLanguage = e.target.value;
+                      setPreferredLanguage(newLanguage);
+                      
+                      // Save language preference to user profile
+                      if (profile) {
+                        const token = localStorage.getItem('token');
+                        if (token) {
+                          axios.patch(
+                            `${import.meta.env.VITE_API_BASE}/api/auth/preferences`,
+                            { preferredLanguage: newLanguage },
+                            { headers: { Authorization: `Bearer ${token}` }}
+                          ).catch(err => console.error('Error saving language preference:', err));
+                        }
+                      }
+                    }}
+                    className="language-select"
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="ru">Russian</option>
+                    <option value="cn">Chinese</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ar">Arabic</option>
+                  </select>
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -229,7 +216,14 @@ const Dashboard = ({ user }) => {
                   <div className="level-badge" style={{ backgroundColor: course.color }}>
                     {course.level}
                   </div>
-                  <img src={course.image} alt={course.title} />
+                  <img 
+                    src={course.image} 
+                    alt={course.title} 
+                    onError={(e) => {
+                      // Fallback to a default image if the course image fails to load
+                      e.target.src = `/images/default-course.svg`;
+                    }}
+                  />
                 </div>
                 <div className="course-info">
                   <h3>{course.title}</h3>

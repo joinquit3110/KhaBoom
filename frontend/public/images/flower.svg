@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f0f0f0"/>
+  
+  <!-- Flower petals -->
+  <ellipse cx="180" cy="150" rx="40" ry="20" transform="rotate(0 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="150" cy="180" rx="20" ry="40" transform="rotate(0 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="120" cy="150" rx="40" ry="20" transform="rotate(0 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="150" cy="120" rx="20" ry="40" transform="rotate(0 150 150)" fill="rgba(255,193,7,0.7)"/>
+  
+  <ellipse cx="173" cy="173" rx="40" ry="20" transform="rotate(45 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="127" cy="173" rx="40" ry="20" transform="rotate(-45 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="173" cy="127" rx="40" ry="20" transform="rotate(135 150 150)" fill="rgba(255,193,7,0.7)"/>
+  <ellipse cx="127" cy="127" rx="40" ry="20" transform="rotate(-135 150 150)" fill="rgba(255,193,7,0.7)"/>
+  
+  <!-- Flower center -->
+  <circle cx="150" cy="150" r="30" fill="#FF5722"/>
+  
+  <text x="150" y="270" font-family="Arial" font-size="14" text-anchor="middle" fill="#333">Circular flower pattern in nature</text>
+</svg>

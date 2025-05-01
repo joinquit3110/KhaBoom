@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { 
+  getCourseById, 
+  getCourseContent, 
+  getGlossaryDefinition, 
+  getAssistantResponse,
+  getAvailableTranslations,
+  loadTranslation
+} from '../utils/contentLoader';
 
 const CourseView = () => {
   const { courseId } = useParams();
@@ -7,174 +15,117 @@ const CourseView = () => {
   const [course, setCourse] = useState(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
+  const messagesEndRef = useRef(null);
+  const contentRef = useRef(null);
+  const [activeGlossary, setActiveGlossary] = useState(null);
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Hi there! I\'m your learning assistant. Ask me anything about this course!' }
   ]);
   const [newMessage, setNewMessage] = useState('');
+  
+  // Language selection state
+  const [language, setLanguage] = useState('en');
+  const [availableLanguages, setAvailableLanguages] = useState([{ code: 'en', name: 'English' }]);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
 
-  // Mock course data - in a real app this would come from an API
+  // Load course data and available languages
   useEffect(() => {
-    // Simulating API request
-    setTimeout(() => {
-      const courseData = {
-        id: courseId,
-        title: getCourseTitle(courseId),
-        description: getCourseDescription(courseId),
-        sections: getCourseSections(courseId),
-        color: getCourseColor(courseId)
-      };
-      setCourse(courseData);
-      setLoading(false);
-    }, 800);
-  }, [courseId]);
-
-  const getCourseTitle = (id) => {
-    const titles = {
-      'circles': 'Circles and Pi',
-      'graph-theory': 'Graph Theory',
-      'probability': 'Probability',
-      'codes': 'Coding Theory',
-      'divisibility': 'Divisibility',
-      'polyhedra': 'Polyhedra',
-      'fractals': 'Fractals',
-      'triangles': 'Triangles'
-    };
-    return titles[id] || 'Course';
-  };
-
-  const getCourseDescription = (id) => {
-    const descriptions = {
-      'circles': 'Learn about circles, their properties, and the significance of Pi in mathematics.',
-      'graph-theory': 'Explore the mathematical structures used to model relations between objects.',
-      'probability': 'Understand the mathematics of chance and uncertainty.',
-      'codes': 'Learn about error detection and correction in data transmission.',
-      'divisibility': 'Understand division and remainders in number theory.',
-      'polyhedra': 'Discover the fascinating world of 3D geometric shapes.',
-      'fractals': 'Explore the beauty of self-similar patterns in mathematics.',
-      'triangles': 'Learn about the fundamental shape in geometry.'
-    };
-    return descriptions[id] || 'An interactive course on mathematics.';
-  };
-
-  const getCourseColor = (id) => {
-    const colors = {
-      'circles': '#5A49C9',
-      'graph-theory': '#4DB94B',
-      'probability': '#F7672C',
-      'codes': '#1094BC',
-      'divisibility': '#E91E63',
-      'polyhedra': '#FF9800',
-      'fractals': '#9C27B0',
-      'triangles': '#00BCD4'
-    };
-    return colors[id] || '#333333';
-  };
-
-  const getCourseSections = (id) => {
-    // Mock sections for the course - in a real app, this would come from backend
-    if (id === 'circles') {
-      return [
-        {
-          title: 'Introduction',
-          content: `<p>For as long as humans have existed, we have looked to the sky and tried to explain life on Earth using the motion of stars, planets and the moon.</p>
-                    <p>Ancient Greek astronomers were the first to discover that all celestial objects move on regular paths, called <strong>orbits</strong>. They believed that these orbits are always circular. After all, circles are the "most perfect" of all shapes: symmetric in every direction, and thus a fitting choice for the underlying order of our universe.</p>
-                    <div class="interactive-element">
-                      <div class="interactive-placeholder">
-                        <img src="/images/circles-intro.jpg" alt="Earth at the center of the Ptolemaic universe" />
-                        <p class="caption">Earth is at the center of the <em>Ptolemaic universe</em>.</p>
-                      </div>
-                    </div>`
-        },
-        {
-          title: 'Circle Properties',
-          content: `<p>Every point on a <strong>circle</strong> has the same distance from its center. This means that they can be drawn using a compass.</p>
-                    <p>There are three important measurements related to circles that you need to know:</p>
-                    <ul>
-                      <li>The <strong>radius</strong> is the distance from the center of a circle to its outer rim.</li>
-                      <li>The <strong>diameter</strong> is the distance between two opposite points on a circle. It goes through its center, and its length is twice the radius.</li>
-                      <li>The <strong>circumference</strong> (or perimeter) is the distance around a circle.</li>
-                    </ul>
-                    <div class="interactive-element">
-                      <div class="interactive-placeholder">
-                        <p>Interactive compass demonstration would appear here in the full version.</p>
-                      </div>
-                    </div>`
-        },
-        {
-          title: 'Pi and Circumference',
-          content: `<p>You might remember that, for similar polygons, the ratio between corresponding sides is always constant. Something similar works for circles: the ratio between the <strong>circumference</strong> and the <strong>diameter</strong> is equal for <em>all circles</em>. It is always 3.14159… – a mysterious number called <strong>Pi</strong>, which is often written as the Greek letter π for "p". Pi has infinitely many decimal digits that go on forever without any specific pattern.</p>
-                    <p>For a circle with diameter <em>d</em>, the circumference is <strong>C = π × d</strong>. Similarly, for a circle with radius <em>r</em>, the circumference is <strong>C = 2 π r</strong>.</p>
-                    <div class="interactive-element">
-                      <div class="interactive-placeholder">
-                        <p>Interactive Pi visualization would appear here in the full version.</p>
-                      </div>
-                    </div>`
-        },
-        {
-          title: 'Circles in Nature',
-          content: `<p>Circles are perfectly symmetric, and they don't have any "weak points" like the corners of a polygon. This is one of the reasons why they can be found everywhere in nature:</p>
-                    <div class="image-grid">
-                      <div>
-                        <img src="/images/circles-flower.jpg" alt="Flower" />
-                        <p>Flowers</p>
-                      </div>
-                      <div>
-                        <img src="/images/circles-earth.jpg" alt="Earth" />
-                        <p>Planets</p>
-                      </div>
-                      <div>
-                        <img src="/images/circles-ripples.jpg" alt="Ripples" />
-                        <p>Ripples</p>
-                      </div>
-                    </div>`
+    const loadCourse = async () => {
+      try {
+        setLoading(true);
+        
+        // First get available translations
+        const translations = await getAvailableTranslations(courseId);
+        setAvailableLanguages(translations);
+        
+        // Then load the content in the selected language
+        const courseData = await loadTranslation(courseId, language);
+        
+        if (courseData) {
+          setCourse({
+            ...courseData.course,
+            sections: courseData.content.sections
+          });
         }
-      ];
-    } else {
-      // Default sections for other courses
-      return [
-        {
-          title: 'Introduction',
-          content: `<p>Welcome to the ${getCourseTitle(id)} course. This is an interactive learning experience where you'll discover fascinating concepts through interactive examples and visualizations.</p>
-                    <p>This is a placeholder for the full interactive course content.</p>`
-        },
-        {
-          title: 'Basic Concepts',
-          content: `<p>In this section, you would learn the fundamental concepts of ${getCourseTitle(id)}.</p>
-                    <p>The interactive elements would allow you to experiment with these concepts directly.</p>
-                    <div class="interactive-element">
-                      <div class="interactive-placeholder">
-                        <p>Interactive demonstration would appear here in the full version.</p>
-                      </div>
-                    </div>`
-        },
-        {
-          title: 'Advanced Applications',
-          content: `<p>Here you would explore more advanced applications of ${getCourseTitle(id)}.</p>
-                    <p>The interactive elements would allow you to see complex examples and solve challenging problems.</p>`
-        }
-      ];
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading course:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadCourse();
+  }, [courseId, language]);
+  
+  // Auto-scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [messages]);
+  
+  // Handle interactions with content elements
+  useEffect(() => {
+    if (!contentRef.current) return;
+    
+    // Add event listeners to glossary terms
+    const glossaryTerms = contentRef.current.querySelectorAll('.term');
+    
+    const handleGlossaryClick = (e) => {
+      const term = e.target.getAttribute('data-gloss');
+      if (term) {
+        setActiveGlossary({
+          term,
+          definition: getGlossaryDefinition(term),
+          position: {
+            top: e.clientY + 10,
+            left: e.clientX - 100
+          }
+        });
+      }
+    };
+    
+    // Add click handlers to all glossary terms
+    glossaryTerms.forEach(term => {
+      term.addEventListener('click', handleGlossaryClick);
+    });
+    
+    // Remove event listeners on cleanup
+    return () => {
+      glossaryTerms.forEach(term => {
+        term.removeEventListener('click', handleGlossaryClick);
+      });
+    };
+  }, [currentSection, course]);
+  
+  // Close glossary popup when clicking elsewhere
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveGlossary(null);
+    };
+    
+    if (activeGlossary) {
+      document.addEventListener('click', handleClickOutside);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }
+  }, [activeGlossary]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
+    const userMessage = newMessage.trim();
     // Add the user message
-    setMessages([...messages, { sender: 'user', text: newMessage }]);
+    setMessages([...messages, { sender: 'user', text: userMessage }]);
     
-    // Generate bot response
+    // Generate bot response using the content loader utility
     setTimeout(() => {
-      const botResponses = [
-        `That's a great question about ${course.title}!`,
-        'Try experimenting with the interactive elements to see how this concept works.',
-        'The key insight here is understanding how these principles connect to real-world applications.',
-        'In the next section, we\'ll explore this concept in more depth.',
-        'This is related to what we learned in the previous section about fundamentals.'
-      ];
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      setMessages(prev => [...prev, { sender: 'bot', text: randomResponse }]);
-    }, 1000);
+      const response = getAssistantResponse(courseId, userMessage);
+      setMessages(prev => [...prev, { sender: 'bot', text: response }]);
+    }, 800);
 
     // Clear the input
     setNewMessage('');
@@ -193,8 +144,38 @@ const CourseView = () => {
       <div className="course-header" style={{ backgroundColor: course.color }}>
         <div className="container">
           <Link to="/dashboard" className="back-button">← Back to Dashboard</Link>
-          <h1>{course.title}</h1>
-          <p className="course-description">{course.description}</p>
+          <div className="course-header-content">
+            <h1>{course.title}</h1>
+            <p className="course-description">{course.description}</p>
+          </div>
+          
+          {/* Language selector */}
+          <div className="language-selector">
+            <button 
+              className="language-button"
+              onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
+            >
+              {availableLanguages.find(lang => lang.code === language)?.name || 'English'}
+              <span className="dropdown-arrow">▼</span>
+            </button>
+            
+            {languageMenuOpen && (
+              <div className="language-dropdown">
+                {availableLanguages.map(lang => (
+                  <button
+                    key={lang.code}
+                    className={`language-option ${lang.code === language ? 'active' : ''}`}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setLanguageMenuOpen(false);
+                    }}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -226,8 +207,24 @@ const CourseView = () => {
             <h2>{course.sections[currentSection].title}</h2>
             <div 
               className="content-html"
+              ref={contentRef}
               dangerouslySetInnerHTML={{ __html: course.sections[currentSection].content }}
             />
+            
+            {/* Glossary tooltip */}
+            {activeGlossary && (
+              <div 
+                className="glossary-tooltip" 
+                style={{
+                  top: activeGlossary.position.top,
+                  left: activeGlossary.position.left
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h4>{activeGlossary.term}</h4>
+                <p>{activeGlossary.definition}</p>
+              </div>
+            )}
             <div className="section-navigation">
               {currentSection > 0 && (
                 <button 
@@ -261,6 +258,7 @@ const CourseView = () => {
                   {message.text}
                 </div>
               ))}
+              <div ref={messagesEndRef} /> {/* This element will be scrolled into view */}
             </div>
             <form className="chat-input" onSubmit={handleSendMessage}>
               <input
