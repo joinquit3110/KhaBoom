@@ -216,6 +216,7 @@ const Register = ({ setUser }) => {
                   required
                   minLength={6}
                   placeholder="Min. 6 characters"
+                  autoComplete="new-password"
                 />
               </div>
             </div>
@@ -233,6 +234,7 @@ const Register = ({ setUser }) => {
                   onChange={handleChange}
                   required
                   placeholder="Re-enter password"
+                  autoComplete="new-password"
                 />
               </div>
             </div>

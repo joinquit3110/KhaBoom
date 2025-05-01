@@ -9,15 +9,23 @@ import compression from 'vite-plugin-compression'
 export default defineConfig({
   // Define environment variables here
   define: {
-    'import.meta.env.VITE_API_BASE': JSON.stringify('http://localhost:5000'),
+    // Use a public API URL that supports CORS instead of localhost
+    // For Netlify deployment, we need an API that accepts cross-origin requests
+    'import.meta.env.VITE_API_BASE': JSON.stringify('https://kha-boom-backend.onrender.com'),
   },
   server: {
     // Configure server to handle JSX properly
     fs: {
       strict: false,
     },
-    // Set correct MIME types
-    middlewareMode: true,
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+        '.jsx': 'jsx'
+      }
+    }
   },
   build: {
     // Ensure modules are handled correctly
@@ -70,27 +78,27 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
       '/content': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
       '/translations': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
       '/assets': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
       '/course': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       },
       '/cache.json': {
-        target: 'http://localhost:5000',
+        target: 'https://kha-boom-backend.onrender.com',
         changeOrigin: true,
       }
     }

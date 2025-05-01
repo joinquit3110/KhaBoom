@@ -76,9 +76,9 @@ function HomePage({ message, user }) {
             src="/logo.png" 
             alt="Kha-Boom Logo" 
             className="hero-logo" 
-            style={{ maxWidth: '250px', marginBottom: '1.5rem' }}
+            style={{ maxWidth: '300px', marginBottom: '1.5rem', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}
           />
-          <h1>Kha-Boom!</h1>
+          <h1 className="hero-title">Kha-<span className="hero-boom">Boom!</span></h1>
           <p className="hero-subtitle">
             Unleash your learning potential with our creative and interactive platform!
           </p>
@@ -97,17 +97,21 @@ function HomePage({ message, user }) {
           )}
         </div>
         <div className="hero-image">
-          <div className="floating-icon" style={{ top: '20%', left: '10%', animationDelay: '0s' }}>
+          <div className="floating-icon book-icon" style={{ top: '20%', left: '10%', animationDelay: '0s' }}>
             <span role="img" aria-label="Book">📚</span>
+            <div className="icon-tooltip">Interactive Learning</div>
           </div>
-          <div className="floating-icon" style={{ top: '70%', left: '20%', animationDelay: '1.5s' }}>
+          <div className="floating-icon idea-icon" style={{ top: '70%', left: '20%', animationDelay: '1.5s' }}>
             <span role="img" aria-label="Idea">💡</span>
+            <div className="icon-tooltip">Creative Ideas</div>
           </div>
-          <div className="floating-icon" style={{ top: '30%', right: '15%', animationDelay: '0.7s' }}>
+          <div className="floating-icon rocket-icon" style={{ top: '30%', right: '15%', animationDelay: '0.7s' }}>
             <span role="img" aria-label="Rocket">🚀</span>
+            <div className="icon-tooltip">Progress Quickly</div>
           </div>
-          <div className="floating-icon" style={{ top: '60%', right: '10%', animationDelay: '2.1s' }}>
+          <div className="floating-icon brain-icon" style={{ top: '60%', right: '10%', animationDelay: '2.1s' }}>
             <span role="img" aria-label="Brain">🧠</span>
+            <div className="icon-tooltip">Deep Understanding</div>
           </div>
         </div>
       </section>
