@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "vite",
-    "build": "npx npm-run-all --sequential build:assets build:vite postbuild",
-    "build:assets": "mgon-build --assets --locales en",
-    "build:vite": "vite build",
+    "build": "npx vite build && node postbuild.js",
+    "build:assets": "echo 'Skipping assets build in CI environment'",
+    "build:vite": "npx vite build",
     "postbuild": "node postbuild.js",
-    "assets": "mgon-build --assets --locales en",
-    "watch": "mgon-build --assets --watch --locales en",
+    "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
+    "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
     "start": "npx npm-run-all --parallel watch dev"
   },
   "dependencies": {

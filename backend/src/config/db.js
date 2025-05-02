@@ -7,16 +7,11 @@ export const connectDB = async () => {
     return Promise.resolve();
   }
 
+  // Modern connection options - older options have been removed from the MongoDB driver
   const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
-    // Auto-retry connection on failure
-    autoReconnect: true,
-    // Never stop trying to reconnect
-    reconnectTries: Number.MAX_VALUE,
-    // Reconnect every 1 second
-    reconnectInterval: 1000
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
   };
 
   try {
