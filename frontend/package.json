@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node postbuild.js",
+    "build": "npx vite build && node postbuild.js",
     "build:assets": "echo 'Skipping assets build in CI environment'",
-    "build:vite": "vite build",
+    "build:vite": "npx vite build",
     "postbuild": "node postbuild.js",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
