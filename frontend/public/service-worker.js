@@ -30,6 +30,14 @@ const CONTENT_ROUTES = [
   '/api/content/'
 ];
 
+// External domains that should be excluded from service worker fetch handling
+const EXTERNAL_DOMAINS = [
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'api.dicebear.com',
+  'www.google-analytics.com'
+];
+
 // Install event - precache critical assets
 self.addEventListener('install', event => {
   console.log('[Service Worker] Installing...');
@@ -86,6 +94,12 @@ self.addEventListener('fetch', event => {
   
   // Skip chrome-extension:, data:, blob:, etc.
   if (!event.request.url.startsWith('http')) {
+    return;
+  }
+  
+  // Skip external domains to avoid CSP issues
+  if (isExternalDomain(url.hostname)) {
+    // Let the browser handle these requests normally
     return;
   }
   
@@ -147,8 +161,8 @@ async function networkFirstWithOfflineFallback(request) {
 
 // Cache first strategy
 async function cacheFirst(request, cacheName = CACHE_NAME) {
-  // Skip chrome-extension URLs to prevent cache errors
-  if (request.url.startsWith('chrome-extension:')) {
+  // Skip requests to external domains
+  if (isExternalDomain(new URL(request.url).hostname)) {
     return fetch(request);
   }
   
@@ -246,4 +260,9 @@ function isAssetRequest(pathname) {
                           '.css', '.js', '.json', '.woff', '.woff2', '.ttf'];
   return assetExtensions.some(ext => pathname.endsWith(ext)) || 
          pathname.includes('/assets/');
+}
+
+// Check if a domain is external and should be excluded from service worker
+function isExternalDomain(hostname) {
+  return EXTERNAL_DOMAINS.some(domain => hostname.includes(domain));
 }
