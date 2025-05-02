@@ -24,7 +24,7 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://kha-boom-backend.onrender.com; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com http://localhost:10000; object-src 'none'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 /*.js

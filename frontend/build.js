@@ -37,17 +37,26 @@ const steps = [
   }
 ];
 
-// Ensure Vite is installed and available
-console.log('⚙️ Ensuring Vite is available...');
+// Ensure Vite is installed and available - more aggressive approach
+console.log('⚙️ Installing Vite explicitly...');
+
+// Always install Vite and React plugin to ensure they're available
 try {
-  // Try to require vite to check if it's installed
-  require.resolve('vite');
-  console.log('✅ Vite is already installed!');
+  // We'll install these packages explicitly with exact paths
+  execSync('npm install --no-save vite@latest @vitejs/plugin-react@latest', { stdio: 'inherit' });
+  console.log('✅ Vite and React plugin installed successfully!');
+  
+  // Verify the installation by checking node_modules
+  const vitePath = path.join(process.cwd(), 'node_modules', 'vite');
+  const exists = fs.existsSync(vitePath);
+  console.log(`Vite installation check: ${exists ? 'FOUND' : 'NOT FOUND'} at ${vitePath}`);
+  
+  if (!exists) {
+    throw new Error('Vite was installed but not found in expected location');
+  }
 } catch (error) {
-  // Vite is not installed, install it
-  console.log('⚠️ Vite not found, installing it...');
-  execSync('npm install --no-save vite@^5 @vitejs/plugin-react', { stdio: 'inherit' });
-  console.log('✅ Vite installed successfully!');
+  console.error('❌ Vite installation failed:', error.message);
+  process.exit(1);
 }
 
 // Execute build steps directly without relying on package.json scripts
@@ -65,25 +74,43 @@ if (process.env.CI === 'true') {
   }
 }
 
-// Step 2: Run Vite build directly
+// Step 2: Run Vite build directly using npx (more reliable than path resolution)
 console.log('\n🏗️ Building Vite application...');
 try {
   const startTime = Date.now();
-  // Use require.resolve to find vite's true location
-  const vitePath = require.resolve('vite');
-  const viteDir = path.dirname(vitePath);
-  // Go up to find the vite package root where bin/vite.js should be
-  const viteRoot = path.resolve(viteDir, '..');
   
-  console.log(`Found Vite at: ${viteRoot}`);
+  // Locate the Vite executable directly in node_modules
+  const vitePath = path.join(process.cwd(), 'node_modules', '.bin', 'vite');
+  console.log(`Looking for Vite at: ${vitePath}`);
   
-  // Directly use Node to execute the Vite CLI
-  execSync(`node ${viteRoot}/bin/vite.js build`, { stdio: 'inherit' });
+  // Check if the binary exists
+  if (fs.existsSync(vitePath)) {
+    console.log(`Vite binary found at: ${vitePath}`);
+    // Execute it directly
+    execSync(`"${vitePath}" build`, { stdio: 'inherit' });
+  } else {
+    console.log('Vite binary not found, using npx as fallback');
+    // Use npx as a fallback
+    execSync('npx --no vite build', { stdio: 'inherit' });
+  }
   
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log(`✅ Vite build completed in ${duration}s`);
 } catch (error) {
   console.error(`❌ Vite build failed:`, error.message);
+  console.log('Checking for node_modules content...');
+  try {
+    // Log node_modules content to help debug
+    const nodeModules = path.join(process.cwd(), 'node_modules');
+    if (fs.existsSync(nodeModules)) {
+      const dirs = fs.readdirSync(nodeModules).filter(d => !d.startsWith('.'));
+      console.log(`Node modules found: ${dirs.join(', ').substring(0, 200)}${dirs.length > 10 ? '...' : ''}`);
+    } else {
+      console.log('node_modules directory not found!');
+    }
+  } catch (e) {
+    console.error('Error checking node_modules:', e.message);
+  }
   success = false;
   process.exit(1);
 }
