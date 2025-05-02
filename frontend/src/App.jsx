@@ -9,6 +9,7 @@ import Dashboard from "./components/Dashboard";
 import CourseView from "./components/CourseView";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
+import NotFound from "./components/NotFound";
 
 export default function App() {
   const [message, setMessage] = useState("");

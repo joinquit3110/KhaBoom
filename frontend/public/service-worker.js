@@ -84,6 +84,11 @@ self.addEventListener('fetch', event => {
     return;
   }
   
+  // Skip chrome-extension:, data:, blob:, etc.
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+  
   // Handle API requests
   if (isApiRoute(url.pathname)) {
     if (isContentApiRoute(url.pathname)) {
