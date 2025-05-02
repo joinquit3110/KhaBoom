@@ -4,10 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node postbuild.js",
+    "build": "vite build && node postbuild.cjs",
     "build:assets": "echo 'Skipping assets build in CI environment'",
     "build:vite": "vite build",
-    "postbuild": "node postbuild.js",
+    "postbuild": "node postbuild.cjs",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
     "start": "npm-run-all --parallel watch dev"
