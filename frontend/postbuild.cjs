@@ -23,7 +23,7 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: blob: *.netlify.app; font-src 'self' data: fonts.gstatic.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://*.mongodb.net http://localhost:* https://*.netlify.app; object-src 'none'; media-src 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: *.netlify.app https://api.dicebear.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Access-Control-Allow-Origin: https://kha-boom-backend.onrender.com
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
