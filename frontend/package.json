@@ -1,11 +1,12 @@
 {
   "name": "kha-boom-frontend",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx vite build && node postbuild.js",
+    "build": "vite build && node postbuild.js",
     "build:assets": "echo 'Skipping assets build in CI environment'",
-    "build:vite": "npx vite build",
+    "build:vite": "vite build",
     "postbuild": "node postbuild.js",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
@@ -18,23 +19,26 @@
     "@mathigon/fermat": "1.1.20",
     "@mathigon/hilbert": "1.1.20",
     "@mathigon/studio": "0.1.43",
+    "@vitejs/plugin-react": "^4.2.0",
     "axios": "^1",
     "framer-motion": "^10.16.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-router-dom": "^6.22.0"
+    "react-router-dom": "^6.22.0",
+    "vite": "^5"
   },
   "devDependencies": {
     "@types/d3": "6.3.0",
     "@types/three": "0.91.14",
     "@types/topojson": "3.2.3",
-    "@vitejs/plugin-react": "^4.2.0",
     "npm-run-all": "4.1.5",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
     "ts-node": "10.9.2",
     "typescript": "5.5.4",
-    "vite": "^5",
     "vite-plugin-compression": "^0.5.1"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   }
 }
