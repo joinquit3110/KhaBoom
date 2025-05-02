@@ -17,18 +17,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../');
 
-// Enable CORS for all routes with full configuration
+// Get allowed origins from environment variables or use default for development
+const allowedOrigins = process.env.CORS_ORIGIN || 'http://localhost:3000';
+
+// Enable CORS for specified origins
 app.use(cors({
-  origin: '*', // Allow all origins
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is allowed
+    const originsArray = allowedOrigins.split(',');
+    if (originsArray.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true,
-  maxAge: 86400 // Cache preflight request results for 24 hours (86400 seconds)
+  maxAge: 86400 // Cache preflight request results for 24 hours
 }));
 
 // Set CORS headers for all responses
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production')) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', true);
