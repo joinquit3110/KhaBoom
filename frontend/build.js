@@ -37,20 +37,55 @@ const steps = [
   }
 ];
 
-// Execute build steps
+// Ensure Vite is installed and available
+console.log('⚙️ Ensuring Vite is available...');
+try {
+  // Try to require vite to check if it's installed
+  require.resolve('vite');
+  console.log('✅ Vite is already installed!');
+} catch (error) {
+  // Vite is not installed, install it
+  console.log('⚠️ Vite not found, installing it...');
+  execSync('npm install --no-save vite@^5 @vitejs/plugin-react', { stdio: 'inherit' });
+  console.log('✅ Vite installed successfully!');
+}
+
+// Execute build steps directly without relying on package.json scripts
 let success = true;
-for (const step of steps) {
+
+// Step 1: Build assets (skip in CI environment)
+console.log('\n📦 Building assets...');
+if (process.env.CI === 'true') {
+  console.log('Skipping assets build in CI environment');
+} else {
   try {
-    console.log(`\n${step.name}...`);
-    const startTime = Date.now();
-    execSync(step.command, { stdio: 'inherit' });
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`✅ ${step.name} completed in ${duration}s`);
+    execSync('npx @mathigon/studio/bin/cli.js --assets --locales en', { stdio: 'inherit' });
   } catch (error) {
-    console.error(`❌ ${step.name} failed:`, error.message);
-    success = false;
-    process.exit(1);
+    console.warn('⚠️ Asset build failed, but continuing:', error.message);
   }
+}
+
+// Step 2: Run Vite build directly
+console.log('\n🏗️ Building Vite application...');
+try {
+  const startTime = Date.now();
+  // Use require.resolve to find vite's true location
+  const vitePath = require.resolve('vite');
+  const viteDir = path.dirname(vitePath);
+  // Go up to find the vite package root where bin/vite.js should be
+  const viteRoot = path.resolve(viteDir, '..');
+  
+  console.log(`Found Vite at: ${viteRoot}`);
+  
+  // Directly use Node to execute the Vite CLI
+  execSync(`node ${viteRoot}/bin/vite.js build`, { stdio: 'inherit' });
+  
+  const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+  console.log(`✅ Vite build completed in ${duration}s`);
+} catch (error) {
+  console.error(`❌ Vite build failed:`, error.message);
+  success = false;
+  process.exit(1);
 }
 
 // Verify build output

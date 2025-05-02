@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "vite",
-    "build": "node ./node_modules/vite/dist/node/cli.js build && node postbuild.js",
+    "build": "npx --yes vite build && node postbuild.js",
     "build:assets": "echo 'Skipping assets build in CI environment'",
-    "build:vite": "node ./node_modules/vite/dist/node/cli.js build",
+    "build:vite": "npx --yes vite build",
     "postbuild": "node postbuild.js",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
