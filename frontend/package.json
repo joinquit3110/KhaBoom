@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "vite",
-    "build": "npm-run-all --sequential build:assets build:vite postbuild",
+    "build": "npx npm-run-all --sequential build:assets build:vite postbuild",
     "build:assets": "mgon-build --assets --locales en",
     "build:vite": "vite build",
     "postbuild": "node postbuild.js",
     "assets": "mgon-build --assets --locales en",
     "watch": "mgon-build --assets --watch --locales en",
-    "start": "npm-run-all --parallel watch dev"
+    "start": "npx npm-run-all --parallel watch dev"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",
