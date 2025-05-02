@@ -142,6 +142,11 @@ async function networkFirstWithOfflineFallback(request) {
 
 // Cache first strategy
 async function cacheFirst(request, cacheName = CACHE_NAME) {
+  // Skip chrome-extension URLs to prevent cache errors
+  if (request.url.startsWith('chrome-extension:')) {
+    return fetch(request);
+  }
+  
   const cachedResponse = await caches.match(request);
   
   if (cachedResponse) {
@@ -150,8 +155,11 @@ async function cacheFirst(request, cacheName = CACHE_NAME) {
   
   try {
     const networkResponse = await fetch(request);
-    const cache = await caches.open(cacheName);
-    cache.put(request, networkResponse.clone());
+    // Only cache if the response is valid and not opaque
+    if (networkResponse && networkResponse.status === 200 && networkResponse.type !== 'opaque') {
+      const cache = await caches.open(cacheName);
+      cache.put(request, networkResponse.clone());
+    }
     return networkResponse;
   } catch (error) {
     console.error('[Service Worker] Fetch failed:', error);

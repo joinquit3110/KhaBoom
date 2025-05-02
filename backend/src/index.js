@@ -20,15 +20,20 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../');
 
 // Parse CORS origins from environment variable
-const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+const corsOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',') 
+  : ['https://khaboom.netlify.app', 'http://localhost:3000'];
 
 // Enable CORS for specified origins
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps, curl requests)
-    if(!origin || corsOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+    // Also always allow the Netlify domain
+    if(!origin || corsOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development' || 
+       origin === 'https://khaboom.netlify.app') {
       callback(null, true);
     } else {
+      console.log(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
