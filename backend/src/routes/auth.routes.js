@@ -5,6 +5,16 @@ import User from "../models/user.model.js";
 
 const router = Router();
 
+// Get JWT secret with fallback to prevent auth failures
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.warn('⚠️ JWT_SECRET not found in environment variables - using fallback for development');
+    return 'khaboom-development-fallback-secret-31102004';
+  }
+  return secret;
+};
+
 router.post("/register", async (req, res) => {
   try {
     const { name, fullName, email, password, class: className, birthdate, gender } = req.body;
@@ -35,8 +45,8 @@ router.post("/register", async (req, res) => {
       avatar 
     });
     
-    // Generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    // Generate token using the consistent JWT secret
+    const token = jwt.sign({ id: user._id }, getJwtSecret(), { expiresIn: "7d" });
     
     // Send back user data (except password) and token
     const userData = user.toObject();
@@ -58,8 +68,8 @@ router.post("/login", async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ msg: "Invalid email or password" });
     
-    // Generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    // Generate token using the consistent JWT secret
+    const token = jwt.sign({ id: user._id }, getJwtSecret(), { expiresIn: "7d" });
     
     // Send back user data (except password) and token
     const userData = user.toObject();
@@ -79,8 +89,8 @@ router.get("/profile", async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ msg: "No token provided" });
     
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token using the consistent JWT secret
+    const decoded = jwt.verify(token, getJwtSecret());
     
     // Get user by id
     const user = await User.findById(decoded.id).select("-password");
@@ -100,8 +110,8 @@ router.patch("/preferences", async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ msg: "No token provided" });
     
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token using the consistent JWT secret
+    const decoded = jwt.verify(token, getJwtSecret());
     
     // Get user by id
     const user = await User.findById(decoded.id);

@@ -239,6 +239,10 @@ const loadContentFile = async (courseId, userId = null) => {
     
     if (contentExists) {
       const response = await fetch(getApiUrl(`/api/content/${contentPath}`));
+      if (!response.ok) {
+        console.error(`Error fetching content: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to fetch ${contentPath}`);
+      }
       const content = await response.text();
       contentData = parseMathigonMd(content);
     } else {
@@ -248,19 +252,43 @@ const loadContentFile = async (courseId, userId = null) => {
       
       if (indexExists) {
         const response = await fetch(getApiUrl(`/api/content/${indexPath}`));
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${indexPath}`);
+        }
         const content = await response.text();
         contentData = parseMathigonMd(content);
       } else {
-        console.error(`No content files found for course: ${courseId}`);
-        return null;
+        // Try direct API endpoint as a final fallback
+        try {
+          const apiResponse = await fetch(getApiUrl(`/api/courses/${courseId}`));
+          if (apiResponse.ok) {
+            const apiData = await apiResponse.json();
+            contentData = {
+              metadata: apiData.metadata || {},
+              html: apiData.html || `<h1>${apiData.title || courseId}</h1><p>${apiData.description || ''}</p>`,
+              sections: apiData.sections || []
+            };
+          } else {
+            console.error(`API fallback failed: ${apiResponse.status}`);
+            throw new Error('All content loading methods failed');
+          }
+        } catch (apiError) {
+          console.error('API fallback error:', apiError);
+          throw new Error('All content loading methods failed');
+        }
       }
     }
     
     // Load user progress if userId is provided
     if (userId && contentData) {
-      const progressData = await loadUserProgress(userId, courseId);
-      if (progressData) {
-        contentData.progress = progressData;
+      try {
+        const progressData = await loadUserProgress(userId, courseId);
+        if (progressData) {
+          contentData.progress = progressData;
+        }
+      } catch (progressError) {
+        console.warn('Failed to load user progress:', progressError);
+        // Continue without progress data
       }
     }
     
@@ -295,7 +323,14 @@ const loadContentFile = async (courseId, userId = null) => {
     return contentData;
   } catch (error) {
     console.error(`Error loading content for ${courseId}:`, error);
-    return null;
+    
+    // Return minimal structured data so the app doesn't crash
+    const course = getCourseById(courseId);
+    return {
+      metadata: { title: course?.title || courseId },
+      html: `<h1>${course?.title || courseId}</h1><p>Error loading content. Please try again later.</p>`,
+      sections: []
+    };
   }
 };
 

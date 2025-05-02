@@ -1,6 +1,16 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
+// Get JWT secret with fallback to prevent auth failures
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.warn('⚠️ JWT_SECRET not found in environment variables - using fallback for development');
+    return 'khaboom-development-fallback-secret-31102004';
+  }
+  return secret;
+};
+
 export const authMiddleware = async (req, res, next) => {
   try {
     // Check for token in headers
@@ -10,8 +20,8 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token with fallback secret
+    const decoded = jwt.verify(token, getJwtSecret());
     
     // Find user
     const user = await User.findById(decoded.id).select('-password');
@@ -24,6 +34,7 @@ export const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error.message);
     return res.status(401).json({ message: 'Token is invalid or expired' });
   }
 };

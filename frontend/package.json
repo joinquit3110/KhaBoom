@@ -1,11 +1,12 @@
 {
   "name": "kha-boom-frontend",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx --yes vite build && node postbuild.js",
+    "build": "vite build && node postbuild.js",
     "build:assets": "echo 'Skipping assets build in CI environment'",
-    "build:vite": "npx --yes vite build",
+    "build:vite": "vite build",
     "postbuild": "node postbuild.js",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",

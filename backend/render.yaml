@@ -18,4 +18,4 @@ services:
       - key: PORT
         value: 10000
       - key: CORS_ORIGIN
-        value: "https://khaboom.netlify.app/"
+        value: "https://khaboom.netlify.app"  # Removed trailing slash

@@ -1,9 +1,12 @@
 // postbuild.js - Netlify post-build optimizations
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 console.log('🔧 Running post-build optimizations for Netlify...');
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, 'dist');
 
 // Create _redirects file for SPA routing if it doesn't exist
@@ -24,8 +27,10 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com http://localhost:10000; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: blob: *.netlify.app; font-src 'self' data: fonts.gstatic.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://*.mongodb.net http://localhost:* https://*.netlify.app; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Access-Control-Allow-Origin: https://kha-boom-backend.onrender.com
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
 
 /*.js
   Cache-Control: public, max-age=31536000
