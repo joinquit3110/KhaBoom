@@ -1601,29 +1601,66 @@ main {
 .category-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  overflow-x: auto;
+  padding: 0.25rem 0;
 }
 
 .category-btn {
   background-color: #f5f5f5;
   color: var(--text-color);
   border: 1px solid #ddd;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
+  border-radius: 22px;
+  padding: 0.6rem 1rem;
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .category-btn:hover {
   background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .category-btn.active {
   background-color: var(--secondary-color);
   color: white;
   border-color: var(--secondary-color);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Level badges styling */
+.level-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+}
+
+/* Mathigon-style category badges */
+.category-tag {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  color: #555;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .courses-grid {

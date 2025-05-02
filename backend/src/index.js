@@ -7,6 +7,8 @@ import fs from "fs";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import contentRoutes from "./routes/content.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import progressRoutes from "./routes/progress.routes.js";
 
 dotenv.config();
 const app = express();
@@ -38,6 +40,8 @@ app.use(express.json());
 connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/content", contentRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/progress", progressRoutes);
 
 // Routes
 // We're handling API routes directly instead of using the index router
@@ -67,7 +71,8 @@ app.get('/course/:id', (req, res) => {
 app.get("/", (_, res) => res.json({ msg: "Kha-Boom API up" }));
 
 // SPA route handling - serve frontend for all non-API routes
-app.use(express.static(path.join(rootDir, 'frontend/dist')));
+const frontendDist = path.resolve(process.cwd(), '../frontend/dist');
+app.use(express.static(frontendDist));
 
 // Catch-all route handler for client-side routing
 app.get('*', (req, res) => {
@@ -77,9 +82,11 @@ app.get('*', (req, res) => {
   }
   
   // For all other routes, serve the frontend application
-  res.sendFile(path.join(rootDir, 'frontend/dist/index.html'));
+  res.sendFile(path.join(frontendDist, "index.html"));
 });
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Content path: ${path.resolve(process.cwd(), '../content')}`);
+  console.log(`Frontend dist path: ${frontendDist}`);
 });

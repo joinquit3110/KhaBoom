@@ -204,7 +204,7 @@ const addFallbackCourses = async () => {
   
   try {
     // Define course data based on the content directory structure
-    // This is based on the originalweb/textbooks-master organization
+    // Enhanced with more detailed categories and levels like Mathigon
     const allCourses = [
       {
         id: 'probability',
@@ -212,7 +212,7 @@ const addFallbackCourses = async () => {
         description: 'Learn about randomness, games, and chance',
         color: '#CD0E66',
         level: 'Foundations',
-        category: 'Statistics'
+        category: 'Statistics & Data'
       },
       {
         id: 'chaos',
@@ -220,7 +220,7 @@ const addFallbackCourses = async () => {
         description: 'Explore the mathematics of unpredictable systems',
         color: '#009EA6',
         level: 'Advanced',
-        category: 'Mathematics'
+        category: 'Pure Mathematics'
       },
       {
         id: 'circles',
@@ -244,7 +244,7 @@ const addFallbackCourses = async () => {
         description: 'Master the art of counting and arrangement',
         color: '#AD1D84',
         level: 'Foundations',
-        category: 'Mathematics'
+        category: 'Discrete Mathematics'
       },
       {
         id: 'complex',
@@ -252,7 +252,7 @@ const addFallbackCourses = async () => {
         description: 'Understand the fascinating world of imaginary numbers',
         color: '#6D3BBF',
         level: 'Advanced',
-        category: 'Mathematics'
+        category: 'Pure Mathematics'
       },
       {
         id: 'data',
@@ -260,7 +260,7 @@ const addFallbackCourses = async () => {
         description: 'Learn how to analyze and interpret data',
         color: '#8D2CA1',
         level: 'Foundations',
-        category: 'Statistics'
+        category: 'Statistics & Data'
       },
       {
         id: 'divisibility',
@@ -268,7 +268,7 @@ const addFallbackCourses = async () => {
         description: 'Explore the fascinating properties of numbers',
         color: '#1AA845',
         level: 'Foundations',
-        category: 'Mathematics'
+        category: 'Pure Mathematics'
       },
       {
         id: 'euclidean-geometry',
@@ -284,7 +284,7 @@ const addFallbackCourses = async () => {
         description: 'A revolutionary way to learn arithmetic and algebra',
         color: '#2A7B23',
         level: 'Foundations',
-        category: 'Mathematics'
+        category: 'Number Systems'
       },
       {
         id: 'exponentials',
@@ -292,7 +292,7 @@ const addFallbackCourses = async () => {
         description: 'Understand growth, decay, and patterns of change',
         color: '#CD0E66',
         level: 'Intermediate',
-        category: 'Algebra'
+        category: 'Functions & Calculus'
       },
       {
         id: 'fractals',
@@ -300,7 +300,7 @@ const addFallbackCourses = async () => {
         description: 'Explore infinite patterns and self-similarity',
         color: '#1F7AED',
         level: 'Advanced',
-        category: 'Mathematics'
+        category: 'Visual Mathematics'
       },
       {
         id: 'functions',
@@ -308,7 +308,7 @@ const addFallbackCourses = async () => {
         description: 'Master the building blocks of mathematics',
         color: '#CE2016',
         level: 'Foundations',
-        category: 'Algebra'
+        category: 'Functions & Calculus'
       },
       {
         id: 'game-theory',
@@ -316,7 +316,7 @@ const addFallbackCourses = async () => {
         description: 'Learn strategic decision making and competitive behavior',
         color: '#CE2016',
         level: 'Advanced',
-        category: 'Mathematics'
+        category: 'Applied Mathematics'
       },
       {
         id: 'graph-theory',
@@ -332,7 +332,7 @@ const addFallbackCourses = async () => {
         description: 'Master the foundations of algebra and coordinate geometry',
         color: '#1F7AED',
         level: 'Foundations',
-        category: 'Algebra'
+        category: 'Functions & Calculus'
       },
       {
         id: 'logic',
@@ -348,7 +348,7 @@ const addFallbackCourses = async () => {
         description: 'Understand linear algebra and its applications',
         color: '#6D3BBF',
         level: 'Advanced',
-        category: 'Algebra'
+        category: 'Linear Algebra'
       },
       {
         id: 'non-euclidean-geometry',
@@ -380,7 +380,7 @@ const addFallbackCourses = async () => {
         description: 'Master parabolas and second-degree equations',
         color: '#1AA845',
         level: 'Intermediate',
-        category: 'Algebra'
+        category: 'Functions & Calculus'
       },
       {
         id: 'sequences',
@@ -388,7 +388,7 @@ const addFallbackCourses = async () => {
         description: 'Discover mathematical patterns and series',
         color: '#0F82F2',
         level: 'Intermediate',
-        category: 'Algebra'
+        category: 'Number Systems'
       },
       {
         id: 'shapes',
@@ -404,7 +404,7 @@ const addFallbackCourses = async () => {
         description: 'Learn to analyze data and draw conclusions',
         color: '#CD0E66',
         level: 'Intermediate',
-        category: 'Statistics'
+        category: 'Statistics & Data'
       },
       {
         id: 'transformations',
@@ -420,7 +420,7 @@ const addFallbackCourses = async () => {
         description: 'Master angles, ratios, and triangle relationships',
         color: '#5A49C9',
         level: 'Intermediate',
-        category: 'Geometry'
+        category: 'Trigonometry'
       },
       {
         id: 'vectors',
@@ -428,7 +428,7 @@ const addFallbackCourses = async () => {
         description: 'Understand quantities with direction and magnitude',
         color: '#6D3BBF',
         level: 'Advanced',
-        category: 'Mathematics'
+        category: 'Linear Algebra'
       }
     ];
 
@@ -457,7 +457,7 @@ const addFallbackCourses = async () => {
         description: 'Learn about randomness, games, and chance',
         color: '#CD0E66',
         level: 'Foundations',
-        category: 'Statistics',
+        category: 'Statistics & Data',
         thumbnail: getApiUrl('/content/probability/hero.jpg'),
         sections: [{ id: 'introduction', title: 'Introduction' }]
       });
