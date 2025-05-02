@@ -9,7 +9,6 @@ export default function Dashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const [levelFilter, setLevelFilter] = useState('All');
   const [sortOrder, setSortOrder] = useState('default');
 
   // Memoize course fetching to prevent unnecessary re-fetches
@@ -92,25 +91,12 @@ export default function Dashboard({ user }) {
     return uniqueCategories;
   }, [courses]);
 
-  // Get unique levels from courses
-  const levels = useMemo(() => {
-    if (!courses || courses.length === 0) return ['All'];
-
-    const uniqueLevels = ['All', ...new Set(courses.map(course => course.level).filter(Boolean))];
-    return uniqueLevels;
-  }, [courses]);
-
-  // Filter and sort courses based on selected category, level, and sort order
+  // Filter and sort courses based on selected category and sort order
   const filteredAndSortedCourses = useMemo(() => {
     // First filter by category
     let filtered = courses;
     if (categoryFilter !== 'All') {
       filtered = courses.filter(course => course.category === categoryFilter);
-    }
-
-    // Then filter by level
-    if (levelFilter !== 'All') {
-      filtered = filtered.filter(course => course.level === levelFilter);
     }
     
     // Then sort based on the selected sort order
@@ -135,7 +121,7 @@ export default function Dashboard({ user }) {
     }
     
     return sorted;
-  }, [courses, categoryFilter, levelFilter, sortOrder]);
+  }, [courses, categoryFilter, sortOrder]);
 
   // Debug information about courses
   const courseDebugInfo = useMemo(() => {
@@ -143,11 +129,9 @@ export default function Dashboard({ user }) {
       totalCourses: courses.length,
       filteredCourses: filteredAndSortedCourses.length,
       categoryFilter,
-      levelFilter,
-      categories: categories.length,
-      levels: levels.length
+      categories: categories.length
     };
-  }, [courses, filteredAndSortedCourses, categoryFilter, levelFilter, categories, levels]);
+  }, [courses, filteredAndSortedCourses, categoryFilter, categories]);
 
   // Function to generate correct thumbnail URLs with API base URL
   const getThumbnailUrl = useCallback((course) => {
@@ -258,41 +242,18 @@ export default function Dashboard({ user }) {
       <div className="courses-section">
         <h2>Available Courses</h2>
         
-        {/* Category buttons filter - Mathigon style */}
-        <div className="category-filter">
-          <button 
-            className={`category-btn ${categoryFilter === 'All' ? 'active' : ''}`}
-            onClick={() => setCategoryFilter('All')}
-          >
-            All Topics
-          </button>
-          {categories.filter(cat => cat !== 'All').map(category => (
-            <button
-              key={category}
-              className={`category-btn ${categoryFilter === category ? 'active' : ''}`}
-              onClick={() => setCategoryFilter(category)}
-              style={categoryFilter === category ? {
-                backgroundColor: filteredAndSortedCourses.find(c => c.category === category)?.color || '#6366F1',
-                borderColor: filteredAndSortedCourses.find(c => c.category === category)?.color || '#6366F1'
-              } : {}}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-        
-        {/* Advanced filters */}
+        {/* Category and Sort Controls */}
         <div className="course-filters">
           <div className="filter-group">
-            <label className="filter-label">Level:</label>
-            <div className="select-wrapper secondary-select">
+            <label className="filter-label">Category:</label>
+            <div className="select-wrapper primary-select">
               <select 
-                value={levelFilter} 
-                onChange={(e) => setLevelFilter(e.target.value)} 
+                value={categoryFilter} 
+                onChange={(e) => setCategoryFilter(e.target.value)} 
                 className="filter-select"
               >
-                {levels.map(level => (
-                  <option key={level} value={level}>{level}</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
@@ -300,7 +261,7 @@ export default function Dashboard({ user }) {
           
           <div className="filter-group">
             <label className="filter-label">Sort by:</label>
-            <div className="select-wrapper tertiary-select">
+            <div className="select-wrapper secondary-select">
               <select 
                 value={sortOrder} 
                 onChange={(e) => setSortOrder(e.target.value)} 
@@ -338,9 +299,7 @@ export default function Dashboard({ user }) {
           <p>Total courses: {courses.length}</p>
           <p>Filtered courses: {filteredAndSortedCourses.length}</p>
           <p>Selected category: {categoryFilter}</p>
-          <p>Selected level: {levelFilter}</p>
           <p>Available categories: {categories.length}</p>
-          <p>Available levels: {levels.length}</p>
         </div>
       </div>
     </div>

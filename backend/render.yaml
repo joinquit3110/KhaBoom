@@ -13,5 +13,3 @@ services:
         sync: false         # set in Render dashboard (link to Mongo Atlas/Render Mongo)
       - key: JWT_SECRET
         sync: false
-      - key: CORS_ORIGIN
-        value: "https://kha-boom.netlify.app"  # Your Netlify domain
