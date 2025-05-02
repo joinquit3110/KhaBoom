@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="KHA-BOOM! Logo" width="300">
+  <img src="frontend/public/logo.png" alt="KHA-BOOM! Logo" width="500">
 </div>
 
 # KHA-BOOM!
@@ -30,6 +30,7 @@ KHA-BOOM! is an interactive educational platform that brings mathematics to life
 - Node.js (v16.0.0 or higher)
 - npm (v6.0.0 or higher)
 - MongoDB (for backend development)
+- Accounts on Netlify, Render, and MongoDB Atlas (for deployment)
 
 ### Installation & Setup
 
@@ -48,6 +49,25 @@ npm start
 ```
 
 This will start both the frontend and backend in development mode. The application will be available at `http://localhost:3000`.
+
+### Environment Configuration
+
+Create `.env` files in both frontend and backend directories:
+
+**Backend (.env)**
+```
+PORT=10000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173,https://khaboom.netlify.app
+```
+
+**Frontend (.env)**
+```
+VITE_API_BASE=http://localhost:10000
+VITE_APP_TITLE=KhaBoom Learning Platform
+```
 
 ### Development Workflow
 
@@ -80,12 +100,62 @@ npm run assets
 - **Authentication**: JWT & bcrypt
 - **Environment**: Node.js
 
+## Deployment
+
+KHA-BOOM! is designed to be deployed on modern cloud platforms. We use the following setup:
+
+- **Frontend**: Deployed on Netlify
+- **Backend API**: Deployed on Render
+- **Database**: MongoDB Atlas
+
+### Frontend Deployment on Netlify
+
+1. Push your code to GitHub
+2. Connect your repository to Netlify
+3. Configure the build settings:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+4. Add environment variables:
+   - `VITE_API_BASE`: Your Render backend URL
+   - `NODE_ENV`: `production`
+5. Deploy the site
+
+### Backend Deployment on Render
+
+1. Push your code to GitHub
+2. Connect your repository to Render
+3. Create a new Web Service
+4. Configure the service:
+   - Root Directory: `backend`
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+5. Add environment variables:
+   - `PORT`: `10000`
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
+   - `JWT_SECRET`: A secure random string
+   - `NODE_ENV`: `production`
+   - `CORS_ORIGIN`: Your Netlify site URL
+
+### MongoDB Atlas Setup
+
+1. Create a MongoDB Atlas account
+2. Create a new cluster
+3. Configure network access (whitelist your IPs)
+4. Create a database user
+5. Get your connection string from the "Connect" button
+6. Use this connection string in your Render environment variables
+
+For more detailed deployment instructions, see the [deployment guide](docs/deployment.md).
+
 ## Documentation
 
-For more detailed documentation about the development and usage of KHA-BOOM!, please refer to the Mathigon documentation and resources:
+For more detailed documentation about the development and usage of KHA-BOOM!, please refer to the following resources:
 
-- [GitHub Repository](https://github.com/mathigon/textbooks)
-- [Live Website](https://mathigon.org/courses)
+- **[Setup Guide](docs/setup.md)**: Instructions for setting up the development environment
+- **[API Testing](docs/api-testing.md)**: Guide for testing the backend API
+- **[Deployment Guide](docs/deployment.md)**: Detailed deployment instructions
+- **[Mathigon Documentation](https://github.com/mathigon/textbooks)**: Original textbooks repository
+- **[Live Demo](https://khaboom.netlify.app/)**: KHA-BOOM! deployed site
 
 ## Contributing
 

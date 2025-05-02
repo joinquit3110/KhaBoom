@@ -63,6 +63,16 @@ coverage
 .env.test.local
 .env.production.local
 
+# Netlify specific
+.netlify
+.netlify/
+.netlify/*
+netlify.toml.bak
+
+# Render specific
+.render
+.render-buildpacks.json
+
 # Logs
 logs
 *.log

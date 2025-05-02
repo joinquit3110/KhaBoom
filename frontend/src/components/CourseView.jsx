@@ -62,7 +62,7 @@ const CourseView = () => {
     return Math.round((completedSecs.length / totalSections) * 100);
   }, []);
 
-  // Parse course content from Mathigon markdown
+  // Parse course content from Mathigon markdown or JSON structure
   const renderCourseContent = useCallback((courseData) => {
     if (!courseData || !courseData.content) {
       console.error('No valid course content provided');
@@ -71,24 +71,42 @@ const CourseView = () => {
     }
     
     try {
-      // Handle different content formats - courseData.content could already be structured
+      console.log('Course content data structure:', Object.keys(courseData.content).join(', '));
+      
+      // Set course sections for navigation if available
+      if (courseData.course && courseData.course.sections) {
+        console.log(`Course has ${courseData.course.sections.length} sections`);
+      }
+      
+      // Handle different content formats
       if (courseData.content.html) {
-        // We already have HTML content
+        // We already have HTML content from structured JSON data
+        console.log('Using pre-generated HTML content');
         return { __html: courseData.content.html };
       } else if (typeof courseData.content === 'string') {
         // If we somehow still have a raw string, use parseMathigonMd
+        console.log('Using raw string content');
         return { __html: parseMathigonMd(courseData.content).html || '' };
       } else if (courseData.content.sections && Array.isArray(courseData.content.sections)) {
         // If we have sections, construct HTML
-        let html = `<h1>${courseData.course.title || 'Course Content'}</h1>\n`;
+        console.log(`Constructing HTML from ${courseData.content.sections.length} sections`);
         
-        courseData.content.sections.forEach(section => {
-          html += `<div class="section" data-section="${section.id}">
-            <h2 id="${section.id}">${section.title}</h2>
-            <div class="section-content">${section.content || ''}</div>
-          </div>\n`;
-        });
+        // Start with the course title
+        let html = `<h1>${courseData.course?.title || 'Course Content'}</h1>\n`;
         
+        // If we're looking at a specific section
+        if (currentSection >= 0 && courseData.content.sections[currentSection]) {
+          const section = courseData.content.sections[currentSection];
+          html = `<div class="current-section">${section.content}</div>`;
+        } else {
+          // Otherwise show all sections
+          courseData.content.sections.forEach(section => {
+            // Content might already be HTML if it came from the JSON data
+            html += section.content;
+          });
+        }
+        
+        console.log('Generated HTML from sections successfully');
         return { __html: html };
       }
       
@@ -124,6 +142,8 @@ const CourseView = () => {
         throw new Error(`Course not found: ${courseId}`);
       }
       
+      console.log('Course info found:', courseInfo);
+      
       // Update course state with properly formatted hero image URL
       setCourse({
         ...courseInfo,
@@ -136,27 +156,22 @@ const CourseView = () => {
       setAvailableLanguages(langs);
       
       try {
-        // Fetch course content using the API base URL
-        const contentPath = `content/${courseId}/content.md`;
-        const response = await fetch(getResourceUrl(contentPath));
+        // Skip direct file loading and use our improved getCourseContent which handles fallbacks
+        console.log(`Loading content for course: ${courseId}`);
         
-        if (!response.ok) {
-          throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
+        // Use the improved content loader which has multiple fallback strategies
+        const contentData = await getCourseContent(courseId);
+        
+        if (!contentData || !contentData.content) {
+          throw new Error(`Could not load content for course: ${courseId}`);
         }
         
-        // Get the raw markdown content
-        const markdownContent = await response.text();
-        
-        if (!markdownContent) {
-          throw new Error('No markdown content found');
-        }
-        
-        // Process the markdown content
-        console.log(`Successfully loaded content for ${courseId}`);
-        const parsedContent = parseMathigonMd(markdownContent);
-        
-        // Set the content directly in the state
-        setCourseContent(parsedContent);
+        console.log('Content loaded successfully:', 
+          Object.keys(contentData.content).join(', '), 
+          'with course:', contentData.course?.title);
+          
+        // Store the full contentData
+        setCourseContent(contentData);
         setLoading(false);
         
         // Try to load progress data
@@ -164,13 +179,20 @@ const CourseView = () => {
       } catch (err) {
         console.error(`Error fetching course content: ${err.message}`);
         
-        // Try fallback content loading approach
-        const contentData = await getCourseContent(courseId);
-        if (!contentData) {
-          throw new Error(`Could not load content for course: ${courseId}`);
-        }
+        // Create a minimal fallback content object for graceful degradation
+        const fallbackContent = {
+          course: courseInfo,
+          content: {
+            html: `<div class="error-fallback">
+              <h1>${courseInfo.title}</h1>
+              <p>${courseInfo.description}</p>
+              <p>Full content is currently unavailable. Please try again later.</p>
+            </div>`,
+            sections: [{ id: 'introduction', title: 'Introduction', content: courseInfo.description }]
+          }
+        };
         
-        setCourseContent(contentData.content);
+        setCourseContent(fallbackContent);
         setLoading(false);
       }
     } catch (err) {

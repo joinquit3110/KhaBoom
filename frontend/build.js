@@ -70,6 +70,23 @@ try {
     } else {
       console.warn(`⚠️ Missing critical files: ${missing.join(', ')}`);
     }
+    
+    // Create a _redirects file for Netlify (SPA routing)
+    const redirectsPath = path.join(distDir, '_redirects');
+    if (!fs.existsSync(redirectsPath)) {
+      console.log('📝 Creating Netlify _redirects file for SPA routing...');
+      fs.writeFileSync(redirectsPath, '/* /index.html 200');
+      console.log('✅ Created _redirects file');
+    }
+    
+    // Create a netlify.toml in dist if it doesn't exist
+    const netlifyTomlDestPath = path.join(distDir, 'netlify.toml');
+    const netlifyTomlSrcPath = path.join(process.cwd(), 'netlify.toml');
+    if (fs.existsSync(netlifyTomlSrcPath) && !fs.existsSync(netlifyTomlDestPath)) {
+      console.log('📝 Copying netlify.toml to dist directory...');
+      fs.copyFileSync(netlifyTomlSrcPath, netlifyTomlDestPath);
+      console.log('✅ Copied netlify.toml file');
+    }
   } else {
     console.error('❌ Dist directory not found!');
     success = false;

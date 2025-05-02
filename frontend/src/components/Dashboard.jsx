@@ -87,7 +87,14 @@ export default function Dashboard({ user }) {
   const categories = useMemo(() => {
     if (!courses || courses.length === 0) return ['All'];
     
-    const uniqueCategories = ['All', ...new Set(courses.map(course => course.category).filter(Boolean))];
+    // Get all categories from courses, ensuring we prioritize the category field
+    const allCategories = courses.map(course => {
+      // Make sure we have a valid category, not just 'Mathematics' for everything
+      return course.category || 'Uncategorized';
+    }).filter(Boolean);
+    
+    // Use Set to get unique categories and add 'All' as first option
+    const uniqueCategories = ['All', ...new Set(allCategories)];
     return uniqueCategories;
   }, [courses]);
 
@@ -211,9 +218,30 @@ export default function Dashboard({ user }) {
                   <Link 
                     to={`/courses/${course.id}`} 
                     className="btn btn-primary btn-sm"
-                    style={{ backgroundColor: course.color }}
+                    style={{ 
+                      backgroundColor: course.color,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s ease',
+                      fontWeight: '500',
+                      padding: '8px 16px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    }}
                   >
                     Start Learning
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </Link>
                 </div>
               </div>

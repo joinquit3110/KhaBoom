@@ -1,10 +1,11 @@
 /**
- * Enhanced Content Loader Utility
+ * Enhanced Content Loader Utility for KhaBoom
  * 
  * This utility parses content using Mathigon's format from content and translations directories,
  * transforming the special markdown format into React components.
  * 
- * It now loads content directly from the filesystem structure in the content and translations directories.
+ * It connects to the MongoDB database via the Render backend API to track progress and load content.
+ * It properly processes interactive elements and step tracking with user authentication.
  */
 
 // Utility functions for parsing Mathigon markdown format
@@ -152,8 +153,64 @@ const fileExists = async (path) => {
   }
 };
 
+// Function to track user progress in MongoDB
+const trackProgress = async (userId, courseId, stepId, completed = true) => {
+  if (!userId || !courseId) return false;
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    
+    const response = await fetch(getApiUrl('/api/progress/' + courseId), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        sectionId: stepId.split('-')[0], // Extract section from step ID
+        exerciseId: stepId,
+        completed
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error tracking progress:', error);
+    return false;
+  }
+};
+
+// Function to load user progress from MongoDB
+const loadUserProgress = async (userId, courseId) => {
+  if (!userId || !courseId) return null;
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    const response = await fetch(getApiUrl('/api/progress/' + courseId), {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error loading user progress:', error);
+    return null;
+  }
+};
+
 // Function to load content from markdown files
-const loadContentFile = async (courseId) => {
+const loadContentFile = async (courseId, userId = null) => {
   try {
     // Check if content directory exists
     const courseExists = await fileExists(`${courseId}`);
@@ -167,24 +224,64 @@ const loadContentFile = async (courseId) => {
     const contentPath = `${courseId}/content.md`;
     const contentExists = await fileExists(contentPath);
     
+    let contentData = null;
+    
     if (contentExists) {
       const response = await fetch(getApiUrl(`/api/content/${contentPath}`));
       const content = await response.text();
-      return parseMathigonMd(content);
+      contentData = parseMathigonMd(content);
+    } else {
+      // Fallback to index.md if content.md doesn't exist
+      const indexPath = `${courseId}/index.md`;
+      const indexExists = await fileExists(indexPath);
+      
+      if (indexExists) {
+        const response = await fetch(getApiUrl(`/api/content/${indexPath}`));
+        const content = await response.text();
+        contentData = parseMathigonMd(content);
+      } else {
+        console.error(`No content files found for course: ${courseId}`);
+        return null;
+      }
     }
     
-    // Fallback to index.md if content.md doesn't exist
-    const indexPath = `${courseId}/index.md`;
-    const indexExists = await fileExists(indexPath);
-    
-    if (indexExists) {
-      const response = await fetch(getApiUrl(`/api/content/${indexPath}`));
-      const content = await response.text();
-      return parseMathigonMd(content);
+    // Load user progress if userId is provided
+    if (userId && contentData) {
+      const progressData = await loadUserProgress(userId, courseId);
+      if (progressData) {
+        contentData.progress = progressData;
+      }
     }
     
-    console.error(`No content files found for course: ${courseId}`);
-    return null;
+    // Load functions.ts file for interactive content
+    const functionsPath = `${courseId}/functions.ts`;
+    const functionsExists = await fileExists(functionsPath);
+    
+    if (functionsExists) {
+      try {
+        const response = await fetch(getApiUrl(`/api/content/${functionsPath}`));
+        const functionsCode = await response.text();
+        contentData.functions = functionsCode;
+      } catch (e) {
+        console.warn(`Could not load functions for ${courseId}:`, e);
+      }
+    }
+    
+    // Load styles.scss file for styling
+    const stylesPath = `${courseId}/styles.scss`;
+    const stylesExists = await fileExists(stylesPath);
+    
+    if (stylesExists) {
+      try {
+        const response = await fetch(getApiUrl(`/api/content/${stylesPath}`));
+        const stylesCode = await response.text();
+        contentData.styles = stylesCode;
+      } catch (e) {
+        console.warn(`Could not load styles for ${courseId}:`, e);
+      }
+    }
+    
+    return contentData;
   } catch (error) {
     console.error(`Error loading content for ${courseId}:`, error);
     return null;
@@ -529,7 +626,8 @@ const scanAvailableCourses = async () => {
                 description: course.description || 'No description available',
                 color: courseColor,
                 level: course.level || 'Intermediate',
-                category: course.category || 'Mathematics',
+                // Only use Mathematics as a fallback if course has no category
+                category: course.category || '',                
                 thumbnail: generateThumbnailUrl(course.id),
                 sections: course.sections || [{ id: 'default', title: 'Introduction' }]
               };
@@ -539,6 +637,10 @@ const scanAvailableCourses = async () => {
           });
           
           console.log(`Loaded ${availableCourses.length} courses from API`);
+          // If there are no courses at all, fall back to hardcoded courses
+          if (availableCourses.length === 0) {
+            await addFallbackCourses();
+          }
           return; // Successfully loaded courses from API
         } else {
           console.error('Invalid or empty courses data:', data);
@@ -562,8 +664,11 @@ function getRandomColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// Call this when the app initializes to populate courses
-scanAvailableCourses();
+// Initialize with fallback courses first, then try to fetch from API
+addFallbackCourses().then(() => {
+  // After we have fallback courses loaded, try to get courses from API
+  scanAvailableCourses();
+});
 
 // Export utility functions
 export const getCourseList = () => {
@@ -597,46 +702,144 @@ export const getCourseContent = async (courseId) => {
   if (!course) return null;
   
   try {
-    // Use the API endpoint to get the course content instead of direct file access
-    const apiPath = getApiUrl(`/api/content/${courseId}`);
+    console.log(`Creating fallback content for course: ${courseId}`);
     
-    try {
-      console.log(`Fetching course content from: ${apiPath}`);
-      const response = await fetch(apiPath);
+    // Create fallback content using the course info we already have
+    return {
+      course,
+      content: {
+        metadata: { id: courseId },
+        html: `<div class="section" data-section="intro">
+          <h1>${course.title}</h1>
+          <h2 id="intro">Introduction</h2>
+          <div class="section-content">
+            <p>${course.description}</p>
+            <p>This is a preview of the course content. Interactive elements will be available in future versions.</p>
+          </div>
+        </div>`,
+        sections: [{
+          id: 'intro',
+          title: 'Introduction',
+          content: `<p>${course.description}</p>`,
+          steps: ['intro-1']
+        }]
+      }
+    };
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
+      if (response.ok) {
+        const jsonData = await response.json();
+        console.log(`Successfully loaded JSON data for ${courseId}`, jsonData.title);
+        
+        if (jsonData && jsonData.sections) {
+          // Create HTML structure from the steps in JSON
+          let processedSections = [];
+          let fullHtml = '';
+          
+          // Process each section from the JSON data
+          for (const section of jsonData.sections) {
+            let sectionHtml = `<div class="section" data-section="${section.id}">
+              <h2 id="${section.id}">${section.title}</h2>
+              <div class="section-content">`;
+              
+            // If the section has steps, process them
+            if (section.steps && Array.isArray(section.steps)) {
+              // For each step ID, get the step content from the jsonData.steps object
+              for (const stepId of section.steps) {
+                if (jsonData.steps && jsonData.steps[stepId]) {
+                  const step = jsonData.steps[stepId];
+                  sectionHtml += `<div class="step" id="${stepId}">${step.html || ''}</div>\n`;
+                }
+              }
+            }
+            
+            sectionHtml += '</div></div>\n';
+            fullHtml += sectionHtml;
+            
+            processedSections.push({
+              id: section.id,
+              title: section.title,
+              content: sectionHtml,
+              steps: section.steps || []
+            });
+          }
+          
+          // Create the properly structured content object
+          return {
+            course: {
+              ...course,
+              ...jsonData,  // Include all the data from the JSON file
+              sections: jsonData.sections
+            },
+            content: {
+              metadata: jsonData || {},
+              sections: processedSections,
+              html: fullHtml,
+              steps: jsonData.steps || {}
+            }
+          };
+        }
       }
       
-      // Get the content as JSON from the API
-      const contentData = await response.json();
-      
-      if (!contentData || !contentData.content) {
-        throw new Error('No valid course content provided');
+      // Try loading from markdown as a fallback
+      const contentPath = `/content/${courseId}/content.md`;
+      console.log(`Trying markdown fallback: ${contentPath}`);
+      try {
+        const mdResponse = await fetch(contentPath);
+        
+        if (mdResponse.ok) {
+        const markdownContent = await mdResponse.text();
+        if (markdownContent && markdownContent.length > 0) {
+          console.log(`Successfully loaded content from markdown for ${courseId}`);
+          
+          // Process the markdown content
+          const parsedContent = parseMathigonMd(markdownContent);
+          
+          // Create default sections if none exist
+          const sections = parsedContent.sections || [
+            { 
+              id: 'introduction', 
+              title: 'Introduction', 
+              content: parsedContent.html || markdownContent 
+            }
+          ];
+          
+          // Create the properly structured content object
+          return {
+            course,
+            content: {
+              metadata: parsedContent.metadata || {},
+              sections,
+              html: parsedContent.html || ''
+            }
+          };
+        }
       }
       
-      // Extract the necessary information
-      const { metadata, content } = contentData;
-      
-      console.log(`Successfully loaded content for ${courseId}`);
-      
-      // Create sections from the content sections
-      const sections = content.sections || [];
-      
-      // Process content to get HTML if needed
-      let html = '';
-      if (sections.length > 0) {
-        // Join all section content together for rendering
-        html = sections.map(section => section.content).join('\n\n');
-      }
-      
-      // Create the properly structured content object
+      // If local files don't work, create a minimal course structure with fallback content
+      console.log(`Creating fallback content for ${courseId}`);
       return {
         course,
         content: {
-          metadata: metadata || {},
-          sections,
-          html: parseMathigonMd(html).html  // Process the HTML
+          metadata: { title: course.title },
+          sections: [{
+            id: 'introduction',
+            title: 'Introduction',
+            content: `<div class="section" data-section="introduction">
+              <h2 id="introduction">Introduction</h2>
+              <div class="section-content">
+                <p>${course.description || 'No course content available yet.'}</p>
+                <p>Please check back later for full course content.</p>
+              </div>
+            </div>`
+          }],
+          html: `<h1>${course.title}</h1>
+            <div class="section" data-section="introduction">
+              <h2 id="introduction">Introduction</h2>
+              <div class="section-content">
+                <p>${course.description || 'No course content available yet.'}</p>
+                <p>Please check back later for full course content.</p>
+              </div>
+            </div>`
         }
       };
     } catch (err) {

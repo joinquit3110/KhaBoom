@@ -7,9 +7,15 @@ services:
     branch: main
     rootDir: backend
     buildCommand: "npm install"
-    startCommand: "npm start"
+    startCommand: "bash ./start.sh"
     envVars:
       - key: MONGODB_URI
-        sync: false         # set in Render dashboard (link to Mongo Atlas/Render Mongo)
+        sync: false         # set in Render dashboard (link to MongoDB Atlas)
       - key: JWT_SECRET
         sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        value: "https://khaboom.netlify.app/"

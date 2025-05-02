@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Login = ({ setUser }) => {
+const Login = ({ setUser, redirectTo }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -38,8 +38,8 @@ const Login = ({ setUser }) => {
       // Update app state
       setUser(user);
       
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Redirect to specified path or default to dashboard
+      navigate(redirectTo || '/dashboard');
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed. Please try again.');
     } finally {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import axios from "axios";
+import CourseRoutes from "./routes/CourseRoutes";
 import Navbar from "./components/Navbar";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -53,9 +54,14 @@ export default function App() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
           <Route path="/dashboard" element={
-            <Dashboard user={user} />
+            user ? <Dashboard user={user} /> : <Login setUser={setUser} redirectTo="/dashboard" />
           } />
-          <Route path="/courses/:courseId" element={<CourseView />} />
+          {/* Course routes */}
+          <Route path="/courses/*" element={<CourseRoutes userId={user?.id} />} />
+          
+          {/* Legacy course path - redirect to new path */}
+          <Route path="/courses/:courseId" element={<Navigate to="/course/:courseId" replace />} />
+          
           <Route path="/" element={
             <HomePage message={message} user={user} />
           } />
@@ -98,7 +104,35 @@ function HomePage({ message, user }) {
             <div className="welcome">
               <h2>Welcome back, {user.fullName}!</h2>
               <p>Continue your learning journey with us.</p>
-              <Link to="/dashboard" className="btn btn-primary start-learning-btn">Go to Dashboard</Link>
+              <Link 
+                to="/dashboard" 
+                className="btn btn-primary start-learning-btn"
+                style={{
+                  backgroundColor: '#22ab24',
+                  borderColor: '#1aa845',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  transition: 'all 0.3s ease',
+                  fontWeight: 'bold',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                }}
+              >
+                Go to Dashboard
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
             </div>
           )}
         </div>
@@ -157,8 +191,36 @@ function HomePage({ message, user }) {
         <div className="cta-content">
           <h2>Ready to Begin Your Learning Journey?</h2>
           <p>Join thousands of students already learning with Kha-Boom!</p>
-          <Link to={user ? "/dashboard" : "/register"} className="btn btn-primary cta-button">
+          <Link 
+            to={user ? "/dashboard" : "/register"} 
+            className="btn btn-primary cta-button" 
+            style={{
+              fontSize: '1.2rem', 
+              padding: '16px 32px',
+              backgroundColor: '#22ab24',
+              borderColor: '#1aa845',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              transition: 'all 0.3s ease',
+              fontWeight: 'bold',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            }}
+          >
             {user ? "Continue Learning" : "Start Learning Now"}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </Link>
         </div>
       </section>

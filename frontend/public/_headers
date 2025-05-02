@@ -2,16 +2,32 @@
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
-  Access-Control-Allow-Origin: *
-  
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://kha-boom-backend.onrender.com; object-src 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
 /*.css
   Content-Type: text/css; charset=UTF-8
+  Cache-Control: public, max-age=31536000
   
 /*.js
   Content-Type: application/javascript; charset=UTF-8
+  Cache-Control: public, max-age=31536000
   
 /*.jsx
   Content-Type: application/javascript; charset=UTF-8
+  Cache-Control: public, max-age=31536000
   
 /*.html
   Content-Type: text/html; charset=UTF-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=31536000
+
+/images/*
+  Cache-Control: public, max-age=31536000
+
+/fonts/*
+  Cache-Control: public, max-age=31536000
