@@ -6,7 +6,18 @@
  * 
  * It connects to the MongoDB database via the Render backend API to track progress and load content.
  * It properly processes interactive elements and step tracking with user authentication.
+ * 
+ * Features:
+ * - Robust error handling with fallbacks
+ * - Client-side caching for better performance
+ * - Support for all Mathigon interactive elements
+ * - Offline content support with service worker integration
+ * - Analytics tracking for learning progress
  */
+
+// Initialize content cache for improved performance
+const contentCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 // Utility functions for parsing Mathigon markdown format
 const parseMathigonMd = (content) => {

@@ -8,6 +8,7 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import CourseView from "./components/CourseView";
 import Footer from "./components/Footer";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export default function App() {
   const [message, setMessage] = useState("");
@@ -45,30 +46,56 @@ export default function App() {
     return <div className="loading">Loading...</div>;
   }
   
+  // Loading spinner component for lazy-loaded routes
+  const LoadingSpinner = () => (
+    <div className="loading-container">
+      <div className="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  );
+
   return (
     <Router>
-      <div className="app">
-        <Navbar user={user} onLogout={handleLogout} />
-        
-        <Routes>
-          <Route path="/login" element={<Login setUser={setUser} />} />
-          <Route path="/register" element={<Register setUser={setUser} />} />
-          <Route path="/dashboard" element={
-            user ? <Dashboard user={user} /> : <Login setUser={setUser} redirectTo="/dashboard" />
-          } />
-          {/* Course routes */}
-          <Route path="/courses/*" element={<CourseRoutes userId={user?.id} />} />
+      <ErrorBoundary>
+        <div className="app">
+          <Navbar user={user} onLogout={handleLogout} />
           
-          {/* Legacy course path - redirect to new path */}
-          <Route path="/courses/:courseId" element={<Navigate to="/course/:courseId" replace />} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/login" element={<Login setUser={setUser} />} />
+              <Route path="/register" element={<Register setUser={setUser} />} />
+              <Route path="/dashboard" element={
+                user ? (
+                  <ErrorBoundary>
+                    <Dashboard user={user} />
+                  </ErrorBoundary>
+                ) : (
+                  <Login setUser={setUser} redirectTo="/dashboard" />
+                )
+              } />
+              
+              {/* Course routes with dedicated error boundary */}
+              <Route path="/courses/*" element={
+                <ErrorBoundary courseId="true">
+                  <CourseRoutes userId={user?.id} />
+                </ErrorBoundary>
+              } />
+              
+              {/* Legacy course path - redirect to new path */}
+              <Route path="/courses/:courseId" element={<Navigate to="/course/:courseId" replace />} />
+              
+              <Route path="/" element={
+                <HomePage message={message} user={user} />
+              } />
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
           
-          <Route path="/" element={
-            <HomePage message={message} user={user} />
-          } />
-        </Routes>
-        
-        <Footer />
+          <Footer />
       </div>
+      </ErrorBoundary>
     </Router>
   );
 }

@@ -1,0 +1,52 @@
+{
+  "name": "KhaBoom Learning Platform",
+  "short_name": "KhaBoom",
+  "description": "Interactive learning platform for mathematics and science",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1565c0",
+  "icons": [
+    {
+      "src": "/assets/icons/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/screenshots/course.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "mathematics", "science", "learning"],
+  "lang": "en-US",
+  "orientation": "any",
+  "shortcuts": [
+    {
+      "name": "Courses",
+      "url": "/courses",
+      "description": "Browse all courses"
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your learning progress"
+    }
+  ]
+}

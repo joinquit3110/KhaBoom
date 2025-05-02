@@ -3,6 +3,9 @@
   publish = "dist"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
 
+[build.environment]
+  NODE_VERSION = "18.17.0"
+
 # Production context: all deploys from the main branch will inherit these settings
 [context.production.environment]
   VITE_API_BASE = "https://kha-boom-backend.onrender.com"

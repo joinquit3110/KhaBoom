@@ -3,6 +3,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap');
 
 /* Import component styles */
+@import './styles/components.css';
+
+/* Import course styles */
 @import './styles/courses.css';
 
 :root {

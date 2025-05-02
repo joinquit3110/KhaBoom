@@ -1,0 +1,8 @@
+To complete the PWA setup, please add the following icon files to this directory:
+
+1. logo-192.png - 192x192 pixels icon for app installation
+2. logo-512.png - 512x512 pixels icon for splash screens
+
+You can create these from your existing logo or generate new ones with your brand colors.
+
+These icons are used in the manifest.json file for proper PWA installation.

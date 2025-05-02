@@ -1,13 +1,68 @@
 /**
- * Utility for handling API errors in the frontend
+ * Enhanced Error Handler Utility for KhaBoom
+ * 
+ * Provides comprehensive error handling for API requests,
+ * including offline detection, retry logic, and user-friendly error messages.
  */
 
-// Convert API error responses to user-friendly messages
+// Track online/offline status
+let isOnline = navigator.onLine;
+window.addEventListener('online', () => { isOnline = true; });
+window.addEventListener('offline', () => { isOnline = false; });
+
+// Error notification subscribers
+const errorSubscribers = [];
+
+/**
+ * Subscribe to error notifications
+ * @param {function} callback Function to call when errors occur
+ * @returns {function} Unsubscribe function
+ */
+export const subscribeToErrors = (callback) => {
+  errorSubscribers.push(callback);
+  return () => {
+    const index = errorSubscribers.indexOf(callback);
+    if (index !== -1) errorSubscribers.splice(index, 1);
+  };
+};
+
+/**
+ * Notify all subscribers about an error
+ * @param {Object} error Error object
+ * @param {string} context Context where error occurred
+ */
+export const notifyError = (error, context) => {
+  const formattedError = formatApiError(error);
+  errorSubscribers.forEach(callback => {
+    try {
+      callback(formattedError, error, context);
+    } catch (e) {
+      console.error('Error in error subscriber:', e);
+    }
+  });
+};
+
+/**
+ * Check if device is currently online
+ * @returns {boolean} Online status
+ */
+export const checkOnlineStatus = () => isOnline;
+
+/**
+ * Convert API error responses to user-friendly messages
+ * @param {Object} error Error object from API request
+ * @returns {string} User-friendly error message
+ */
 export const formatApiError = (error) => {
   if (!error) {
     return 'An unknown error occurred';
   }
 
+  // Check for network/offline errors first
+  if (error.message === 'Network Error' || !navigator.onLine) {
+    return 'Unable to connect to the server. Please check your internet connection.';
+  }
+  
   // Handle axios error responses
   if (error.response) {
     // The server responded with a status code outside the 2xx range
@@ -23,8 +78,14 @@ export const formatApiError = (error) => {
         return 'You do not have permission to perform this action.';
       case 404:
         return 'The requested resource was not found.';
+      case 429:
+        return 'Too many requests. Please try again later.';
       case 500:
         return 'Server error. Please try again later.';
+      case 502:
+      case 503:
+      case 504:
+        return 'Server temporarily unavailable. Please try again later.';
       default:
         return data.error || `Error: ${status}`;
     }
