@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "vite",
-    "build": "npx vite build && node postbuild.js",
+    "build": "vite build && node postbuild.js",
     "build:assets": "echo 'Skipping assets build in CI environment'",
-    "build:vite": "npx vite build",
+    "build:vite": "vite build",
     "postbuild": "node postbuild.js",
     "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
     "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
-    "start": "npx npm-run-all --parallel watch dev"
+    "start": "npm-run-all --parallel watch dev"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",
