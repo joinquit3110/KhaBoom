@@ -1,6 +1,8 @@
 // MongoDB index creation script for better performance
-const mongoose = require('mongoose');
-require('dotenv').config();
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://joinquit:31102004@khaboomdb.cqugkeo.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB';
 
