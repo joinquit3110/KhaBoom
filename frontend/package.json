@@ -1,7 +1,6 @@
 {
   "name": "kha-boom-frontend",
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npx vite build && node postbuild.js",

@@ -1,12 +1,8 @@
 // postbuild.js - Netlify post-build optimizations
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const fs = require('fs');
+const path = require('path');
 
 console.log('🔧 Running post-build optimizations for Netlify...');
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, 'dist');
 
 // Create _redirects file for SPA routing if it doesn't exist
