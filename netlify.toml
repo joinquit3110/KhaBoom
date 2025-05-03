@@ -16,4 +16,89 @@
 # Branch deploy context: all deploys that aren't from a pull request or from the main branch
 [context.branch-deploy.environment]
   VITE_API_BASE = "https://kha-boom-backend-staging.onrender.com"
-  NODE_ENV = "staging" 
+  NODE_ENV = "staging"
+
+# Handle SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  
+# Proxy API requests to Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://kha-boom-backend.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# Proxy content requests to Render backend
+[[redirects]]
+  from = "/content/*"
+  to = "https://kha-boom-backend.onrender.com/content/:splat"
+  status = 200
+  force = true
+
+# Add headers for proper MIME types and CORS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "no-referrer-when-downgrade"
+    Access-Control-Allow-Origin = "*"
+    Content-Security-Policy = """
+      default-src 'self' https:;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:;
+      style-src 'self' 'unsafe-inline' https: https://fonts.googleapis.com;
+      connect-src 'self' https: wss: ws: data: blob:;
+      font-src 'self' data: https: https://fonts.gstatic.com;
+      img-src 'self' data: blob: https: https://api.dicebear.com https://*.render.com https://kha-boom-backend.onrender.com https://*.netlify.app;
+      media-src 'self' https:;
+      object-src 'none';
+      worker-src 'self' blob:;
+      manifest-src 'self';
+      frame-src 'self' https:;
+      child-src 'self' blob: https:;
+      form-action 'self' https:;
+      base-uri 'self';
+      frame-ancestors 'none'
+    """
+
+# Content types for JavaScript files
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/*.mjs"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/*.jsx"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+    
+[[headers]]
+  for = "/*.module.js*"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+    
+# Content types for CSS files
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+
+# Course content files
+[[headers]]
+  for = "/content/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400" 
