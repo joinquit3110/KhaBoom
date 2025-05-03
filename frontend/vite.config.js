@@ -28,6 +28,9 @@ export default defineConfig({
       strict: false,
     },
     port: 3000,
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8',
+    },
   },
   build: {
     // Ensure modules are handled correctly
@@ -63,7 +66,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   plugins: [
-    react()
+    react(),
+    {
+      name: 'fix-jsx-mime-type',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          // Fix MIME type for JSX files
+          if (req.url.endsWith('.jsx')) {
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          }
+          next();
+        });
+      }
+    }
   ],
   root: './'
 });

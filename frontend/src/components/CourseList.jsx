@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
-import { progressService } from '../services/api';
+import { getCourseList } from '../utils/contentLoader';
 
 /**
  * CourseList Component
@@ -20,26 +19,25 @@ const CourseList = ({ userId }) => {
       try {
         setLoading(true);
         
-        // Fetch courses
-        const coursesResponse = await api.get('/api/content/courses');
-        const coursesList = coursesResponse.data || [];
+        // Get courses from contentLoader
+        const coursesList = getCourseList();
         
-        // Fetch user progress if logged in
+        if (!coursesList || coursesList.length === 0) {
+          setError('No courses found. Please check your content directory.');
+          setLoading(false);
+          return;
+        }
+        
+        // Get progress data from localStorage if available
         if (userId) {
-          try {
-            const progressResponse = await progressService.getAllProgress();
-            const userProgress = progressResponse.data || [];
-            
-            // Create a map of course ID to progress
-            const progressMap = {};
-            userProgress.forEach(item => {
-              progressMap[item.courseId] = item;
-            });
-            
-            setProgress(progressMap);
-          } catch (progressError) {
-            console.error('Failed to load progress:', progressError);
-            // Continue with courses even if progress fails
+          const savedProgressData = localStorage.getItem('courses-progress');
+          if (savedProgressData) {
+            try {
+              const progressMap = JSON.parse(savedProgressData);
+              setProgress(progressMap);
+            } catch (e) {
+              console.error('Error parsing progress data:', e);
+            }
           }
         }
         
@@ -57,18 +55,29 @@ const CourseList = ({ userId }) => {
   
   // Render a course card with progress info
   const renderCourseCard = (course) => {
+    const apiBase = import.meta.env.VITE_API_BASE || '';
     const courseProgress = progress[course.id] || {};
     const completionPercentage = courseProgress.completionPercentage || 0;
+    
+    // Generate correct thumbnail URL
+    let thumbnailUrl = course.thumbnail;
+    if (thumbnailUrl && !thumbnailUrl.startsWith('http')) {
+      // Ensure we have the API base URL prepended
+      thumbnailUrl = `${apiBase}${thumbnailUrl.startsWith('/') ? thumbnailUrl : `/${thumbnailUrl}`}`;
+    } else if (!thumbnailUrl) {
+      // Default thumbnail URL
+      thumbnailUrl = `${apiBase}/content/${course.id}/hero.jpg`;
+    }
     
     return (
       <div className="course-card" key={course.id}>
         <div className="course-card-header" style={{ backgroundColor: course.color || '#4d7fc2' }}>
           <img 
-            src={course.thumbnail || `/content/${course.id}/thumbnail.jpg`} 
+            src={thumbnailUrl} 
             alt={course.title}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = '/images/default-course.jpg';
+              e.target.src = '/logo.png';
             }}
           />
         </div>
@@ -78,7 +87,7 @@ const CourseList = ({ userId }) => {
           <p className="course-description">{course.description}</p>
           <div className="course-meta">
             <span className="course-difficulty">{course.level || 'Intermediate'}</span>
-            <span className="course-category">{course.category || 'Mathematics'}</span>
+            {course.category && <span className="course-category">{course.category}</span>}
           </div>
           
           {userId && (
@@ -95,7 +104,7 @@ const CourseList = ({ userId }) => {
         </div>
         
         <div className="course-card-footer">
-          <Link to={`/course/${course.id}`} className="course-link-button">
+          <Link to={`/courses/${course.id}`} className="course-link-button">
             {courseProgress.lastAccessed ? 'Continue Learning' : 'Start Learning'}
           </Link>
         </div>

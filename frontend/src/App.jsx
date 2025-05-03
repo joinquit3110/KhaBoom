@@ -83,7 +83,7 @@ export default function App() {
               } />
               
               {/* Legacy course path - redirect to new path */}
-              <Route path="/courses/:courseId" element={<Navigate to="/course/:courseId" replace />} />
+              {/* Remove legacy redirect - now properly handle /courses/:courseId in CourseRoutes */}
               
               <Route path="/" element={
                 <HomePage message={message} user={user} />
@@ -133,7 +133,7 @@ function HomePage({ message, user }) {
               <h2>Welcome back, {user.fullName}!</h2>
               <p>Continue your learning journey with us.</p>
               <Link 
-                to="/dashboard" 
+                to="/courses" 
                 className="btn btn-primary start-learning-btn"
                 style={{
                   backgroundColor: '#22ab24',
@@ -155,7 +155,7 @@ function HomePage({ message, user }) {
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
                 }}
               >
-                Go to Dashboard
+                Browse Courses
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -220,7 +220,7 @@ function HomePage({ message, user }) {
           <h2>Ready to Begin Your Learning Journey?</h2>
           <p>Join thousands of students already learning with Kha-Boom!</p>
           <Link 
-            to={user ? "/dashboard" : "/register"} 
+            to={user ? "/courses" : "/register"} 
             className="btn btn-primary cta-button" 
             style={{
               fontSize: '1.2rem', 
@@ -244,7 +244,7 @@ function HomePage({ message, user }) {
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
             }}
           >
-            {user ? "Continue Learning" : "Start Learning Now"}
+            {user ? "Browse Courses" : "Start Learning Now"}
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

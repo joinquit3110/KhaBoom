@@ -615,87 +615,115 @@ const extractSectionsFromStructure = (courseId) => {
   return null;
 };
 
-// Function to scan available courses from the content directory
+// Function to load all available courses from the content directory
 const scanAvailableCourses = async () => {
+  console.log('Scanning for available courses...');
+  
   try {
-    console.log('Attempting to fetch courses from API...');
-    console.log('Current environment:', import.meta.env.MODE);
-    console.log('API Base URL:', import.meta.env.VITE_API_BASE || 'Not set');
-    console.log('Available courses before scan:', availableCourses.length);
+    // API endpoint to scan content directory
+    const endpoint = getApiUrl('/api/content/courses');
+    console.log(`Fetching courses from ${endpoint}`);
     
-    // Use the specific scan endpoint for enhanced course information
-    const apiUrl = getApiUrl('/api/content/scan');
-    console.log('API URL:', apiUrl);
+    const response = await fetch(endpoint);
     
-    const contentResponse = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      mode: 'cors',
-      credentials: 'omit'
-    });
-    
-    // Handle response
-    if (!contentResponse.ok) {
-      console.error(`Failed to scan courses: ${contentResponse.status} ${contentResponse.statusText}`);
-      // Don't throw, continue with hardcoded fallback courses
-      await addFallbackCourses();
-    } else {
-      try {
-        const responseText = await contentResponse.text();
-        console.log('API Response:', responseText.substring(0, 500) + '...'); // Log just the beginning to avoid too much output
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`Loaded ${data.length} courses from API`);
+      
+      if (Array.isArray(data) && data.length > 0) {
+        // Clear existing courses first
+        availableCourses.length = 0;
         
-        // Parse the JSON response
-        const data = JSON.parse(responseText);
+        // Add API courses to availableCourses
+        const apiCourses = data.map(course => ({
+          ...course,
+          // Make sure course has a color
+          color: course.color || getRandomColor()
+        }));
         
-        if (data && Array.isArray(data.courses) && data.courses.length > 0) {
-          // Success! Clear existing courses and add the new ones
-          console.log(`Found ${data.courses.length} courses from API`);
-          availableCourses.length = 0;
+        availableCourses.push(...apiCourses);
+        console.log(`Added ${apiCourses.length} courses from API`);
+        return;
+      } else {
+        console.warn('API returned empty or invalid courses list');
+      }
+    }
+    
+    // Fallback: Directly scan the content directory for course structure
+    console.log('Performing manual scan for content directory structure...');
+    
+    // Check if each directory in /content/ is a valid course
+    const contentPath = '/content';
+    const contentResponse = await fetch(getApiUrl(`/api/content/directories?path=${contentPath}`));
+    
+    if (contentResponse.ok) {
+      const directories = await contentResponse.json();
+      
+      if (Array.isArray(directories) && directories.length > 0) {
+        // Clear existing courses first
+        availableCourses.length = 0;
+        
+        // Check each directory for course content files
+        for (const dir of directories) {
+          if (dir === 'shared') continue; // Skip shared directory
           
-          // Process and add each course
-          data.courses.forEach(course => {
-            // Make sure each course has the required fields
-            if (course && course.id) {
-              // Clean up potential JSON parsing issues with color values
-              let courseColor = course.color || getRandomColor();
-              if (typeof courseColor === 'string' && courseColor.includes('"')) {
-                courseColor = courseColor.replace(/"/g, '');
+          // Check if the directory has a content.md file
+          const hasContentFile = await fileExists(`${contentPath}/${dir}/content.md`);
+          const hasIndexFile = await fileExists(`${contentPath}/${dir}/index.md`);
+          
+          if (hasContentFile || hasIndexFile) {
+            // Try to extract metadata from content file
+            let courseTitle = dir.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            let courseDescription = '';
+            let courseColor = getRandomColor();
+            
+            try {
+              // Try to load title from content.md or index.md
+              const contentFile = hasContentFile ? 'content.md' : 'index.md';
+              const contentResponse = await fetch(getApiUrl(`/api/content/${contentPath}/${dir}/${contentFile}`));
+              
+              if (contentResponse.ok) {
+                const content = await contentResponse.text();
+                const { metadata } = parseMathigonMd(content);
+                
+                if (metadata.title) courseTitle = metadata.title;
+                if (metadata.description) courseDescription = metadata.description;
+                if (metadata.color) courseColor = metadata.color;
               }
-              
-              // Add default values for any missing fields
-              const processedCourse = {
-                id: course.id,
-                title: course.title || `Course ${course.id}`,
-                description: course.description || 'No description available',
-                color: courseColor,
-                level: course.level || 'Intermediate',
-                // Only use Mathematics as a fallback if course has no category
-                category: course.category || '',                
-                thumbnail: generateThumbnailUrl(course.id),
-                sections: course.sections || [{ id: 'default', title: 'Introduction' }]
-              };
-              
-              availableCourses.push(processedCourse);
+            } catch (e) {
+              console.warn(`Error extracting metadata for ${dir}:`, e);
             }
-          });
-          
-          console.log(`Loaded ${availableCourses.length} courses from API`);
-          // If there are no courses at all, fall back to hardcoded courses
-          if (availableCourses.length === 0) {
-            await addFallbackCourses();
+            
+            // Verify hero.jpg exists or create it
+            const heroExists = await fileExists(`${contentPath}/${dir}/hero.jpg`);
+            if (!heroExists) {
+              console.log(`Hero image missing for ${dir}, will use fallback`);
+            }
+            
+            // Add the course
+            availableCourses.push({
+              id: dir,
+              title: courseTitle,
+              description: courseDescription || `Learn about ${courseTitle}`,
+              color: courseColor,
+              level: 'Intermediate', // Default level
+              category: 'Mathematics', // Default category
+              thumbnail: `/content/${dir}/hero.jpg`
+            });
+            
+            console.log(`Added course: ${courseTitle} (${dir})`);
           }
-          return; // Successfully loaded courses from API
-        } else {
-          console.error('Invalid or empty courses data:', data);
-          await addFallbackCourses();
         }
-      } catch (parseError) {
-        console.error('Error parsing course data:', parseError);
+        
+        console.log(`Added ${availableCourses.length} courses from content directory scan`);
+      } else {
+        console.warn('No directories found in content path');
+        // If no directories found, add fallback courses
         await addFallbackCourses();
       }
+    } else {
+      console.error('Failed to scan content directories, using fallback courses');
+      await addFallbackCourses();
     }
   } catch (error) {
     console.error('Error scanning courses:', error);

@@ -93,4 +93,41 @@ if (!fs.existsSync(sitemapPath)) {
   console.log('✅ Created basic sitemap.xml file');
 }
 
+// Create placeholder hero images for courses
+const courseDirs = [
+  'functions',
+  'vectors',
+  'logic',
+  'combinatorics',
+  'non-euclidean-geometry',
+  'shared'
+];
+
+console.log('🖼️ Creating placeholder hero images for courses...');
+courseDirs.forEach(course => {
+  const contentDir = path.join(distDir, 'content', course);
+  // Create course content directory if it doesn't exist
+  if (!fs.existsSync(contentDir)) {
+    fs.mkdirSync(contentDir, { recursive: true });
+  }
+  
+  // Create hero image
+  const heroPath = path.join(contentDir, 'hero.jpg');
+  if (!fs.existsSync(heroPath)) {
+    // Copy logo.png as a placeholder or create an empty file
+    try {
+      const logoPath = path.join(distDir, 'logo.png');
+      if (fs.existsSync(logoPath)) {
+        fs.copyFileSync(logoPath, heroPath);
+      } else {
+        // Create an empty file as placeholder
+        fs.writeFileSync(heroPath, '');
+      }
+      console.log(`✅ Created hero image for ${course}`);
+    } catch (err) {
+      console.error(`❌ Failed to create hero image for ${course}:`, err);
+    }
+  }
+});
+
 console.log('🎉 Post-build optimizations complete!');

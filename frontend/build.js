@@ -165,3 +165,51 @@ if (success) {
   console.error('\n❌ Build failed!');
   process.exit(1);
 }
+
+// Function to create placeholder hero images for courses
+async function createPlaceholderHeroImages() {
+  console.log('🖼️ Creating placeholder hero images for courses...');
+  
+  const courses = [
+    'functions',
+    'vectors',
+    'logic',
+    'combinatorics',
+    'non-euclidean-geometry',
+    'shared'
+  ];
+  
+  for (const course of courses) {
+    const heroPath = path.join(__dirname, 'public', 'content', course, 'hero.jpg');
+    
+    if (!fs.existsSync(heroPath)) {
+      // Create directory if it doesn't exist
+      const dir = path.dirname(heroPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      // Copy a placeholder image or create a minimal one
+      try {
+        const placeholderPath = path.join(__dirname, 'public', 'logo.png');
+        if (fs.existsSync(placeholderPath)) {
+          fs.copyFileSync(placeholderPath, heroPath);
+        } else {
+          // Create a minimal placeholder image (you may want to use a better approach for actual images)
+          fs.writeFileSync(heroPath, '');
+        }
+        console.log(`✅ Created placeholder image for ${course}`);
+      } catch (error) {
+        console.error(`❌ Failed to create placeholder image for ${course}:`, error);
+      }
+    }
+  }
+}
+
+// Call the function if this script is run directly
+if (require.main === module) {
+  createPlaceholderHeroImages().catch(console.error);
+}
+
+// Export the function for use in other scripts
+exports.createPlaceholderHeroImages = createPlaceholderHeroImages;

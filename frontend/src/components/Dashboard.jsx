@@ -145,16 +145,23 @@ export default function Dashboard({ user }) {
     const apiBase = import.meta.env.VITE_API_BASE || '';
     if (!course || !course.id) return '';
     
+    // First check if there's a specific thumbnail property
     if (course.thumbnail) {
+      // If thumbnail already includes http or https, it's an absolute URL
+      if (course.thumbnail.startsWith('http')) {
+        return course.thumbnail;
+      }
+      
       // If thumbnail already starts with the API base URL, return it as is
       if (course.thumbnail.startsWith(apiBase)) {
         return course.thumbnail;
       }
+      
       // Otherwise, append the API base URL
       return `${apiBase}${course.thumbnail.startsWith('/') ? course.thumbnail : `/${course.thumbnail}`}`;
     }
     
-    // Default thumbnail URL - use hero.jpg instead of icon.png
+    // Default thumbnail URL - use hero.jpg
     return `${apiBase}/content/${course.id}/hero.jpg`;
   }, []);
 
