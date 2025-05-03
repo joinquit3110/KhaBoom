@@ -23,7 +23,7 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Access-Control-Allow-Origin: https://kha-boom-backend.onrender.com
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
