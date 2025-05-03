@@ -2,7 +2,73 @@
   <img src="frontend/public/logo.png" alt="KHA-BOOM! Logo" width="500">
 </div>
 
-# KHA-BOOM!
+# Kha-Boom Learning Platform
+
+A modern, interactive learning platform built with React, deployed on Netlify, with a Render backend and MongoDB database.
+
+## Architecture
+
+- **Frontend**: React application hosted on Netlify
+- **Backend**: Node.js API hosted on Render
+- **Database**: MongoDB Atlas for course progress and user data
+- **Content**: Hosted on Render backend with Mathigon-format course content
+
+## Deployment
+
+### Frontend (Netlify)
+
+The frontend is automatically deployed to Netlify when changes are pushed to the main branch.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR-NETLIFY-BADGE-ID/deploy-status)](https://app.netlify.com/sites/khaboom/deploys)
+
+Manual deployment:
+
+```
+npm install -g netlify-cli
+netlify login
+npm run deploy
+```
+
+### Backend (Render)
+
+The backend is deployed to Render and will automatically update when changes are pushed to the main branch.
+
+## Cloud Infrastructure
+
+- **Netlify**: Hosts the frontend application with built-in CDN
+- **Render**: Hosts the backend API and serves course content
+- **MongoDB Atlas**: Cloud database for user accounts and progress tracking
+
+## Content Structure
+
+Course content follows the Mathigon format:
+- Each course is in its own directory under `/content`
+- Course metadata and content is in `content.md` files
+- Hero images are at `/content/{courseId}/hero.jpg`
+
+## Development
+
+To run the project locally:
+
+```
+# Install dependencies
+cd frontend
+npm install
+
+# Start development server
+npm run dev
+```
+
+## Deployment Configuration
+
+- `netlify.toml`: Configuration for Netlify deployment
+- `frontend/netlify.toml`: Frontend-specific Netlify settings
+- `frontend/postbuild.cjs`: Post-build script for Netlify deployment 
+
+## Production URLs
+
+- Frontend: https://khaboom.netlify.app
+- Backend API: https://kha-boom-backend.onrender.com
 
 ## Project Overview
 KHA-BOOM! is an interactive educational platform that brings mathematics to life through engaging, interactive content. Built on the foundation of Mathigon's educational framework, KHA-BOOM! transforms complex mathematical concepts into an immersive learning experience.
@@ -99,53 +165,6 @@ npm run assets
 - **Database**: MongoDB with Mongoose
 - **Authentication**: JWT & bcrypt
 - **Environment**: Node.js
-
-## Deployment
-
-KHA-BOOM! is designed to be deployed on modern cloud platforms. We use the following setup:
-
-- **Frontend**: Deployed on Netlify
-- **Backend API**: Deployed on Render
-- **Database**: MongoDB Atlas
-
-### Frontend Deployment on Netlify
-
-1. Push your code to GitHub
-2. Connect your repository to Netlify
-3. Configure the build settings:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-4. Add environment variables:
-   - `VITE_API_BASE`: Your Render backend URL
-   - `NODE_ENV`: `production`
-5. Deploy the site
-
-### Backend Deployment on Render
-
-1. Push your code to GitHub
-2. Connect your repository to Render
-3. Create a new Web Service
-4. Configure the service:
-   - Root Directory: `backend`
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-5. Add environment variables:
-   - `PORT`: `10000`
-   - `MONGODB_URI`: Your MongoDB Atlas connection string
-   - `JWT_SECRET`: A secure random string
-   - `NODE_ENV`: `production`
-   - `CORS_ORIGIN`: Your Netlify site URL
-
-### MongoDB Atlas Setup
-
-1. Create a MongoDB Atlas account
-2. Create a new cluster
-3. Configure network access (whitelist your IPs)
-4. Create a database user
-5. Get your connection string from the "Connect" button
-6. Use this connection string in your Render environment variables
-
-For more detailed deployment instructions, see the [deployment guide](docs/deployment.md).
 
 ## Documentation
 

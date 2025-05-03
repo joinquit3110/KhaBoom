@@ -8,9 +8,7 @@
     "build:assets": "echo 'Skipping assets build in CI environment'",
     "build:vite": "vite build",
     "postbuild": "node postbuild.cjs",
-    "assets": "npx @mathigon/studio/bin/cli.js --assets --locales en",
-    "watch": "npx @mathigon/studio/bin/cli.js --assets --watch --locales en",
-    "start": "npm-run-all --parallel watch dev"
+    "start": "vite preview"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",

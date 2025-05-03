@@ -59,10 +59,10 @@ const Navbar = ({ user, onLogout }) => {
       
       <div className={`navbar-menu ${menuOpen ? 'is-active' : ''}`}>
         <Link to="/" className="navbar-item">Home</Link>
+        <Link to="/courses" className="navbar-item">Courses</Link>
         
         {user ? (
           <>
-            <Link to="/dashboard" className="navbar-item">Dashboard</Link>
             <div className="navbar-user">
               <span className="user-name">
                 {user.avatar && (

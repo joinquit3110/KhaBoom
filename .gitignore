@@ -65,7 +65,6 @@ coverage
 
 # Netlify specific
 .netlify
-.netlify/
 .netlify/*
 netlify.toml.bak
 
@@ -99,3 +98,41 @@ lerna-debug.log*
 # Temporary files
 .temp
 .cache
+
+# Node dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Built files
+dist/
+build/
+.netlify/
+.vercel/
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.cache/
+temp/
+tmp/
+
+# Local Netlify folder
+.netlify

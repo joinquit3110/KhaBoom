@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: kha-boom-backend
+    env: node
+    region: oregon
+    branch: main
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://khaboom.netlify.app
+      - key: JWT_SECRET
+        fromGroup: khaboom-secrets
+      - key: MONGODB_URI
+        fromGroup: khaboom-secrets
+  
+  - type: web
+    name: kha-boom-backend-staging
+    env: node
+    region: oregon
+    branch: develop
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: staging
+      - key: CORS_ORIGIN
+        value: https://develop--khaboom.netlify.app
+      - key: JWT_SECRET
+        fromGroup: khaboom-secrets-staging
+      - key: MONGODB_URI
+        fromGroup: khaboom-secrets-staging 

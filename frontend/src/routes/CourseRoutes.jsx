@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import CourseRenderer from '../components/CourseRenderer';
-import CourseList from '../components/CourseList';
+import Dashboard from '../components/Dashboard';
 import NotFound from '../components/NotFound';
 
 /**
@@ -10,11 +10,11 @@ import NotFound from '../components/NotFound';
  * Defines the routes for course-related pages, including course list, 
  * course content, and section navigation.
  */
-const CourseRoutes = ({ userId }) => {
+const CourseRoutes = ({ userId, user }) => {
   return (
     <Routes>
-      {/* Course listing page */}
-      <Route path="/" element={<CourseList userId={userId} />} />
+      {/* Course listing page - using Dashboard component */}
+      <Route path="/" element={<Dashboard user={user} />} />
       
       {/* Course home page */}
       <Route path="/:courseId" element={<CourseRenderer userId={userId} />} />

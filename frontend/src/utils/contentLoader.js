@@ -144,49 +144,21 @@ const getApiUrl = (path) => {
   return `${apiBase}${cleanPath}`;
 };
 
-// Function to generate correct thumbnail URLs using hero images
+// Function to generate correct thumbnail URLs for cloud hosting
 const generateThumbnailUrl = (courseId) => {
-  const apiBase = import.meta.env.VITE_API_BASE || '';
-  
-  // If we're using a local development server, use a relative path
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `/content/${courseId}/hero.jpg`;
-  }
-  
-  // Otherwise use the API base URL
-  return `${apiBase}/content/${courseId}/hero.jpg`;
+  // This handles both development and production environments
+  return `/content/${courseId}/hero.jpg`;
 };
 
-// Function to check if a file exists on the server
+// Function to check if a file exists via API
 const fileExists = async (path) => {
   try {
     // Use HEAD request to check if file exists
-    // First, try the direct path (for production builds with static files)
-    try {
-      const directResponse = await fetch(path, {
-        method: 'HEAD'
-      });
-      
-      if (directResponse.ok) {
-        return true;
-      }
-    } catch (err) {
-      // Silently ignore direct fetch errors and try API
-      console.debug(`Direct file check failed for ${path}, trying API...`);
-    }
-    
-    // Then try the API (for development or when files are served via API)
-    const apiBase = import.meta.env.VITE_API_BASE || '';
-    const apiPath = `${apiBase}/api/content/exists?path=${encodeURIComponent(path)}`;
-    
-    const response = await fetch(apiPath, {
-      method: 'HEAD'
-    });
-    
-    return response.status === 200;
+    const response = await fetch(path, { method: 'HEAD' });
+    return response.ok;
   } catch (error) {
     console.error(`Error checking if file exists at ${path}:`, error);
-    // In case of error, assume file exists to prevent cascading failures
+    // Default to true to prevent cascading failures
     return true;
   }
 };
@@ -642,12 +614,41 @@ const extractSectionsFromStructure = (courseId) => {
   return null;
 };
 
-// Function to load all available courses from the content directory
+// Function to load all available courses
 const scanAvailableCourses = async () => {
   console.log('Scanning for available courses...');
   
   try {
-    // First try to get courses from the API
+    // First try the API endpoint for cloud courses
+    try {
+      // First, try to load from cloud-courses.json
+      const response = await fetch('/cloud-courses.json');
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Loaded ${data.courses.length} courses from cloud data`);
+        
+        if (Array.isArray(data.courses) && data.courses.length > 0) {
+          // Clear existing courses
+          availableCourses.length = 0;
+          
+          // Process the courses
+          const apiCourses = data.courses.map(course => ({
+            ...course,
+            color: course.color || getRandomColor(),
+            thumbnail: generateThumbnailUrl(course.id)
+          }));
+          
+          availableCourses.push(...apiCourses);
+          console.log(`Added ${apiCourses.length} courses from cloud data`);
+          return;
+        }
+      }
+    } catch (localError) {
+      console.warn('Error loading from local cloud-courses.json:', localError);
+    }
+    
+    // Then try the backend API
     const apiBase = import.meta.env.VITE_API_BASE || '';
     const endpoint = `${apiBase}/api/content/courses`;
     
@@ -677,106 +678,10 @@ const scanAvailableCourses = async () => {
       }
     } catch (apiError) {
       console.warn('Error fetching courses from API:', apiError);
-      // Continue to fallback method
     }
     
-    // Fallback: scan the content directories directly in the static build
-    console.log('Using fallback to scan content directories...');
-    
-    // For the fallback, we'll use a predefined list of course directories
-    // from checking existing content folders
-    const knownCourseDirs = [
-      'basic-probability',
-      'chaos',
-      'circles',
-      'codes',
-      'combinatorics',
-      'complex',
-      'data',
-      'divisibility',
-      'euclidean-geometry',
-      'exploding-dots',
-      'exponentials',
-      'fractals',
-      'functions',
-      'game-theory',
-      'graph-theory',
-      'linear-functions',
-      'logic',
-      'matrices',
-      'non-euclidean-geometry',
-      'polygons',
-      'polyhedra',
-      'probability',
-      'quadratics',
-      'sequences',
-      'shapes',
-      'statistics',
-      'transformations',
-      'triangles',
-      'vectors'
-    ];
-    
-    // Clear existing courses
-    availableCourses.length = 0;
-    
-    // Check each course directory and try to load metadata
-    for (const dir of knownCourseDirs) {
-      console.log(`Checking course directory: ${dir}`);
-      
-      // Default course info if we can't load metadata
-      let courseInfo = {
-        id: dir,
-        title: dir.charAt(0).toUpperCase() + dir.slice(1).replace(/-/g, ' '),
-        description: `Learn about ${dir.replace(/-/g, ' ')}`,
-        color: getRandomColor(),
-        level: 'Intermediate',
-        category: 'Mathematics'
-      };
-      
-      try {
-        // Try to load metadata from content.md
-        const contentExists = await fileExists(`/content/${dir}/content.md`);
-        
-        if (contentExists) {
-          console.log(`Found content.md for ${dir}`);
-          
-          try {
-            const response = await fetch(`/content/${dir}/content.md`);
-            if (response.ok) {
-              const content = await response.text();
-              
-              // Extract metadata using regex
-              const titleMatch = content.match(/> title: (.+)/);
-              const descMatch = content.match(/> description: (.+)/);
-              const colorMatch = content.match(/> color: (.+)/);
-              
-              if (titleMatch) courseInfo.title = titleMatch[1];
-              if (descMatch) courseInfo.description = descMatch[1];
-              if (colorMatch) courseInfo.color = colorMatch[1];
-            }
-          } catch (err) {
-            console.warn(`Error loading content.md for ${dir}:`, err);
-          }
-        }
-        
-        // Check if hero image exists
-        const heroExists = await fileExists(`/content/${dir}/hero.jpg`);
-        console.log(`Hero image for ${dir}: ${heroExists ? 'Found' : 'Not found'}`);
-        
-        // Add the course
-        availableCourses.push({
-          ...courseInfo,
-          thumbnail: generateThumbnailUrl(dir)
-        });
-        
-        console.log(`Added course: ${courseInfo.title} (${dir})`);
-      } catch (err) {
-        console.warn(`Error processing course ${dir}:`, err);
-      }
-    }
-    
-    console.log(`Added ${availableCourses.length} courses from directory scan`);
+    // If all else fails, use the fallback courses
+    await addFallbackCourses();
   } catch (error) {
     console.error('Error scanning courses:', error);
     // Ensure we have courses even if API scan fails

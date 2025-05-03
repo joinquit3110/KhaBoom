@@ -1,6 +1,7 @@
 // postbuild.js - Netlify post-build optimizations
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 console.log('🔧 Running post-build optimizations for Netlify...');
 const distDir = path.join(__dirname, 'dist');
@@ -9,8 +10,21 @@ const distDir = path.join(__dirname, 'dist');
 const redirectsPath = path.join(distDir, '_redirects');
 if (!fs.existsSync(redirectsPath)) {
   console.log('📝 Creating Netlify _redirects file...');
-  fs.writeFileSync(redirectsPath, '/* /index.html 200');
-  console.log('✅ Created _redirects file for SPA routing');
+  
+  // Enhanced redirects with content rewriting
+  const redirects = `
+# SPA routing fallback  
+/*  /index.html  200
+
+# API proxy - rewrite to Render backend
+/api/*  https://kha-boom-backend.onrender.com/api/:splat  200
+
+# Content proxy - rewrite to content repository  
+/content/*  https://kha-boom-backend.onrender.com/content/:splat  200
+`;
+  
+  fs.writeFileSync(redirectsPath, redirects.trim());
+  console.log('✅ Created _redirects file for SPA routing and API proxying');
 }
 
 // Create _headers file for security headers
@@ -23,7 +37,7 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.render.com https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.render.com https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
@@ -112,89 +126,40 @@ if (!fs.existsSync(sitemapPath)) {
   console.log('✅ Created basic sitemap.xml file');
 }
 
-// Create content directories and ensure hero images for all courses
-console.log('🖼️ Creating content directories and hero images for courses...');
-
-// Updated list based on actual content directory
-const courseDirs = [
-  'basic-probability',
-  'chaos',
-  'circles',
-  'codes',
-  'combinatorics',
-  'complex',
-  'data',
-  'divisibility',
-  'euclidean-geometry',
-  'exploding-dots',
-  'exponentials',
-  'fractals',
-  'functions',
-  'game-theory',
-  'graph-theory',
-  'linear-functions',
-  'logic',
-  'matrices',
-  'non-euclidean-geometry',
-  'polygons',
-  'polyhedra',
-  'probability',
-  'quadratics',
-  'sequences',
-  'shapes',
-  'statistics',
-  'transformations',
-  'triangles',
-  'vectors'
-];
-
-courseDirs.forEach(course => {
-  const contentDir = path.join(distDir, 'content', course);
-  // Create course content directory if it doesn't exist
-  if (!fs.existsSync(contentDir)) {
-    fs.mkdirSync(contentDir, { recursive: true });
-  }
+// Create a placeholder course entry for cloud content
+const placeholderCoursePath = path.join(distDir, 'cloud-courses.json');
+if (!fs.existsSync(placeholderCoursePath)) {
+  console.log('📝 Creating placeholder course info for cloud content...');
   
-  // Create hero image
-  const heroPath = path.join(contentDir, 'hero.jpg');
-  if (!fs.existsSync(heroPath)) {
-    // Copy logo.png as a placeholder or create an empty file
-    try {
-      const logoPath = path.join(distDir, 'logo.png');
-      if (fs.existsSync(logoPath)) {
-        fs.copyFileSync(logoPath, heroPath);
-      } else {
-        // Create an empty file as placeholder
-        fs.writeFileSync(heroPath, '');
-      }
-      console.log(`✅ Created hero image for ${course}`);
-    } catch (err) {
-      console.error(`❌ Failed to create hero image for ${course}:`, err);
+  const courses = [
+    {
+      id: 'probability',
+      title: 'Introduction to Probability',
+      description: 'Learn about randomness, games, and chance',
+      color: '#CD0E66',
+      level: 'Foundations',
+      category: 'Statistics'
+    },
+    {
+      id: 'circles',
+      title: 'Circles and Pi',
+      description: 'Discover the properties of circles and the famous number Pi',
+      color: '#5A49C9',
+      level: 'Intermediate',
+      category: 'Geometry'
+    },
+    {
+      id: 'vectors',
+      title: 'Vectors',
+      description: 'Understand quantities with direction and magnitude',
+      color: '#6D3BBF',
+      level: 'Advanced',
+      category: 'Mathematics'
     }
-  }
+  ];
   
-  // Create a minimal content.md file if it doesn't exist
-  const contentPath = path.join(contentDir, 'content.md');
-  if (!fs.existsSync(contentPath)) {
-    try {
-      const minimalContent = `# ${course.charAt(0).toUpperCase() + course.slice(1).replace(/-/g, ' ')}
-
-> title: ${course.charAt(0).toUpperCase() + course.slice(1).replace(/-/g, ' ')}
-> description: Learn about ${course.replace(/-/g, ' ')}
-> color: #4a90e2
-
-## Introduction
-
-> section: introduction
-
-Welcome to the ${course.replace(/-/g, ' ')} course! This content is coming soon.
-`;
-      fs.writeFileSync(contentPath, minimalContent);
-      console.log(`✅ Created minimal content.md for ${course}`);
-    } catch (err) {
-      console.error(`❌ Failed to create content.md for ${course}:`, err);
-    }
-  }
-});
+  fs.writeFileSync(placeholderCoursePath, JSON.stringify({ courses }, null, 2));
+  console.log('✅ Created placeholder course info for cloud content');
+}
 
 console.log('🎉 Post-build optimizations complete!');

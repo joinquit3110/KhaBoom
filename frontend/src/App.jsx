@@ -65,25 +65,16 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<Login setUser={setUser} />} />
               <Route path="/register" element={<Register setUser={setUser} />} />
-              <Route path="/dashboard" element={
-                user ? (
-                  <ErrorBoundary>
-                    <Dashboard user={user} />
-                  </ErrorBoundary>
-                ) : (
-                  <Login setUser={setUser} redirectTo="/dashboard" />
-                )
-              } />
+              
+              {/* Redirect /dashboard to /courses */}
+              <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
               
               {/* Course routes with dedicated error boundary */}
               <Route path="/courses/*" element={
                 <ErrorBoundary courseId="true">
-                  <CourseRoutes userId={user?.id} />
+                  <CourseRoutes userId={user?.id} user={user} />
                 </ErrorBoundary>
               } />
-              
-              {/* Legacy course path - redirect to new path */}
-              {/* Remove legacy redirect - now properly handle /courses/:courseId in CourseRoutes */}
               
               <Route path="/" element={
                 <HomePage message={message} user={user} />
@@ -95,7 +86,7 @@ export default function App() {
           </Suspense>
           
           <Footer />
-      </div>
+        </div>
       </ErrorBoundary>
     </Router>
   );

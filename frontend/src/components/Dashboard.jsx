@@ -130,39 +130,12 @@ export default function Dashboard({ user }) {
     return sorted;
   }, [courses, categoryFilter, sortOrder]);
 
-  // Debug information about courses
-  const courseDebugInfo = useMemo(() => {
-    return {
-      totalCourses: courses.length,
-      filteredCourses: filteredAndSortedCourses.length,
-      categoryFilter,
-      categories: categories.length
-    };
-  }, [courses, filteredAndSortedCourses, categoryFilter, categories]);
-
-  // Function to generate correct thumbnail URLs with API base URL
+  // Function to generate correct thumbnail URLs with local paths
   const getThumbnailUrl = useCallback((course) => {
-    const apiBase = import.meta.env.VITE_API_BASE || '';
     if (!course || !course.id) return '';
     
-    // First check if there's a specific thumbnail property
-    if (course.thumbnail) {
-      // If thumbnail already includes http or https, it's an absolute URL
-      if (course.thumbnail.startsWith('http')) {
-        return course.thumbnail;
-      }
-      
-      // If thumbnail already starts with the API base URL, return it as is
-      if (course.thumbnail.startsWith(apiBase)) {
-        return course.thumbnail;
-      }
-      
-      // Otherwise, append the API base URL
-      return `${apiBase}${course.thumbnail.startsWith('/') ? course.thumbnail : `/${course.thumbnail}`}`;
-    }
-    
-    // Default thumbnail URL - use hero.jpg
-    return `${apiBase}/content/${course.id}/hero.jpg`;
+    // Use local content path instead of API
+    return `/content/${course.id}/hero.jpg`;
   }, []);
 
   // Use useMemo to prevent unnecessary re-renders of the course grid
@@ -259,24 +232,12 @@ export default function Dashboard({ user }) {
     );
   }, [filteredAndSortedCourses, getThumbnailUrl]);
 
-  if (!user) {
-    return (
-      <div className="container">
-        <h1>Dashboard</h1>
-        <p>Please log in to view your dashboard</p>
-        <Link to="/login" className="btn btn-primary">Login</Link>
-      </div>
-    );
-  }
-
   return (
     <div className="dashboard container">
-      <h1>Welcome to Your Dashboard</h1>
-      <p className="welcome-message">Hello, {user.fullName}!</p>
+      <h1>Interactive Courses</h1>
+      {user && <p className="welcome-message">Welcome, {user.fullName || user.username}!</p>}
 
       <div className="courses-section">
-        <h2>Available Courses</h2>
-        
         {/* Category and Sort Controls */}
         <div className="course-filters">
           <div className="filter-group">
@@ -317,26 +278,30 @@ export default function Dashboard({ user }) {
             <p>Loading courses...</p>
           </div>
         ) : error ? (
-          <div className="error-message">{error}</div>
+          <div className="error-message">
+            <p>{error}</p>
+            <button onClick={forceRefreshCourses} className="btn btn-secondary">Retry</button>
+          </div>
         ) : (
           renderedCourseGrid
         )}
       </div>
 
-      {/* Debug Utility */}
-      <div className="debug-section">
-        <h3>Debug Information</h3>
-        <p>This section shows information about course loading and filtering. If you're not seeing all expected courses, try refreshing:</p>
-        
-        <button onClick={forceRefreshCourses} className="btn btn-secondary">Force Refresh Courses</button>
-        
-        <div className="debug-info">
-          <p>Total courses: {courses.length}</p>
-          <p>Filtered courses: {filteredAndSortedCourses.length}</p>
-          <p>Selected category: {categoryFilter}</p>
-          <p>Available categories: {categories.length}</p>
+      {/* Debug info only shown in development mode */}
+      {import.meta.env.DEV && (
+        <div className="debug-section">
+          <details>
+            <summary>Debug Information</summary>
+            <div className="debug-info">
+              <p>Total courses: {courses.length}</p>
+              <p>Filtered courses: {filteredAndSortedCourses.length}</p>
+              <p>Selected category: {categoryFilter}</p>
+              <p>Available categories: {categories.length}</p>
+              <button onClick={forceRefreshCourses} className="btn btn-secondary">Force Refresh Courses</button>
+            </div>
+          </details>
         </div>
-      </div>
+      )}
     </div>
   );
 }
