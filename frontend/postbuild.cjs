@@ -25,10 +25,26 @@ if (!fs.existsSync(headersPath)) {
   Referrer-Policy: strict-origin-when-cross-origin
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Access-Control-Allow-Origin: https://kha-boom-backend.onrender.com
+  Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
 
 /*.js
+  Cache-Control: public, max-age=31536000
+  Content-Type: application/javascript; charset=utf-8
+
+/*.jsx
+  Cache-Control: public, max-age=31536000
+  Content-Type: application/javascript; charset=utf-8
+
+/*.mjs
+  Cache-Control: public, max-age=31536000
+  Content-Type: application/javascript; charset=utf-8
+
+/*.cjs
+  Cache-Control: public, max-age=31536000
+  Content-Type: application/javascript; charset=utf-8
+
+/*.module.js
   Cache-Control: public, max-age=31536000
   Content-Type: application/javascript; charset=utf-8
 
@@ -41,6 +57,9 @@ if (!fs.existsSync(headersPath)) {
 
 /assets/*
   Cache-Control: public, max-age=31536000
+
+/content/*
+  Cache-Control: public, max-age=86400
 `;
   fs.writeFileSync(headersPath, headers.trim());
   console.log('✅ Created _headers file with security headers and caching rules');
@@ -93,17 +112,42 @@ if (!fs.existsSync(sitemapPath)) {
   console.log('✅ Created basic sitemap.xml file');
 }
 
-// Create placeholder hero images for courses
+// Create content directories and ensure hero images for all courses
+console.log('🖼️ Creating content directories and hero images for courses...');
+
+// Updated list based on actual content directory
 const courseDirs = [
-  'functions',
-  'vectors',
-  'logic',
+  'basic-probability',
+  'chaos',
+  'circles',
+  'codes',
   'combinatorics',
+  'complex',
+  'data',
+  'divisibility',
+  'euclidean-geometry',
+  'exploding-dots',
+  'exponentials',
+  'fractals',
+  'functions',
+  'game-theory',
+  'graph-theory',
+  'linear-functions',
+  'logic',
+  'matrices',
   'non-euclidean-geometry',
-  'shared'
+  'polygons',
+  'polyhedra',
+  'probability',
+  'quadratics',
+  'sequences',
+  'shapes',
+  'statistics',
+  'transformations',
+  'triangles',
+  'vectors'
 ];
 
-console.log('🖼️ Creating placeholder hero images for courses...');
 courseDirs.forEach(course => {
   const contentDir = path.join(distDir, 'content', course);
   // Create course content directory if it doesn't exist
@@ -126,6 +170,29 @@ courseDirs.forEach(course => {
       console.log(`✅ Created hero image for ${course}`);
     } catch (err) {
       console.error(`❌ Failed to create hero image for ${course}:`, err);
+    }
+  }
+  
+  // Create a minimal content.md file if it doesn't exist
+  const contentPath = path.join(contentDir, 'content.md');
+  if (!fs.existsSync(contentPath)) {
+    try {
+      const minimalContent = `# ${course.charAt(0).toUpperCase() + course.slice(1).replace(/-/g, ' ')}
+
+> title: ${course.charAt(0).toUpperCase() + course.slice(1).replace(/-/g, ' ')}
+> description: Learn about ${course.replace(/-/g, ' ')}
+> color: #4a90e2
+
+## Introduction
+
+> section: introduction
+
+Welcome to the ${course.replace(/-/g, ' ')} course! This content is coming soon.
+`;
+      fs.writeFileSync(contentPath, minimalContent);
+      console.log(`✅ Created minimal content.md for ${course}`);
+    } catch (err) {
+      console.error(`❌ Failed to create content.md for ${course}:`, err);
     }
   }
 });

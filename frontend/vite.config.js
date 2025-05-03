@@ -7,6 +7,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +30,7 @@ export default defineConfig({
     },
     port: 3000,
     headers: {
+      'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/javascript; charset=utf-8',
     },
   },
@@ -77,6 +79,29 @@ export default defineConfig({
           }
           next();
         });
+      },
+      // Add a hook to ensure correct MIME types in the built files
+      writeBundle() {
+        // Create a .htaccess file to ensure JSX files are served with correct MIME type
+        const htaccessContent = `
+# Proper MIME type for all files
+<IfModule mod_mime.c>
+  # JavaScript
+  AddType application/javascript js
+  AddType application/javascript jsx
+  AddType application/javascript mjs
+  AddType application/javascript ts
+  AddType application/javascript tsx
+</IfModule>
+        `;
+        
+        // Write the .htaccess file to the dist directory
+        if (!fs.existsSync('dist')) {
+          fs.mkdirSync('dist', { recursive: true });
+        }
+        fs.writeFileSync(path.join('dist', '.htaccess'), htaccessContent);
+        
+        console.log('✅ Added .htaccess file for proper MIME types');
       }
     }
   ],
