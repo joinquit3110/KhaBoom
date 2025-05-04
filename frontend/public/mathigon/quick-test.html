@@ -71,10 +71,14 @@
     <button onclick="loadCourse()">Load Course</button>
     <button onclick="location.reload()">Reload Page</button>
     <button onclick="toggleDebug()">Toggle Debug</button>
+    <button onclick="clearCache()">Clear Cache</button>
   </div>
   
   <div id="mathigon-textbook"></div>
   <div id="debug-panel" class="debug-panel"></div>
+  
+  <!-- Load diagnostic helper first -->
+  <script src="/mathigon-test.js"></script>
   
   <script>
     // Default course
@@ -91,6 +95,40 @@
     function toggleDebug() {
       const debugPanel = document.getElementById('debug-panel');
       debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    // Clear caches
+    function clearCache() {
+      // Clear localStorage
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('content.json') || key.includes('mathigon'))) {
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Clear service worker caches if available
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            if (cacheName.includes('khaboom') || cacheName.includes('mathigon')) {
+              caches.delete(cacheName);
+            }
+          });
+        });
+      }
+      
+      log('Cleared all caches', 'success');
+      
+      // Unregister service workers
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (const registration of registrations) {
+            registration.unregister();
+            log(`Unregistered service worker: ${registration.scope}`, 'success');
+          }
+        });
+      }
     }
     
     // Log to debug panel
@@ -123,6 +161,9 @@
         try {
           log('Creating TextbookLoader instance...', 'success');
           
+          // Explicitly log the configuration
+          console.log('Mathigon config:', window.mathigonConfig);
+          
           const textbook = new window.Mathigon.TextbookLoader({
             courseId,
             container: '#mathigon-textbook',
@@ -140,10 +181,12 @@
           }).catch(err => {
             log('Error initializing textbook: ' + (err.message || 'Unknown error'), 'error');
             alert('Error initializing textbook: ' + (err.message || 'Unknown error'));
+            console.error('Initialization error:', err);
           });
         } catch (err) {
           log('Error creating textbook: ' + (err.message || 'Unknown error'), 'error');
           alert('Error creating textbook: ' + (err.message || 'Unknown error'));
+          console.error('Textbook creation error:', err);
         }
       } else if (window.Mathigon && window.Mathigon.load) {
         try {
@@ -154,10 +197,12 @@
           }).catch(err => {
             log('Error loading textbook: ' + (err.message || 'Unknown error'), 'error');
             alert('Error loading textbook: ' + (err.message || 'Unknown error'));
+            console.error('Load error:', err);
           });
         } catch (err) {
           log('Error using Mathigon.load: ' + (err.message || 'Unknown error'), 'error');
           alert('Error using Mathigon.load: ' + (err.message || 'Unknown error'));
+          console.error('Load error:', err);
         }
       } else {
         log('Mathigon or TextbookLoader not available', 'error');

@@ -92,35 +92,45 @@ const MathigonCourse = () => {
           }
           window.mathigonConfig.contentFormat = 'json'; // Use json instead of markdown
           
-          const textbook = new TextbookLoaderClass({
-            courseId,
+          console.log('MathigonCourse: Initializing with config:', { 
+            courseId, 
             sectionId: sectionId || undefined,
-            container: '#mathigon-textbook',
-            sourcePrefix: `${basePath}mathigon/content/`,
-            assetsPrefix: `${basePath}mathigon/assets/`,
-            language: 'en',
-            progress: true,
-            contentFormat: 'json', // Important: specify we're using JSON files
-            onSectionComplete: (sectionId) => {
-              console.log(`Completed section ${sectionId}`);
-            },
-            onInteraction: (step, action) => {
-              console.log(`Interaction: ${step} - ${action}`);
-            }
+            basePath, 
+            contentFormat: window.mathigonConfig.contentFormat 
           });
           
-          // Initialize the textbook
-          console.log('Initializing textbook...');
-          textbook.initialize().then(() => {
-            console.log('Textbook initialized successfully');
-            setLoading(false);
-          }).catch(err => {
-            console.error('Error initializing textbook:', err);
-            setError('Failed to initialize textbook: ' + (err.message || 'Unknown error'));
-            setLoading(false);
-          });
-          
-          return textbook;
+          try {
+            const textbook = new TextbookLoaderClass({
+              courseId,
+              sectionId: sectionId || undefined,
+              container: '#mathigon-textbook',
+              sourcePrefix: `${basePath}mathigon/content/`,
+              assetsPrefix: `${basePath}mathigon/assets/`,
+              language: 'en',
+              progress: true,
+              contentFormat: 'json', // Explicitly set to use JSON format
+            });
+            
+            console.log('MathigonCourse: TextbookLoader created');
+            
+            textbook.initialize()
+              .then(() => {
+                console.log('MathigonCourse: Textbook initialized successfully');
+                if (onReady) onReady(textbook);
+              })
+              .catch(error => {
+                console.error('MathigonCourse: Initialization error:', error);
+                setError('Error loading the course. Please try again.');
+              });
+            
+            return () => {
+              // Cleanup code
+              textbook?.destroy?.();
+            };
+          } catch (err) {
+            console.error('MathigonCourse: Error creating textbook:', err);
+            setError(`Error creating textbook: ${err.message || 'Unknown error'}`);
+          }
         } catch (err) {
           console.error('Error creating textbook:', err);
           setError('Error creating textbook: ' + (err.message || 'Unknown error'));
