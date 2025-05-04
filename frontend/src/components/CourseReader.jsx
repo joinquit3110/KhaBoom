@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { parseMathigonMd } from '../utils/mathigonParser';
 
 /**
@@ -9,10 +9,13 @@ import { parseMathigonMd } from '../utils/mathigonParser';
  * in the content directory following Mathigon format
  */
 const CourseReader = () => {
-  const { courseId } = useParams();
+  const { courseId, sectionId } = useParams();
+  const navigate = useNavigate();
   const [content, setContent] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeSectionId, setActiveSectionId] = useState(sectionId || null);
+  const contentRef = useRef(null);
   
   useEffect(() => {
     // Function to load content directly from the content directory
@@ -36,6 +39,15 @@ const CourseReader = () => {
         // Parse the markdown content using our Mathigon parser
         const parsedContent = parseMathigonMd(mdContent);
         setContent(parsedContent);
+        
+        // If section ID is provided in URL, set it as active
+        if (sectionId) {
+          setActiveSectionId(sectionId);
+        } else if (parsedContent.sections && parsedContent.sections.length > 0) {
+          // Default to first section if none specified
+          setActiveSectionId(parsedContent.sections[0].id);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error(`Error loading course content for ${courseId}:`, err);
@@ -47,7 +59,143 @@ const CourseReader = () => {
     if (courseId) {
       loadContent();
     }
-  }, [courseId]);
+  }, [courseId, sectionId]);
+  
+  // Handle section change
+  useEffect(() => {
+    if (activeSectionId && activeSectionId !== sectionId) {
+      // Update URL to reflect active section without reloading
+      navigate(`/${courseId}/${activeSectionId}`, { replace: true });
+    }
+    
+    // Scroll to section when it changes
+    if (activeSectionId && contentRef.current) {
+      const sectionElement = contentRef.current.querySelector(`#${activeSectionId}`);
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [activeSectionId, sectionId, courseId, navigate]);
+  
+  // Process interactive elements after rendering
+  useEffect(() => {
+    if (!loading && content && contentRef.current) {
+      // Process input fields (blanks)
+      const inputFields = contentRef.current.querySelectorAll('.input-field');
+      inputFields.forEach(field => {
+        if (!field.hasAttribute('data-processed')) {
+          // Create input element
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'blank-input';
+          input.placeholder = 'Enter answer';
+          
+          // Get correct value from data attribute
+          const correctValue = field.getAttribute('data-value');
+          
+          // Handle input validation
+          input.addEventListener('change', (e) => {
+            const userValue = e.target.value.trim();
+            if (userValue === correctValue) {
+              field.classList.add('correct');
+              field.classList.remove('incorrect');
+            } else {
+              field.classList.add('incorrect');
+              field.classList.remove('correct');
+              
+              // Show hint if available
+              const hint = field.getAttribute('data-hint');
+              if (hint) {
+                alert(`Hint: ${hint.replace(/[()]/g, '')}`);
+              }
+            }
+          });
+          
+          field.innerHTML = '';
+          field.appendChild(input);
+          field.setAttribute('data-processed', 'true');
+        }
+      });
+      
+      // Process action buttons
+      const actionButtons = contentRef.current.querySelectorAll('.action-button');
+      actionButtons.forEach(button => {
+        if (!button.hasAttribute('data-processed')) {
+          button.addEventListener('click', () => {
+            const action = button.getAttribute('data-action');
+            console.log(`Action triggered: ${action}`);
+            // In a real implementation, you would evaluate this action
+            // or trigger a corresponding function
+          });
+          button.setAttribute('data-processed', 'true');
+        }
+      });
+      
+      // Process glossary terms
+      const glossaryTerms = contentRef.current.querySelectorAll('.glossary-term');
+      glossaryTerms.forEach(term => {
+        if (!term.hasAttribute('data-processed')) {
+          term.addEventListener('click', () => {
+            const termId = term.getAttribute('data-term');
+            alert(`Glossary: ${termId}`);
+            // In a real implementation, you'd show a tooltip with the definition
+          });
+          term.setAttribute('data-processed', 'true');
+        }
+      });
+      
+      // Process variable sliders
+      const sliders = contentRef.current.querySelectorAll('.variable-slider');
+      sliders.forEach(slider => {
+        if (!slider.hasAttribute('data-processed')) {
+          const varName = slider.getAttribute('data-var');
+          const initialValue = slider.getAttribute('data-value');
+          const rangeData = slider.getAttribute('data-range');
+          
+          // Create slider element
+          const input = document.createElement('input');
+          input.type = 'range';
+          input.className = 'variable-range';
+          input.value = initialValue;
+          
+          // Parse range data (min,max,step)
+          if (rangeData) {
+            const [min, max, step] = rangeData.split(',');
+            input.min = min || 0;
+            input.max = max || 10;
+            input.step = step || 1;
+          }
+          
+          // Create label to display value
+          const label = document.createElement('span');
+          label.className = 'slider-value';
+          label.textContent = initialValue;
+          
+          // Update related variable expressions when slider changes
+          input.addEventListener('input', (e) => {
+            const value = e.target.value;
+            label.textContent = value;
+            
+            // Update all variable expressions that use this variable
+            const expressions = contentRef.current.querySelectorAll('.variable-expression');
+            expressions.forEach(expr => {
+              const exprText = expr.getAttribute('data-expr');
+              if (exprText.includes(varName)) {
+                // In a real implementation, you would evaluate this expression
+                // For now, just update to show it would change
+                expr.textContent = `${exprText} = ?`;
+              }
+            });
+          });
+          
+          slider.innerHTML = '';
+          slider.appendChild(input);
+          slider.appendChild(label);
+          slider.setAttribute('data-processed', 'true');
+        }
+      });
+    }
+  }, [loading, content]);
   
   // Render loading state
   if (loading) {
@@ -88,9 +236,36 @@ const CourseReader = () => {
         {content.metadata.description && (
           <p className="course-description">{content.metadata.description}</p>
         )}
+        
+        {/* Course color bar based on metadata */}
+        {content.metadata.color && (
+          <div 
+            className="course-color-bar" 
+            style={{ backgroundColor: content.metadata.color }}
+          ></div>
+        )}
       </div>
       
-      <div className="course-content">
+      {/* Section navigation */}
+      {content.sections && content.sections.length > 0 && (
+        <div className="course-nav">
+          <ul className="section-tabs">
+            {content.sections.map((section, index) => (
+              <li key={section.id || index} className={section.id === activeSectionId ? 'active' : ''}>
+                <button 
+                  onClick={() => setActiveSectionId(section.id)}
+                  className="section-button"
+                >
+                  {section.title || `Section ${index + 1}`}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Main content area */}
+      <div className="course-content" ref={contentRef}>
         {/* Render HTML content using dangerouslySetInnerHTML */}
         <div
           className="mathigon-content"
@@ -98,19 +273,42 @@ const CourseReader = () => {
         />
       </div>
       
-      {/* Show sections navigation if there are sections */}
-      {content.sections && content.sections.length > 0 && (
-        <div className="course-sections">
-          <h3>Sections</h3>
-          <ul>
-            {content.sections.map((section, index) => (
-              <li key={section.id || index}>
-                <a href={`#${section.id}`}>{section.title}</a>
-              </li>
-            ))}
-          </ul>
+      {/* Step navigation and progress controls */}
+      <div className="course-footer">
+        <div className="step-buttons">
+          <button 
+            className="prev-section" 
+            disabled={!content.sections || !activeSectionId || 
+              content.sections.findIndex(s => s.id === activeSectionId) === 0}
+            onClick={() => {
+              if (content.sections && activeSectionId) {
+                const currentIndex = content.sections.findIndex(s => s.id === activeSectionId);
+                if (currentIndex > 0) {
+                  setActiveSectionId(content.sections[currentIndex - 1].id);
+                }
+              }
+            }}
+          >
+            Previous Section
+          </button>
+          
+          <button 
+            className="next-section"
+            disabled={!content.sections || !activeSectionId || 
+              content.sections.findIndex(s => s.id === activeSectionId) === content.sections.length - 1}
+            onClick={() => {
+              if (content.sections && activeSectionId) {
+                const currentIndex = content.sections.findIndex(s => s.id === activeSectionId);
+                if (currentIndex < content.sections.length - 1) {
+                  setActiveSectionId(content.sections[currentIndex + 1].id);
+                }
+              }
+            }}
+          >
+            Next Section
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
