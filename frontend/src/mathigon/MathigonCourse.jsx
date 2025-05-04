@@ -15,6 +15,20 @@ const MathigonCourse = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  // Function to determine correct base path for assets
+  const getBasePath = () => {
+    // Check if we're in a deployed environment (Netlify/Render)
+    const hostname = window.location.hostname;
+    if (hostname.includes('netlify.app') || 
+        hostname.includes('render.com') || 
+        hostname !== 'localhost') {
+      // In deployed environments, ensure we use absolute paths
+      return '/';
+    }
+    // In local dev, use relative paths
+    return '/';
+  };
+  
   // Function to inject CSS with specific CSP content
   const injectCSPMetaTag = () => {
     // Remove any existing CSP meta tag
@@ -35,12 +49,15 @@ const MathigonCourse = () => {
     // Create a global textbook context for Mathigon
     if (window.Mathigon && window.Mathigon.TextbookLoader) {
       try {
+        console.log('Creating Mathigon TextbookLoader for course:', courseId);
+        
+        const basePath = getBasePath();
         const textbook = new window.Mathigon.TextbookLoader({
           courseId,
           sectionId: sectionId || undefined,
           container: '#mathigon-textbook',
-          sourcePrefix: `/mathigon/content/`,
-          assetsPrefix: `/mathigon/assets/`,
+          sourcePrefix: `${basePath}mathigon/content/`,
+          assetsPrefix: `${basePath}mathigon/assets/`,
           language: 'en',
           progress: true,
           onSectionComplete: (sectionId) => {
@@ -52,28 +69,39 @@ const MathigonCourse = () => {
         });
         
         // Initialize the textbook
+        console.log('Initializing textbook...');
         textbook.initialize().then(() => {
           console.log('Textbook initialized successfully');
           setLoading(false);
         }).catch(err => {
           console.error('Error initializing textbook:', err);
-          setError('Failed to initialize textbook: ' + err.message);
+          setError('Failed to initialize textbook: ' + (err.message || 'Unknown error'));
           setLoading(false);
         });
         
         return textbook;
       } catch (err) {
         console.error('Error creating textbook:', err);
-        setError('Error creating textbook: ' + err.message);
+        setError('Error creating textbook: ' + (err.message || 'Unknown error'));
         setLoading(false);
         return null;
       }
     } else {
       console.error('Mathigon TextbookLoader not available');
+      if (window.Mathigon) {
+        console.log('Available Mathigon objects:', Object.keys(window.Mathigon));
+      } else {
+        console.log('Mathigon global object not found');
+      }
       setError('Mathigon TextbookLoader not available. Try refreshing the page.');
       setLoading(false);
       return null;
     }
+  };
+  
+  // Check if any required scripts are already loaded
+  const checkScriptsLoaded = () => {
+    return document.querySelector('script[src*="mathigon/assets/course.js"]');
   };
   
   useEffect(() => {
@@ -103,56 +131,84 @@ const MathigonCourse = () => {
         mainElement.className = 'textbook-container-main';
         container.appendChild(mainElement);
         
-        // Add Mathigon stylesheet
-        const linkElements = [
-          { rel: 'stylesheet', href: '/mathigon/assets/course.css' }
-        ];
+        const basePath = getBasePath();
         
-        linkElements.forEach(linkData => {
-          if (!document.querySelector(`link[href="${linkData.href}"]`)) {
-            const link = document.createElement('link');
-            link.rel = linkData.rel;
-            link.href = linkData.href;
-            document.head.appendChild(link);
-          }
-        });
-        
-        // Create a global configuration object for Mathigon
+        // Create a global configuration object for Mathigon before loading scripts
         window.mathigonConfig = {
-          assetsPrefix: '/mathigon/assets/',
-          contentPrefix: '/mathigon/content/',
+          assetsPrefix: `${basePath}mathigon/assets/`,
+          contentPrefix: `${basePath}mathigon/content/`,
           language: 'en', // Default language
           downloadMode: false
         };
         
-        // Add Mathigon script
-        const loadScript = (src) => {
+        // Add Mathigon stylesheet first
+        const addStylesheet = () => {
+          return new Promise((resolve) => {
+            if (document.querySelector('link[href*="mathigon/assets/course.css"]')) {
+              resolve();
+              return;
+            }
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `${basePath}mathigon/assets/course.css`;
+            link.onload = () => resolve();
+            link.onerror = (e) => {
+              console.error('Failed to load Mathigon CSS', e);
+              // Try a fallback path
+              link.href = `/mathigon/assets/course.css`;
+              resolve(); // Continue anyway
+            };
+            document.head.appendChild(link);
+          });
+        };
+        
+        // Load Mathigon script with proper error handling
+        const loadScript = () => {
           return new Promise((resolve, reject) => {
+            // Check if script is already loaded
+            if (checkScriptsLoaded()) {
+              console.log('Mathigon course.js already loaded');
+              resolve();
+              return;
+            }
+            
             const script = document.createElement('script');
-            script.src = src;
-            script.async = true;
-            script.onload = resolve;
-            script.onerror = reject;
+            script.src = `${basePath}mathigon/assets/course.js`;
+            script.async = false; // Important! Load in order
+            script.onload = () => {
+              console.log('Mathigon course.js loaded successfully');
+              resolve();
+            };
+            script.onerror = (e) => {
+              console.error('Failed to load Mathigon course.js', e);
+              // Try a fallback path
+              script.src = `/mathigon/assets/course.js`;
+              script.onload = () => {
+                console.log('Mathigon course.js loaded using fallback path');
+                resolve();
+              };
+              script.onerror = () => {
+                reject(new Error('Failed to load required scripts'));
+              };
+            };
             document.body.appendChild(script);
           });
         };
         
-        loadScript('/mathigon/assets/course.js')
+        // Load assets in the correct order
+        addStylesheet()
+          .then(() => loadScript())
           .then(() => {
-            console.log('Mathigon course.js loaded successfully');
-            
-            // Listen for section changes to update the URL
-            window.addEventListener('section-change', (e) => {
-              if (e.detail && e.detail.id) {
-                navigate(`/courses/${courseId}/${e.detail.id}`, { replace: true });
-              }
-            });
-            
-            // Initialize the Mathigon textbook
+            // Give a bit of time for the script to initialize
+            console.log('All Mathigon assets loaded, waiting for initialization...');
             setTimeout(() => {
+              // Initialize the Mathigon textbook
               const textbook = initializeTextbook();
+              
               if (!textbook) {
-                // If initialization fails, fallback to the original approach
+                // If initialization fails, try a fallback approach
+                console.log('Trying fallback initialization method...');
                 if (window.Mathigon && window.Mathigon.load) {
                   window.Mathigon.load()
                     .then(() => {
@@ -161,100 +217,95 @@ const MathigonCourse = () => {
                     })
                     .catch(err => {
                       console.error('Error in fallback method:', err);
-                      setError('Failed to load with fallback method: ' + err.message);
+                      setError('Failed to load with fallback method: ' + (err.message || 'Unknown error'));
                       setLoading(false);
+                      
                       // Navigate to fallback view as last resort
+                      console.log('Navigating to fallback view');
                       navigate(`/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}`, { replace: true });
                     });
                 } else {
+                  console.error('No fallback method available');
                   setLoading(false);
-                }
-              }
-            }, 300);
-            
-            // Add a MutationObserver to fix any script loading issues
-            const observer = new MutationObserver((mutations) => {
-              for (const mutation of mutations) {
-                if (mutation.type === 'childList') {
-                  // Find any inline scripts added by Mathigon and execute them
-                  mutation.addedNodes.forEach(node => {
-                    if (node.tagName === 'SCRIPT' && !node.src) {
-                      const script = document.createElement('script');
-                      script.textContent = node.textContent;
-                      document.body.appendChild(script);
+                  
+                  // If all else fails, try a page refresh
+                  if (!error) {
+                    const shouldReload = window.confirm(
+                      'Could not initialize the course. Would you like to refresh the page and try again?'
+                    );
+                    if (shouldReload) {
+                      window.location.reload();
+                    } else {
+                      navigate(`/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}`, { replace: true });
                     }
-                  });
+                  }
                 }
               }
-            });
+            }, 500); // Increase timeout for slower connections
             
-            observer.observe(containerRef.current, { 
-              childList: true, 
-              subtree: true 
+            // Listen for section changes to update the URL
+            window.addEventListener('section-change', (e) => {
+              if (e.detail && e.detail.id) {
+                navigate(`/${courseId}/${e.detail.id}`, { replace: true });
+              }
             });
           })
-          .catch((err) => {
-            console.error('Failed to load Mathigon script:', err);
-            setError('Failed to load course content: ' + err.message);
+          .catch(err => {
+            console.error('Asset loading error:', err);
+            setError('Failed to load required resources: ' + (err.message || 'Unknown error'));
             setLoading(false);
-            containerRef.current.innerHTML = `
-              <div class="mathigon-error-message">
-                <h2>Failed to load course content</h2>
-                <p>${err.message}</p>
-                <button onclick="window.location.href='/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}'" class="fallback-button">Try Alternative View</button>
-                <button onclick="window.location.reload()" class="retry-button">Reload</button>
-              </div>
-            `;
           });
+          
       } catch (err) {
-        console.error('Error setting up Mathigon:', err);
-        setError('Error setting up course: ' + err.message);
+        console.error('Setup error:', err);
+        setError('Setup error: ' + (err.message || 'Unknown error'));
         setLoading(false);
-        containerRef.current.innerHTML = `
-          <div class="mathigon-error-message">
-            <h2>Error setting up course</h2>
-            <p>${err.message}</p>
-            <button onclick="window.location.href='/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}'" class="fallback-button">Try Alternative View</button>
-            <button onclick="window.location.reload()" class="retry-button">Reload</button>
-          </div>
-        `;
       }
     }
     
-    // Cleanup function
+    // Cleanup on unmount
     return () => {
-      // Remove any global variables when component unmounts
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('section-change', () => {});
-      }
+      // Remove event listeners
+      window.removeEventListener('section-change', () => {});
     };
-  }, [courseId, sectionId, navigate]);
+  }, [courseId, sectionId]);
   
-  return (
-    <div className="mathigon-wrapper">
-      {loading && (
-        <div className="mathigon-loading">
-          <div className="spinner"></div>
-          <p>Loading course content...</p>
-        </div>
-      )}
-      
-      {error && (
-        <div className="mathigon-error-banner">
-          <p>{error}</p>
-          <button onClick={() => navigate(`/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}`, { replace: true })}>
+  // Render the component
+  if (loading) {
+    return (
+      <div className="mathigon-loading">
+        <div className="spinner"></div>
+        <p>Loading interactive course...</p>
+        <p className="course-info">{courseId || ""}</p>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="mathigon-error">
+        <h3>Error loading course</h3>
+        <p>{error}</p>
+        <div className="error-actions">
+          <button 
+            className="btn btn-primary"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate(`/fallback/${courseId}${sectionId ? `/${sectionId}` : ''}`)}
+          >
             Alternative View
           </button>
-          <button onClick={() => window.location.reload()}>Reload</button>
         </div>
-      )}
-      
-      <div 
-        ref={containerRef} 
-        className="mathigon-container"
-        style={{ opacity: loading ? 0 : 1 }}
-      />
-    </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="mathigon-wrapper" ref={containerRef}></div>
   );
 };
 

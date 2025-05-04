@@ -15,8 +15,8 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "no-referrer-when-downgrade"
     Content-Security-Policy = """
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://*.mathigon.org https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com;
+      default-src 'self' https://*.netlify.app;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://*.netlify.app https://*.mathigon.org https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' data: blob: https://*.netlify.app https://*.mathigon.org https://*.render.com https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com;
       font-src 'self' data: https://fonts.gstatic.com;
@@ -33,6 +33,7 @@
   for = "/*.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
 
 [[headers]]
   for = "/*.jsx"
@@ -49,32 +50,41 @@
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
 
+# Add additional rules for Mathigon assets
 [[headers]]
-  for = "/*.mjs"
+  for = "/mathigon/assets/*.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
 
 [[headers]]
-  for = "/*.ts"
-  [headers.values]
-    Content-Type = "application/javascript; charset=utf-8"
-
-[[headers]]
-  for = "/*.tsx"
-  [headers.values]
-    Content-Type = "application/javascript; charset=utf-8"
-
-[[headers]]
-  for = "/*.css"
+  for = "/mathigon/assets/*.css"
   [headers.values]
     Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
 
 [[headers]]
-  for = "/*.scss"
+  for = "/mathigon/content/*"
   [headers.values]
-    Content-Type = "text/css; charset=utf-8"
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
+# Add special handling for fonts
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Content-Type = "font/woff2"
+    Cache-Control = "public, max-age=31536000"
 
 [[headers]]
-  for = "/*.json"
+  for = "/*.woff"
   [headers.values]
-    Content-Type = "application/json; charset=utf-8" 
+    Content-Type = "font/woff"
+    Cache-Control = "public, max-age=31536000"
+
+# Add HTML content type
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+    Cache-Control = "public, no-cache" 

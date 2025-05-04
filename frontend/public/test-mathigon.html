@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mathigon Test Page</title>
   <link rel="stylesheet" href="/mathigon/assets/course.css">
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+    #mathigon-textbook { width: 100vw; height: 100vh; }
+    #controls { position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+    #controls button { margin: 5px; padding: 8px 12px; background: #1f7aff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    #controls select { margin: 5px; padding: 8px; }
+    #debug { position: fixed; bottom: 10px; left: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; max-height: 200px; overflow-y: auto; }
+    #debug pre { margin: 0; padding: 5px; font-size: 12px; }
+    .error { color: red; }
+    .success { color: green; }
+    .hide { display: none; }
+  </style>
   <script>
     // Global configuration
     window.mathigonConfig = {
@@ -12,17 +24,159 @@
       contentPrefix: '/mathigon/content/'
     };
     
-    // Default to circles course
-    window.courseId = 'circles';
-    window.steps = null;
+    // Default to circles course, can be changed via URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    window.courseId = urlParams.get('course') || 'circles';
+    window.steps = urlParams.get('section') || null;
+
+    // Log Mathigon events for debugging
+    window.addEventListener('DOMContentLoaded', () => {
+      const debugEl = document.getElementById('debug');
+      const courseSelect = document.getElementById('courseSelect');
+      
+      // Log to debug panel
+      window.logDebug = (message, type) => {
+        const now = new Date();
+        const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        const pre = document.createElement('pre');
+        pre.textContent = `[${timestamp}] ${message}`;
+        if (type) {
+          pre.classList.add(type);
+        }
+        debugEl.appendChild(pre);
+        debugEl.scrollTop = debugEl.scrollHeight;
+      };
+      
+      // Populate course select
+      fetch('/mathigon/content')
+        .then(response => {
+          logDebug('Content directory accessible', 'success');
+          return response.ok ? response.json() : [];
+        })
+        .catch(error => {
+          logDebug(`Error accessing content directory: ${error}`, 'error');
+          return [];
+        })
+        .then(courses => {
+          if (Array.isArray(courses) && courses.length) {
+            courses.forEach(course => {
+              const option = document.createElement('option');
+              option.value = course;
+              option.textContent = course;
+              if (course === window.courseId) {
+                option.selected = true;
+              }
+              courseSelect.appendChild(option);
+            });
+          } else {
+            // Fallback to hardcoded list if API fails
+            const defaultCourses = ['circles', 'statistics', 'probability', 'triangles', 'polyhedra'];
+            defaultCourses.forEach(course => {
+              const option = document.createElement('option');
+              option.value = course;
+              option.textContent = course;
+              if (course === window.courseId) {
+                option.selected = true;
+              }
+              courseSelect.appendChild(option);
+            });
+          }
+        });
+      
+      // Check script and asset availability
+      fetch('/mathigon/assets/course.js')
+        .then(response => {
+          if (response.ok) {
+            logDebug('course.js is accessible', 'success');
+          } else {
+            logDebug(`course.js returned status ${response.status}`, 'error');
+          }
+        })
+        .catch(error => {
+          logDebug(`Error accessing course.js: ${error}`, 'error');
+        });
+      
+      fetch('/mathigon/assets/course.css')
+        .then(response => {
+          if (response.ok) {
+            logDebug('course.css is accessible', 'success');
+          } else {
+            logDebug(`course.css returned status ${response.status}`, 'error');
+          }
+        })
+        .catch(error => {
+          logDebug(`Error accessing course.css: ${error}`, 'error');
+        });
+      
+      // Check if course.js properly initializes Mathigon
+      setTimeout(() => {
+        if (window.Mathigon) {
+          logDebug('Mathigon global object available', 'success');
+          if (window.Mathigon.TextbookLoader) {
+            logDebug('TextbookLoader class available', 'success');
+          } else {
+            logDebug('TextbookLoader class not found', 'error');
+          }
+        } else {
+          logDebug('Mathigon global object not available', 'error');
+        }
+      }, 1000);
+      
+      // Event listener for course changes
+      courseSelect.addEventListener('change', () => {
+        const newCourse = courseSelect.value;
+        window.location.href = `?course=${newCourse}`;
+      });
+      
+      // Button actions
+      document.getElementById('reload').addEventListener('click', () => {
+        window.location.reload();
+      });
+      
+      document.getElementById('toggleDebug').addEventListener('click', () => {
+        debugEl.classList.toggle('hide');
+      });
+      
+      document.getElementById('clearCache').addEventListener('click', () => {
+        if ('caches' in window) {
+          caches.keys().then(cacheNames => {
+            return Promise.all(
+              cacheNames.map(cacheName => {
+                logDebug(`Clearing cache: ${cacheName}`);
+                return caches.delete(cacheName);
+              })
+            );
+          }).then(() => {
+            logDebug('All caches cleared, reloading page...', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+          }).catch(error => {
+            logDebug(`Error clearing caches: ${error}`, 'error');
+          });
+        } else {
+          logDebug('Cache API not available in this browser', 'error');
+        }
+      });
+    });
   </script>
-  <style>
-    body { margin: 0; padding: 0; overflow: hidden; }
-    #mathigon-textbook { width: 100vw; height: 100vh; }
-  </style>
 </head>
 <body>
+  <div id="controls">
+    <div>
+      <select id="courseSelect"></select>
+    </div>
+    <div>
+      <button id="reload">Reload Page</button>
+      <button id="clearCache">Clear Cache</button>
+      <button id="toggleDebug">Toggle Debug</button>
+    </div>
+  </div>
+  
   <div id="mathigon-textbook"></div>
+  
+  <div id="debug">
+    <pre>Mathigon Diagnostics:</pre>
+  </div>
+  
   <script src="/mathigon/assets/course.js"></script>
 </body>
 </html> 

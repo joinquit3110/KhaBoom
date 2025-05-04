@@ -60,12 +60,18 @@
   margin-bottom: 20px;
 }
 
+.mathigon-loading .course-info {
+  color: #666;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
 /* Error messages */
-.mathigon-error-message {
+.mathigon-error {
   max-width: 600px;
   margin: 100px auto;
   padding: 30px;
@@ -76,13 +82,20 @@
   color: #d00;
 }
 
-.mathigon-error-message h2 {
+.mathigon-error h3 {
   margin-top: 0;
   font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.mathigon-error-message button {
+.mathigon-error .error-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-top: 20px;
+}
+
+.mathigon-error button {
   padding: 8px 16px;
   background-color: #1f7aff;
   color: #fff;
@@ -90,139 +103,201 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  margin-right: 10px;
 }
 
-.mathigon-error-message .fallback-button {
+.mathigon-error button.btn-secondary {
   background-color: #4caf50;
 }
 
-.mathigon-error-message .retry-button {
-  background-color: #1f7aff;
-}
+/* Mathigon Specific Elements */
 
-.mathigon-error-message button:hover {
-  opacity: 0.9;
-}
-
-.mathigon-error-banner {
+/* Steps and progress */
+.mathigon-wrapper .progress-bar {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background-color: #fff4f4;
-  border: 1px solid #ffcaca;
-  padding: 10px 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-}
-
-.mathigon-error-banner p {
-  margin: 0 20px 0 0;
-  color: #d00;
-}
-
-.mathigon-error-banner button {
-  padding: 4px 10px;
-  background-color: #1f7aff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-}
-
-.mathigon-error-banner button:first-of-type {
-  background-color: #4caf50;
-}
-
-/* Fix for proper Mathigon step boxes */
-.step {
-  background: #f6f7f9;
-  padding: 12px 16px;
-  margin: 1.5em 0;
-  border-radius: 6px;
-  border-left: 4px solid #1f7aff;
-  position: relative;
-}
-
-/* Properly style elements like in the original Mathigon */
-.blank-space {
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-  background: rgba(31, 122, 255, 0.1);
-  border-radius: 4px;
-  margin: 0 4px;
-  vertical-align: middle;
-  position: relative;
-}
-
-/* Interactive element styles */
-.interactive-element {
-  width: 100%;
-  min-height: 240px;
-  border: 1px solid #e2e2e2;
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 1.5em 0;
-  position: relative;
-}
-
-/* Table styles */
-table.static {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1.5em 0;
-}
-
-table.static td,
-table.static th {
-  padding: 8px 12px;
-  border: 1px solid #e2e2e2;
-}
-
-table.static th {
-  background-color: #f6f7f9;
-  font-weight: 600;
-}
-
-/* Math and equations */
-.math {
-  font-family: "KaTeX_Main", serif;
-}
-
-/* Override any problematic styles from the main app */
-#mathigon-textbook * {
-  box-sizing: border-box;
-}
-
-/* Fix header and sidebar spacing */
-#mathigon-textbook .header {
-  position: sticky;
   top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
-#mathigon-textbook .sidebar {
-  position: fixed;
-  top: 60px;
-  bottom: 0;
+.mathigon-wrapper .progress-bar-inner {
+  height: 100%;
+  background-color: #1f7aff;
+  transition: width 0.3s;
 }
 
-/* Make sure iframe elements are fully visible */
-#mathigon-textbook iframe {
+/* Step navigation */
+.mathigon-wrapper .step-nav {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.mathigon-wrapper .step-nav button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: none;
+  background-color: #1f7aff;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mathigon-wrapper .step-nav button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Interactive elements */
+.mathigon-wrapper .blank-input {
+  display: inline-block;
+  padding: 3px 6px;
+  min-width: 60px;
+  height: 28px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  vertical-align: middle;
+  margin: 0 2px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.mathigon-wrapper .blank-input:focus,
+.mathigon-wrapper .blank-input.correct {
+  border-color: #1f7aff;
+  outline: none;
+}
+
+.mathigon-wrapper .blank-input.error {
+  border-color: #ff4c4c;
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Interactive geopad */
+.mathigon-wrapper .geopad-container {
+  margin: 1em 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mathigon-wrapper .geopad-svg {
+  width: 100%;
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+.mathigon-wrapper .geopad-point {
+  cursor: move;
+  fill: #1f7aff;
+  stroke: white;
+  stroke-width: 2;
+}
+
+/* Sliders and interactive controls */
+.mathigon-wrapper .slider-container {
+  margin: 1em 0;
   width: 100%;
 }
 
-/* Fix any popup positioning issues */
-.popup-content {
-  position: fixed;
-  z-index: 1000;
+.mathigon-wrapper .slider {
+  width: 100%;
+  height: 5px;
+  background: #ddd;
+  border-radius: 5px;
+  position: relative;
+}
+
+.mathigon-wrapper .slider-handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1f7aff;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mathigon-wrapper .slider-label {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+}
+
+/* Tabs and navigation */
+.mathigon-wrapper .tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 1em;
+}
+
+.mathigon-wrapper .tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  color: #666;
+}
+
+.mathigon-wrapper .tab.active {
+  border-bottom-color: #1f7aff;
+  color: #1f7aff;
+}
+
+/* Step boxes and hints */
+.mathigon-wrapper .step {
+  margin: 20px 0;
+  padding: 15px;
+  border-left: 4px solid #1f7aff;
+  background-color: rgba(31, 122, 255, 0.05);
+  border-radius: 4px;
+}
+
+.mathigon-wrapper .notice {
+  margin: 20px 0;
+  padding: 15px;
+  border-left: 4px solid #ffb600;
+  background-color: rgba(255, 182, 0, 0.05);
+  border-radius: 4px;
+}
+
+/* Fix Mathigon textbook specifics */
+.mathigon-wrapper .x-blank-mc .item {
+  cursor: pointer;
+  display: inline-block;
+  border: 2px solid #ddd;
+  padding: 6px 12px;
+  margin: 0 5px 5px 0;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.mathigon-wrapper .x-blank-mc .item:hover {
+  border-color: #1f7aff;
+}
+
+.mathigon-wrapper .x-blank-mc .item.correct {
+  background-color: rgba(31, 122, 255, 0.1);
+  border-color: #1f7aff;
 }
 
 /* Match colors and styles to Mathigon original */

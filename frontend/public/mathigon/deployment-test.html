@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathigon Deployment Test</title>
+  <style>
+    body { 
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #1f7aff; }
+    .test-section {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #444;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .success { color: green; }
+    .error { color: red; }
+    .warning { color: orange; }
+    button {
+      background: #1f7aff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .env-info {
+      font-size: 0.9em;
+      color: #666;
+    }
+    #mathigon-test-container {
+      height: 400px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mathigon Deployment Test</h1>
+    <p>This page tests the Mathigon integration in the current deployment environment.</p>
+    
+    <div class="env-info">
+      <p><strong>Environment Info:</strong></p>
+      <div id="env-display"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>1. Asset Availability Test</h2>
+      <button onclick="testAssets()">Test Assets</button>
+      <div class="result" id="assets-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>2. Content Availability Test</h2>
+      <button onclick="testContent()">Test Content</button>
+      <div class="result" id="content-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>3. TextbookLoader Test</h2>
+      <button onclick="testTextbookLoader()">Test TextbookLoader</button>
+      <div class="result" id="loader-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>4. Service Worker Test</h2>
+      <button onclick="testServiceWorker()">Test Service Worker</button>
+      <div class="result" id="sw-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>5. Content Rendering Test</h2>
+      <button onclick="renderMathigon('circles')">Render Circles</button>
+      <button onclick="renderMathigon('triangles')">Render Triangles</button>
+      <button onclick="renderMathigon('probability')">Render Probability</button>
+      <div id="mathigon-test-container"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Display environment information
+    function showEnvironmentInfo() {
+      const envInfo = document.getElementById('env-display');
+      const info = {
+        'Hostname': window.location.hostname,
+        'Protocol': window.location.protocol,
+        'Pathname': window.location.pathname,
+        'User Agent': navigator.userAgent,
+        'Service Worker Support': 'serviceWorker' in navigator ? 'Yes' : 'No'
+      };
+      
+      let html = '<ul>';
+      for (const [key, value] of Object.entries(info)) {
+        html += `<li>${key}: ${value}</li>`;
+      }
+      html += '</ul>';
+      envInfo.innerHTML = html;
+    }
+    
+    // Log results with color coding
+    function logResult(elementId, message, type = 'info') {
+      const resultEl = document.getElementById(elementId);
+      const timestamp = new Date().toISOString().substr(11, 8);
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      resultEl.appendChild(logEntry);
+      resultEl.scrollTop = resultEl.scrollHeight;
+    }
+    
+    // Test asset availability
+    async function testAssets() {
+      const assetsResult = document.getElementById('assets-result');
+      assetsResult.innerHTML = '';
+      
+      const assets = [
+        '/mathigon/assets/course.js',
+        '/mathigon/assets/course.css',
+        '/mathigon/assets/icons.svg'
+      ];
+      
+      for (const asset of assets) {
+        try {
+          const response = await fetch(asset);
+          if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            logResult('assets-result', `✅ ${asset} - Status: ${response.status}, Content-Type: ${contentType}`, 'success');
+          } else {
+            logResult('assets-result', `❌ ${asset} - Status: ${response.status}`, 'error');
+          }
+        } catch (error) {
+          logResult('assets-result', `❌ ${asset} - Error: ${error.message}`, 'error');
+        }
+      }
+    }
+    
+    // Test content availability
+    async function testContent() {
+      const contentResult = document.getElementById('content-result');
+      contentResult.innerHTML = '';
+      
+      const courses = ['circles', 'triangles', 'probability'];
+      
+      for (const course of courses) {
+        try {
+          const response = await fetch(`/mathigon/content/${course}/content.json`);
+          if (response.ok) {
+            const data = await response.json();
+            logResult('content-result', `✅ ${course}/content.json - Available`, 'success');
+            if (data && data.sections) {
+              logResult('content-result', `  Found ${data.sections.length} sections`, 'success');
+            }
+          } else {
+            logResult('content-result', `❌ ${course}/content.json - Status: ${response.status}`, 'error');
+          }
+        } catch (error) {
+          logResult('content-result', `❌ ${course}/content.json - Error: ${error.message}`, 'error');
+        }
+      }
+    }
+    
+    // Test TextbookLoader initialization
+    function testTextbookLoader() {
+      const loaderResult = document.getElementById('loader-result');
+      loaderResult.innerHTML = '';
+      
+      // Load course.js if needed
+      if (!window.Mathigon) {
+        logResult('loader-result', 'Loading Mathigon course.js...', 'info');
+        const script = document.createElement('script');
+        script.src = '/mathigon/assets/course.js';
+        script.onload = checkTextbookLoader;
+        script.onerror = () => {
+          logResult('loader-result', '❌ Failed to load course.js', 'error');
+        };
+        document.body.appendChild(script);
+      } else {
+        checkTextbookLoader();
+      }
+    }
+    
+    function checkTextbookLoader() {
+      if (window.Mathigon) {
+        logResult('loader-result', '✅ Mathigon global object available', 'success');
+        
+        if (window.Mathigon.TextbookLoader) {
+          logResult('loader-result', '✅ TextbookLoader class available', 'success');
+          
+          // Log all available Mathigon objects
+          const keys = Object.keys(window.Mathigon);
+          logResult('loader-result', `Available Mathigon objects: ${keys.join(', ')}`, 'info');
+          
+          // Test creating a TextbookLoader
+          try {
+            window.mathigonConfig = {
+              assetsPrefix: '/mathigon/assets/',
+              contentPrefix: '/mathigon/content/'
+            };
+            
+            const testLoader = new window.Mathigon.TextbookLoader({
+              courseId: 'circles',
+              container: '#mathigon-test-container',
+              sourcePrefix: '/mathigon/content/',
+              assetsPrefix: '/mathigon/assets/'
+            });
+            
+            logResult('loader-result', '✅ TextbookLoader instance created successfully', 'success');
+          } catch (error) {
+            logResult('loader-result', `❌ Error creating TextbookLoader: ${error.message}`, 'error');
+          }
+        } else {
+          logResult('loader-result', '❌ TextbookLoader class not found', 'error');
+          
+          // Check if Mathigon has an init function
+          if (typeof window.Mathigon.load === 'function') {
+            logResult('loader-result', '✅ Mathigon.load function available', 'success');
+          } else {
+            logResult('loader-result', '❌ No Mathigon.load function available', 'error');
+          }
+        }
+      } else {
+        logResult('loader-result', '❌ Mathigon global object not available', 'error');
+      }
+    }
+    
+    // Test service worker
+    async function testServiceWorker() {
+      const swResult = document.getElementById('sw-result');
+      swResult.innerHTML = '';
+      
+      if ('serviceWorker' in navigator) {
+        logResult('sw-result', 'Service Worker API is available', 'success');
+        
+        try {
+          // Check for registered service workers
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          logResult('sw-result', `Found ${registrations.length} registered service workers`, 'info');
+          
+          for (const registration of registrations) {
+            logResult('sw-result', `Service Worker: ${registration.scope}`, 'info');
+            if (registration.active) {
+              logResult('sw-result', '  Active service worker found', 'success');
+            }
+            if (registration.installing) {
+              logResult('sw-result', '  Service worker is installing', 'info');
+            }
+            if (registration.waiting) {
+              logResult('sw-result', '  Service worker is waiting', 'warning');
+            }
+          }
+          
+          // Test cache access
+          if ('caches' in window) {
+            logResult('sw-result', 'Cache API is available', 'success');
+            
+            const cacheNames = await caches.keys();
+            logResult('sw-result', `Found ${cacheNames.length} caches: ${cacheNames.join(', ')}`, 'info');
+            
+            // Look for our specific cache
+            if (cacheNames.includes('khaboom-cache-v2')) {
+              logResult('sw-result', '✅ Found KhaBoom cache', 'success');
+              
+              const khaboomCache = await caches.open('khaboom-cache-v2');
+              const cachedAssets = await khaboomCache.keys();
+              logResult('sw-result', `Cache contains ${cachedAssets.length} assets`, 'info');
+            } else {
+              logResult('sw-result', '❌ KhaBoom cache not found', 'error');
+            }
+          } else {
+            logResult('sw-result', '❌ Cache API not available', 'error');
+          }
+        } catch (error) {
+          logResult('sw-result', `❌ Service Worker error: ${error.message}`, 'error');
+        }
+      } else {
+        logResult('sw-result', '❌ Service Worker API not available in this browser', 'error');
+      }
+    }
+    
+    // Render a Mathigon course
+    function renderMathigon(courseId) {
+      const container = document.getElementById('mathigon-test-container');
+      container.innerHTML = '';
+      
+      // Create a div for the textbook
+      const textbookDiv = document.createElement('div');
+      textbookDiv.id = 'mathigon-textbook';
+      container.appendChild(textbookDiv);
+      
+      // Load course.js if needed
+      if (!window.Mathigon) {
+        const script = document.createElement('script');
+        script.src = '/mathigon/assets/course.js';
+        script.onload = () => initMathigon(courseId);
+        script.onerror = () => {
+          container.innerHTML = '<p class="error">Failed to load Mathigon course.js</p>';
+        };
+        document.body.appendChild(script);
+        
+        // Add CSS
+        if (!document.querySelector('link[href="/mathigon/assets/course.css"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = '/mathigon/assets/course.css';
+          document.head.appendChild(link);
+        }
+      } else {
+        initMathigon(courseId);
+      }
+    }
+    
+    function initMathigon(courseId) {
+      try {
+        // Set up global config
+        window.courseId = courseId;
+        window.mathigonConfig = {
+          assetsPrefix: '/mathigon/assets/',
+          contentPrefix: '/mathigon/content/'
+        };
+        
+        if (window.Mathigon && window.Mathigon.TextbookLoader) {
+          const textbook = new window.Mathigon.TextbookLoader({
+            courseId,
+            container: '#mathigon-textbook',
+            sourcePrefix: '/mathigon/content/',
+            assetsPrefix: '/mathigon/assets/'
+          });
+          
+          textbook.initialize()
+            .then(() => {
+              console.log('Textbook initialized successfully');
+            })
+            .catch(err => {
+              console.error('Error initializing textbook:', err);
+              document.getElementById('mathigon-test-container').innerHTML = 
+                `<p class="error">Error initializing textbook: ${err.message || 'Unknown error'}</p>`;
+            });
+        } else {
+          document.getElementById('mathigon-test-container').innerHTML = 
+            '<p class="error">Mathigon TextbookLoader not available</p>';
+        }
+      } catch (e) {
+        document.getElementById('mathigon-test-container').innerHTML = 
+          `<p class="error">Error: ${e.message}</p>`;
+      }
+    }
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      showEnvironmentInfo();
+    });
+  </script>
+</body>
+</html> 
