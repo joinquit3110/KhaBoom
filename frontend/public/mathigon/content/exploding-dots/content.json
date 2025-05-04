@@ -1,0 +1,150 @@
+{
+  "sections": [
+    {
+      "section": "infinity",
+      "id": "race",
+      "description": "A mathematical story developed for Global Math Week – learn about place value, infinity and p-adic numbers.",
+      "color": "\"#6D3BBF\"",
+      "content": "# Exploding Dots\n\n## Staircase to Infinity\n\n\nIn ancient Greece, Achilles was one of the greatest heroes and (almost)\ninvulnerable. On one day, he was challenged to race … by a tortoise!\n\n::: x-slideshow\n\n    .race(slot=\"stage\")\n      svg(width=760 height=140 viewBox=\"0 0 760 140\")\n        line(x1=40 y1=113 x2=761 y2=113)\n        line(x1=40 y1=113 x2=40 y2=121)\n        text(x=40 y=135) 0\n        line(x1=451 y1=113 x2=451 y2=121)\n        text(x=451 y=135) 100\n        g\n          line(x1=616 y1=113 x2=616 y2=121)\n          text(x=616 y=135) 110\n        g\n          line(x1=683 y1=113 x2=683 y2=121)\n          text(x=683 y=135) 111\n        g: line(x1=709 y1=113 x2=709 y2=121)\n        g: line(x1=720 y1=113 x2=720 y2=121)\n      img(src=\"images/achilles.png\" width=80 height=110 style=\"left: 0%; z-index: 1;\")\n      img(src=\"images/tortoise.png\" width=80 height=50 style=\"left: 54%; margin-top: 8%;\")\n\nAchilles knew that he could run _ten times_ as fast as\nthe tortoise. He felt very confident, and decided to give it a 100m head start.\n\nAnd the race began. In the time it took Achilles to reach\nthe 100m mark, the tortoise moved by [[10]]m: _{span.reveal(when=\"blank-0\")}it\nwas now at 110m._\n\nWhen Achilles arrived at 110m, the tortoise had moved by\n[[one]] more meter(s): _{span.reveal(when=\"blank-1\")}it was now at 111m._\n\nWhen Achilles arrived at the 111m mark, the tortoise had moved by 10cm.\n\nAt every step, Achilles gets closer to the tortoise. But since the tortoise keeps moving, he never\nquite reaches it. And since he can’t overtake it, the tortoise wins the race!\n\n:::"
+    },
+    {
+      "content": "figure: x-img(src=\"images/mind-blown.gif\" alt=\"Mind Blown GIF\" width=300 height=200)\n\nIt seems obvious that something in our argument must have gone wrong. We clearly\n_know_ that Achilles would eventually overtake the tortoise. But it is\ndifficult to pinpoint a specific error in the explanation.\n\nIt turns out that saying “and so on, forever” can be very dangerous in\nmathematics. Whenever something infinite is involved, things tend to behave\nvery differently from our intuition. In this course we will explore the concept\nof infinity from a few different angles."
+    },
+    {
+      "content": "### Trouble in our number system\n\n::: column.grow\n\nOur number notation is incredibly powerful, and has allowed us to make amazing\ndiscoveries in mathematics, science and engineering. In Europe, mathematicians\nfirst used the [Roman numeral system](gloss:roman-numerals) (numbers like I, V,\nX, …) before the [Arabic numbers](gloss:arabic-numerals) were introduced\nin the 12th century.\n\n{.r} There is one important property of numbers that we usually take for\ngranted: all numbers are __unique__. In other words, there are no two different\nnumbers that are equal. 5 and 8 are different, just like 100 is different from\n101, and so on. [Continue](btn:next)\n\n::: column(width=300)\n\n    x-img(src=\"images/clock.jpg\" alt=\"Clock\" width=300 height=300)\n\n{.caption} On a clock, the number 12 (XII) is actually the same as the number 0.\n\n:::"
+    },
+    {
+      "id": "choice",
+      "goals": "choice",
+      "content": "Well – almost. Like for every rule, there might be some exceptions to this one.\nFor example, here is one age-old question asked by students around the world:\n\n::: blockquote\nIs 0.999999… equal to 1?\n:::\n\nThe “…” means that there are _infinitely many_ 9s to the right of the decimal\npoint. If the answer to this question is _yes_, it would mean that there are two\ncompletely different numbers, that are actually the same. What do you think?\n\n    p: .btn-row.text-center\n      button.btn.btn-green They’re the same\n      button.btn.btn-blue They’re different"
+    },
+    {
+      "content": "We’ll answer this later in this course – but you might also think that the\nentire question sounds a bit dubious. There is no way we could _actually write\ndown_ infinitely many 9s – it would take infinitely long. We have to cheat by\nwriting dots and using our imagination. The question should really be:\n\n::: blockquote(style=\"max-width: 480px; margin: 1.5em auto\")\nIf we were somehow God-like and could write an infinite string of 9s, would\nthe results be equal to 1?\n:::\n\nSince we humans are not God-like, you might decide that the question is\nmeaningless. But that seems like a very unsatisfactory solution – and new\ndiscoveries always start by asking _“what if…”_\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "numberline",
+      "goals": "n2 n3 n4",
+      "content": "As humans, we can only ever write a finite number of 9s, say ${n}{n|1|1,15,1}:\n\n    figure: svg(width=680 height=110 viewBox=\"0 0 680 110\")\n      line(x1=\"20\" y1=\"79.5\" x2=\"660\" y2=\"79.5\" stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\"2\")\n      line(x1=\"20\" y1=\"88\" x2=\"20\" y2=\"80\" stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\"2\")\n      line(x1=\"660\" y1=\"88\" x2=\"660\" y2=\"80\" stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\"2\")\n      text(transform=\"translate(16.01 106.62)\" font-size=\"18\") 0\n      text(transform=\"translate(656.01 106.62)\" font-size=\"18\") 1\n      g(fill=\"#fd8c00\")\n        text(transform=\"translate(522.54 38.62)\" font-size=\"16\") 0.9\n        line(x1=\"532\" y1=\"68.53\" x2=\"532\" y2=\"43\" stroke=\"#fd8c00\" stroke-linecap=\"round\" stroke-width=\"2\")\n        polygon(points=\"532 77 536.88 65.06 532 67.89 527.12 65.06 532 77\")\n      g.reveal(when=\"n2\" fill=\"#22ab24\")\n        text(transform=\"translate(620.57 38.62)\" font-size=\"16\") 0.99\n        line(x1=\"634\" y1=\"68.53\" x2=\"634\" y2=\"43\" stroke=\"#22ab24\" stroke-linecap=\"round\" stroke-width=\"2\")\n        polygon(points=\"634 77 638.88 65.06 634 67.89 629.12 65.06 634 77\")\n      g.reveal(when=\"n3\" fill=\"#0f82f2\")\n        text(transform=\"translate(637.59 14.62)\" font-size=\"16\") 0.999\n        line(x1=\"655\" y1=\"68.53\" x2=\"655\" y2=\"19\" stroke=\"#0f82f2\" stroke-linecap=\"round\" stroke-width=\"2\")\n        polygon(points=\"655 77 659.88 65.06 655 67.89 650.12 65.06 655 77\")\n    x-gesture(target=\"x-var\" slide=\"100,0\")\n\n{.convergence.no-voice} __{.m-yellow}0.9__ is less than 1.<br>\n_{span.reveal(when=\"n2\")} __{.m-green}0.99__ is less than 1._<br>\n_{span.reveal(when=\"n3\")} __{.m-blue}0.999__ is less than 1._<br>\n_{span.reveal(when=\"n4\")} __{.m-red}0.9999__ is less than 1._<br>\n_{span.hidden} __${nines(n)}__ is less than 1._"
+    },
+    {
+      "content": "Each of these approximations is [[less than|greater than|equal to]] 1. They form\na [sequence](gloss:sequence) of numbers that steadily marches rightward on the\nnumber line, getting closer and closer to 1 (without ever quite reaching it)."
+    },
+    {
+      "id": "convergence",
+      "content": "Notice that the sequence will eventually enter any amount of space you might\nspecify on the left of 1. For example, if you want an approximation that’s\nwithin 1/${pow(x)}{x|7|1,20,1} of 1, you could pick ${nines(x)}."
+    },
+    {
+      "content": "In other words, there cannot be any space between 0.999999… and 1. Since it is\nclearly also not _bigger_ than 1, we can deduce that 0.999999… must actually be\n_equal_ to 1."
+    },
+    {
+      "id": "dots",
+      "goals": "d1 d2 d3 d4 x1 x2 x3 x4",
+      "content": "### A dot-machine explanation\n\nIf you’re not satisfied with this explanation, let’s have a look at what 0.9999…\nwould look like in a [`1←10` machine](gloss:dot-machine):\n\n    x-dot-machine(cells=\"0.9999…\")\n    p.text-center.reveal(when=\"d1\"): button.btn.btn-small.btn-red Explode\n\nClick anywhere in the [first decimal box](->#dots_.dot-decimal+.dot-cell)\nto create a [dot and anti-dot pair](gloss:anti-dot). This doesn’t change the\nnumber.\n\n{.reveal(when=\"d1\")} Now click the [explode button](->#dots_button) to simplify\nthe number using the `1←10` rule.\n\n{.reveal(when=\"x1\")} Let’s do the same thing for the [second decimal\nbox](->#dots_.dot-decimal+.dot-cell+.dot-cell). First add a dot and\nanti-dot pair, and then explode.\n\n{.reveal(when=\"d2 x2\")} Notice how the dot/anti-dot pair canceled out! This is\ncalled an [annihilation](gloss:dot-annihilation). The resulting number is still\nthe same as 0.9999… Keep going with the remaining cells.\n\n{.reveal(when=\"d3 x3 d4 x4\")} If we keep doing this forever, it looks like we\nare actually showing that 0.9999… is the same as 1.0000…!"
+    },
+    {
+      "content": "### An algebraic explanation\n\nIf you’re still not convinced, let’s end with an algebraic argument. If you\nbelieve that 0.9999… is a valid number (that might or might not be 1), then it\nmakes sense to assume that it also obeys all the usual rules of arithmetic.\n\n    ol.proof\n      li Let’s start by giving the number a name, say #[.ivar F] for #[strong.m-green Frederica]:\n        .text-center.r #[.ivar F] = 0.9999…#[button.next-step Continue]\n      li.reveal(when=\"next-0\") Now multiply it by 10. This gives us\n        .text-center.r 10#[.ivar F] = 9.9999…#[button.next-step Continue]\n      li.reveal(when=\"next-1\") Subtract the equation in step 1 from the equation in step 2. Since all their decimal places are equal, they simply cancel out:\n        .text-center.r 9#[.ivar F] = 9#[button.next-step Continue]\n      li.reveal(when=\"next-2\") Finally, if we divide both sides by 9, we get\n        .text-center.md #[.ivar F] = [[1]]"
+    },
+    {
+      "section": "unusual",
+      "content": "Amazing! But let’s be clear on what we have established here. __IF__ you choose\nto believe that 0.9999… is a meaningful quantity in usual mathematics, __THEN__\nyou must conclude that it equals 1. This is important, because the same\nalgebraic argument can lead to philosophical woes – as we’ll see in the next\nsection…\n\n\n\n--------------------------------------------------------------------------------\n\n\n\n## Unusual Numbers\n\n\nIn the [previous section](/course/exploding-dots/infinity), we looked at a\nnumber with infinitely many 9s to the right of the decimal point:\n\n{.text-center} __0.999999…__\n\nNow, let’s see what happens if we add infinitely many 9s to the _left_ of the\ndecimal point:\n\n{.text-center} __…999999__"
+    },
+    {
+      "content": "If we assume that this is a meaningful number (and not, for example, just\n“infinity”), we can try to use the same algebraic argument as before, to work\nout its value:\n\n    ol.proof.s-yellow\n      li Let’s start by giving the number a name, say #[.ivar A] for #[strong.m-yellow Allistaire]:\n        .text-center.r #[.ivar A] = …999999#[button.next-step Continue]\n      li.reveal(when=\"next-0\") Now multiply it by 10. This gives us\n        .text-center.r 10#[.ivar A] = …999990#[button.next-step Continue]\n      li.reveal(when=\"next-1\") Notice that #[.ivar A] and 10#[.ivar A] only differ in their final digit. Therefore, if we subtract the equation in step 1 from the equation in step 2, we get\n        .text-center.r 9#[.ivar A] = –9#[button.next-step Continue]\n      li.reveal(when=\"next-2\") Finally, if we divide both sides by 9, we get\n        .text-center.md #[.ivar A] = [[-1]]"
+    },
+    {
+      "content": "In other words, we have just shown that _{strong.m-yellow.nowrap}…999999_ = −1.\nApparently, if we pulled out an infinite calculator and computed the sum of 9 +\n90 + 900 + 9000 + …, the result would be −1!\n\n_Do you believe that?_\n\n    figure: x-img(src=\"images/confused.gif\" alt=\"Confused GID\" width=200 height=200)"
+    },
+    {
+      "content": "### Unusual Arithmetic\n\nEven though …9999999 is clearly not a “normal” number, let’s assume for now that\nit exists, and that it follows the basic laws of arithmetic. If that is the\ncase, we’d expect …9999999 + 1 = [[0]]."
+    },
+    {
+      "id": "dots-1",
+      "goals": "dot",
+      "content": "Let’s use a [`1←10` machine](gloss:dot-machine) to see if that is actually the\ncase. Click somewhere in the 1s cell to add 1:\n\n    x-dot-machine(cells=\"…99999\")\n    x-gesture(target=\"#dots-1 .dot-cell:last-child\")"
+    },
+    {
+      "content": "Looks like this actually worked! If we add 1 to _{span.nowrap}…9999999_, the\nresult is 0.\n\nBut remember: all we have shown is that __IF__ we choose to believe that …999999\nis a meaningful number that follows our usual laws of arithmetic, __THEN__ it\nmust have value –1. Most people simply say that it _isn’t_ a number and stop\nthere – and that is a perfectly valid view.\n\nThis begs the question: is there an _unusual_ system of arithmetic for which\n…999999 is a meaningful number?\n\n::: .box.blue\n#### Challenge\n\nLet’s make matters worse! Consider the number with infinitely many 9s both to\nthe left _and_ to the right of the decimal point: __{.m-red.nowrap}…9999.9999…__.\nTry to use the same algebraic argument to show that this equals __{.m-red}zero__.\n\n*Somehow this makes sense, because __{.m-red.nowrap}…9999.9999…__ =\n__{.m-green.nowrap}…9999__ + __{.m-yellow.nowrap}0.9999…__ = __{.m-green}−1__ +\n__{.m-yellow}1__ = __{.m-red}0__.*\n\n:::\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "warp-1",
+      "content": "### Warping the Number Line\n\nIn the previous chapter, we saw that _{span.nowrap}0.999999… = 1_. This seems\nsomewhat plausible, because the sequence of approximations 0.9, 0.99, 0.999,\n0.9999, and so on, get closer and closer to 1.\n\nIn this example, the exact opposite happens: the numbers 9, 99, 999, 9999, and\nso on, are marching further and further away from –1. That’s why it is so\nabstruse to think that _{span.nowrap}…999999_ could possibly equal –1.\n\n    figure: include svg/number-line-1.svg\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "warp-2",
+      "content": "It turns out, however, that it _is_ possible to develop a new arithmetic system\nin which numbers like _{span.nowrap}…999999_ are meaningful. To do that, we just\nhave to change how we measure “distance” between numbers on the number line.\n\nUsually, _distance_ is defined using __addition__ and __subtraction__. For\nexample, the distance between 2 and 6 is [[4]],\n_{span.reveal(when=\"blank-0\")}because `2 + 4 = 6`._\n\n    figure: include svg/number-line-2.svg"
+    },
+    {
+      "content": "Instead, we can define a “different kind” of distance using __multiplication__\nand __division__.\n\n{.r} In the world of integers, 0 is the _most divisible_ number of all. It can\nbe divided any number of times by any integer, and still give an integer result\n(namely 0). If we focus on our number base of 10, we can see that 0 can be\ndivided by 10 once, or twice, or thirty-seven times, or a million times.\n[Continue](btn:next)"
+    },
+    {
+      "id": "zero-list",
+      "content": "* The number __40__ is a little bit “zero-like”, in this sense in that we can\n  divide it by ten and still have an integer.\n* The number __1700__ is more zero-like: it can be divided [[twice|three\n  times|four times]] by 10, and still give an integer result.\n* {.reveal(when=\"blank-0\")} The number __230,000__ is even more zero-like. It\n  can be divided [[four]] times by 10, and still stay an integer.\n* {.reveal(when=\"blank-1\")} The number __5__, on the other hand, is not very\n  zero-like. We can’t divide it by ten even once, and have it stay an integer."
+    },
+    {
+      "content": "We can now develop a __distance formula__, based on how often 10 “goes into”\ninto a number multiplicatively. If we can divide a number _a_ by ten a maximum\nof _k_ times while remaining an integer, let’s write\n\n{.text-center} `abs(a)_(ten) = 1/10^k`\n\nFor example, `abs(850)_(ten) = 1/(10^1) = 0.1`, and `abs(8500)_(ten) = 1/(10^2) = 0.01`,\nand `abs(850000)_(ten) =` [[0.0001]]."
+    },
+    {
+      "content": "We can also measure the distance between any two different numbers. For example,\nthe distance between 3 and 33 is `abs(33−3)_(ten) = abs(30)_(ten) = 1/(10^1) = 0.1`.\n\nWith this new way to measure distance, 1, 10, 100, 1000, … is a sequence of\nnumbers getting closer and closer to [[zero|1|–1|infinity]]. Similarly, 9, 99,\n999, 9999, … is getting closer and closer to [[-1]], just like we saw above."
+    },
+    {
+      "id": "p-adic-numbers",
+      "content": "Mathematicians call this way of viewing distances between the non-negative\nintegers [__ten-adic arithmetic__](gloss:adic). The suffix “adic” means “a\ncounting of operations”. Here we are counting factors of ten."
+    },
+    {
+      "id": "dots-2",
+      "goals": "dots",
+      "content": "### Negative Numbers and Fractions\n\nWe’ve already seen that our new, ten-adic system supports negative integers:\n_{span.nowrap}…999999 = –1_. We can do something similar for other negative numbers. How much\ndo you have to add to _{span.nowrap}…999998_, to get it to explode?\n\n    x-dot-machine(cells=\"…99998\")\n    x-gesture(target=\"#dots-2 .dot-cell:last-child\")"
+    },
+    {
+      "content": "In other words, _{span.nowrap}…999998 = [[-2]]_. _{span.reveal(when=\"blank-0\")}\nWe can similarly calculate that *{span.nowrap}…999997 = [[-3]]*,\n*{span.nowrap}…999953 = [[-47]]*, *{span.nowrap}…999700 = –300*\nand so on. Every negative integer has a ten-adic equivalent._"
+    },
+    {
+      "id": "dots-3",
+      "goals": "dots",
+      "content": "{.text-center} •\n\nConstructing ten-adic fractions is a bit more difficult. Let’s see what happens\nif we multiply _{span.nowrap}…6666667_ by 3:\n\n    x-dot-machine.tiny(cells=\"…66667\")\n    p.text-center: button.btn.btn-small.btn-red Multiply by 3\n    x-gesture(target=\"#dots-3 button\")"
+    },
+    {
+      "content": "Since _{span.nowrap}…6666667_ × 3 = [[1]], *{span.reveal(when=\"blank-0\")}we\nknow that _{span.nowrap}…6666667_ = `1/3`.*"
+    },
+    {
+      "content": "::: .box.blue\n#### Challenge\n\nCan you work out which ten-adic number behaves like `2/3`?\n\nWhat about other fractions like `4/7` or `2/13`?\n\n:::\n\n_It turns out that there are a few fractions that cannot be expressed in our\nten-adic number system: all fractions that, in their reduced form, have a\n[denominator](gloss:denominator) that is a multiple of 2 or 5 (or both). You\ncan fix this by allowing ten-adic numbers to have a finite number of decimal\nplaces. Now, every [rational number](gloss:rational-numbers) has a ten-adic\nequivalent._"
+    },
+    {
+      "id": "flaw",
+      "content": "### A Serious Flaw\n\nWe’ve now seen that every integer an fraction has a ten-adic equivalent, and\nthat we can add, subtract and multiply ten-adic numbers, just like we would\nnormal integers. Unfortunately there is one serious flaw: we cannot _divide_ by\nall ten-adic numbers.\n\nTo see why that’s the case, we need to look at the powers of 2 and 5:\n\n::: column(width=180)\n\n{.text-center} `2^1` = 2<br>\n`2^2` = 4<br>\n`2^3` = 8<br>\n`2^4` = 16<br>\n`2^5` = [[32]]<br>\n`2^6` = [[64]]<br>\n`2^7` = 128<br>\n…\n\n::: column(width=180)\n\n{.text-center} `5^1` = 5<br>\n`5^2` = 25<br>\n`5^3` = [[125]]<br>\n`5^4` = [[625]]<br>\n`5^5` = 3,_{span.po2}125_<br>\n`5^6` = 15,_{span.po2}625_<br>\n`5^7` = 78,_{span.po2}125_<br>\n…\n\n:::"
+    },
+    {
+      "id": "flaw-1",
+      "content": "Notice how many of the powers of 5 end in [{.no-margins}other, smaller powers of 5](->.po2). The\nsame is also true for powers of 2. It turns out that we can create two infinite, 10-adic numbers,\nthat always end in powers of 2 or 5 respectively:\n\n::: column(width=140)\n\n{.text-right} `2^1` = 2<br>\n`2^5` = 32<br>\n`2^25` = 33554432<br>\n__{.i.m-red}M__ = …33554432\n\n::: column(width=140)\n\n{.text-right} `5^1` = 5<br>\n`5^2` = 25<br>\n`5^3` = 125<br>\n__{.i.m-yellow}N__ = …1953125\n\n:::\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "flaw-2",
+      "content": "If we try to multiply powers of 2 and 5, we get a sequence of products that get\ncloser and closer to zero (in our 10-adic sense):\n\n|    |   |     |   |           |\n| -: | - | --: | - | --------: |\n|  2 | × |   5 | = |        10 |\n|  4 | × |  25 | = |       100 |\n|  8 | × | 125 | = |  [[1000]] |\n| 16 | × | 625 | = | [[10000]] |"
+    },
+    {
+      "id": "flaw-3",
+      "content": "The same happens if we try to multiply __{.i.m-red}M__ and __{.i.m-yellow}N__:\n\n|   |   |    |    |    |    |\n| - | - | -- | -- | -- | -- |\n|   | … |  3 |  1 |  2 |  5 |\n| × | … |  4 |  4 |  3 |  2 |\n|   | … |  6 |  2 |  4 | 10 |\n|   | … |  3 |  6 | 15 |    |\n|   | … |  8 | 20 |    |    |\n| + | … | 20 |    |    |    |\n| = | … | 37 | 28 | 19 | 10 |\n| = | … |  0 |  0 |  0 |  0 |"
+    },
+    {
+      "section": "p-adic",
+      "id": "p-adic",
+      "content": "In other words, we have found two non-zero numbers __{.i.m-red}M__ and\n__{.i.m-yellow}N__ so that __{.i.m-red}M__ × __{.i.m-yellow}N__ = 0.\n\nThis means that in ten-adic arithmetic, it is impossible to divide by\n__{.i.m-red}M__ or __{.i.m-yellow}N__. (If it were possible, we could divide the\nequation __{.i.m-red}M__ × __{.i.m-yellow}N__ = 0 by __{.i.m-yellow}N__, and get\n__{.i.m-red}M__ = 0. That is a contradiction.)\n\n\n\n--------------------------------------------------------------------------------\n\n\n\n## P-adic Numbers\n\n\nIn the [previous section](/course/exploding-dots/unusual), we managed to\nconstruct two non-zero [10-adic numbers](gloss:adic) _M_ and _N_, so that\n`M×N=0`. This means that it is impossible to divide by numbers like _M_ and _N_\n– a serious flaw in any number system.\n\nIt turns out, however, that this problem only occurs if the number base is not a\n[prime number](gloss:prime). Since 10 [[is not prime|is prime]],\n_{span.reveal(when=\"blank-0\")}the 10-adic numbers are flawed. 2-adic or 3-adic\nnumbers, on the other hand, are not._"
+    },
+    {
+      "content": "Mathematicians call these numbers __*p*-adic numbers__, where the *p* stands for\n“prime”. Even though they don’t seem particularly relevant in everyday life,\n_p_-adic numbers turn out to be very useful in certain parts of mathematics.\n\nFor example, many unanswered problems in mathematics are related to prime\nnumbers and [prime factorizations](gloss:factorisation). Since _p_-adic numbers\nwere defined using _multiplication_ rather than _addition_, they are perfect for\nanalysing these problems. *P*-adic numbers were even used in Andrew Wiles’\nfamous proof of [Fermat’s Last Theorem](gloss:fermat-last)."
+    },
+    {
+      "id": "square",
+      "content": "One of the must surprising applications of p-adic numbers is in geometry. Here\nyou can see a square that is divided into ${2*x}{x|9|1,50,1} small triangles of\nequal area:\n\n    figure: svg.square(width=320 height=320)\n    x-gesture(target=\"x-var\" slide=\"100,0\")"
+    },
+    {
+      "id": "square-1",
+      "content": "As you move the slider, you can see that it is possible to divide the square\ninto any [[even|odd|prime]] number of equal triangles.\n\n{.r.reveal(when=\"blank-0\")} But what about _odd_ numbers? Draw a square on a\nsheet of paper, and then try dividing it into 3, 5 or 7 triangles of equal area.\n[Continue](btn:next)"
+    },
+    {
+      "id": "square-3",
+      "content": "Here’s the shocker: it turns out that it is _impossible_ to divide a square into\nan _odd_ number of triangles of equal area! This was proven in 1970 by\nmathematician [Paul Monsky](bio:monsky) – you can even have a look at the paper\nhe published about it:\n\n    figure\n      x-img(src=\"images/paper.jpg\" alt=\"Paper by Paul Monsky\" width=400 height=132)\n      p.caption #[a(href=\"http://ieee.scripts.mit.edu/urgewiki/images/0/00/Monsky.pdf\" target=\"_blank\") The American Mathematical Monthly]\n\nIn the proof, Monsky had to use the 2-adic number system. Mathematics, no matter\nhow abstruse it might seem, always comes up with surprising and unexpected\napplications."
+    }
+  ],
+  "title": "Exploding Dots"
+}

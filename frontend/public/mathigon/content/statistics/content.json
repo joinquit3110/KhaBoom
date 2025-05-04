@@ -1,0 +1,87 @@
+{
+  "sections": [
+    {
+      "id": "roulette",
+      "sectionBackground": "dark casino",
+      "goals": "rotate",
+      "section": "casino",
+      "color": "\"#BA1778\"",
+      "level": "Intermediate",
+      "next": "graph-theory",
+      "content": "# Statistics and Data\n\n## Casino Mathematics\n\n\n    .roulette-wheel\n      .layer-2.wheel\n      .layer-3\n      .layer-4.wheel\n      .layer-5\n      .ball\n      svg(width=380 height=380): circle(cx=190 cy=190 r=190)\n    x-gesture(target=\".roulette-wheel\" offset=\"-90,-100\" slide=\"0,200\")\n\nSoon after their initial discovery, mathematicians started applying the laws of\nprobability to many different parts of life – including casino games.\n\nOne of these mathematicians was [Karl Pearson](bio:pearson) who analysed the\nresults of roulette games published in the French newspaper _Le Monaco_.\n\nRoulette consists of a wheel with the numbers from 1 to 36 coloured in\n__{.red}red__ and __{.black}black__, as well as a green 0. A ball rolls around\nthe outside and randomly lands on one of the numbers. Gamblers can bet on a\nsingle number, a set of multiple numbers, or just a colour. Their potential\nwinning depends on the likelihood of each of these outcomes."
+    },
+    {
+      "id": "roulette-1",
+      "content": "Here is one of the many hundreds of newspaper extracts which Pearson collected\nand analysed. At first sight, it looks pretty random:\n\n    include mixins\n    .newspaper\n      p Roulette results on 19 August 1823, Table 5:\n      div\n        for x in [13, 12, 30, 33, 3, 12, 29, 5, 8, 22, 23, 13, 5, 18, 14, 31, 36, 15, 18, 28, 32, 29, 11, 34, 23, 36, 8, 16, 2, 3, 9, 20, 16, 14, 15, 26, 31, 21, 15, 3, 33, 22, 12, 14, 9, 6, 30, 13, 33, 5, 28, 17, 27, 6, 5, 34, 11, 18, 32, 6, 9, 31, 29, 2, 18, 35, 6, 1, 34, 28, 1, 10]\n          span(class=colour(x))= x\n\nA roulette wheel has the same number of red and black numbers. If we ignore the\ngreen 0 (which means the casino wins) we would expect the number of red and\nblack numbers to be [[approximately the same|exactly equal]]. Let’s check that\nthis is indeed the case for the set of results above.\n\n    include mixins\n    +barchart([['Red', 37, 'r'], ['Black', 35, 'b']])"
+    },
+    {
+      "id": "roulette-2",
+      "content": "This looks pretty evenly distributed – there is a small difference between the\nnumber of red and black results, but that is always to be expected in\nprobability.\n\nHowever, Pearson didn’t stop here. He realised that if the results were\ncompletely random, then each of the four possible pairs of two consecutive\ncolours should also be equally likely. Again we can count the number of\noccurrences in our example:\n\n    include mixins\n    +barchart([['RR', 14, 'r'], ['RB', 24, 'rb'], ['BR', 24, 'rb'], ['BB', 9, 'b']])"
+    },
+    {
+      "id": "roulette-3",
+      "content": "For some reasons, it seems that __{.red}RR__ and __{.black}BB__ happen much\n[[less frequently|more frequently]] than __{.red}R__**{.black}B** and\n__{.red}B__**{.black}R**, even though they should all have the same probability.\nOf course, we might have just been _unlucky_ in this particular sequence of\nresults – but Pearson tested many thousands of results and always found the same."
+    },
+    {
+      "id": "roulette-4",
+      "content": "It gets even worse if we look at triples of results. Each of the 8 possible\ntriples of colours should be equally likely, but that is clearly not the case\nhere:\n\n    include mixins\n    +barchart([['RRR', 3, 'r'], ['RRB', 10, 'rrb'], ['BRR', 10, 'rrb'], ['RBR', 15, 'rrb'], ['BRB', 14, 'bbr'], ['RBB', 8, 'bbr'], ['BBR', 8, 'bbr'], ['BBB', 2, 'b']])\n\nIt seems that in this particular casino, the colours alternate much more often\nthan one would expect. There are hardly any long sequences of the same colour\n(__{.red}RRR__ or __{.black}BBB__).\n\nPearson calculated that the probability of seeing results which were this skewed\nwas less than 1 in 100,000,000! He assumed that the Roulette wheels were rigged\nto create higher profits for the Casino – and wrote many angry letters to expose\nthis scam."
+    },
+    {
+      "id": "roulette-5",
+      "content": "::: column(width=300)\n\n    x-img(src=\"images/cocktails.jpg\" alt=\"Cocktail Bar\" width=300 height=185)\n\n::: column.grow\nWhen he finally travelled to Monte Carlo, he discovered that the reason for the\nskewed results was of a very different nature: the journalists who were supposed\nto be recording the results were instead just sitting in the bar of the casino,\ndrinking, and making up random colours…\n:::"
+    },
+    {
+      "id": "random-sequence",
+      "goals": "random",
+      "content": "This story shows that we humans tend to be quite bad at coming up with\nrandom-looking data: we often underestimate unlikely events (long sequences of\nthe same colour) and overestimate likely ones (alternating colours). This can be\nused effectively to detect fraud in banking and insurance.\n\nHere you can try for yourself if you are better than the journalists: write\ndown a sequence of Rs and Bs, and find out how random it really is:\n\n    label.newspaper: input(type=\"text\", placeholder=\"RBBRRBBBRRRBRBRRB\")\n    p.text-center(style=\"margin-top: -1em; font-family: monospace\") Randomness Score: #[span.score 100]/100"
+    },
+    {
+      "id": "dealer",
+      "content": "::: column.grow\nWhile Pearson only analysed previous Roulette results, others tried to use\nmathematics to increase their chances of winning in casinos. One of these was\n[Edward Thorp](bio:thorp), who invented _card counting_ – a technique that\nallowed him to beat casinos at [Blackjack](gloss:blackjack).\n\nHe later turned his focus to Roulette: believing that, if you knew the exact\nposition and speed of the ball in a Roulette wheel, you should be able to use\nPhysics to approximately predict the outcome. After the dealer sets the roulette\nwheel spinning, there are just a few seconds when you are still allowed to place\nnew bets. Unfortunately this time is much too short for humans to calculate the\noutcome in their head.\n::: column(width=150)\n\n    .book: img(src=\"images/beat-the-dealer.jpg\" width=150 height=250)\n\n:::"
+    },
+    {
+      "id": "dealer-1",
+      "content": "img.computer(src=\"images/wearable-computer.png\" width=275 height=364)\n\nAt the Massachusetts Institute of Technology, Thorp discussed his ideas with\n[Claude Shannon](bio:shannon), another mathematician and the father of\n[information theory](gloss:information). Together they decided to build the\nfirst ever _wearable computer_, decades before the likes of Google Glass or\nApple Watch.\n\nThe computer was roughly the size of a pack of cigarettes and strapped around\ntheir waist. A set of wires ran down to their shoe, which they tapped whenever\nthe ball crossed a certain marker on the roulette wheel. That allowed the\ncomputer to calculate its speed, and predict where it would end up. Another set\nof wires led from the computer to an earpiece, which produced different tones\nbased on different outcomes."
+    },
+    {
+      "id": "dealer-2",
+      "section": "visualisation",
+      "sectionStatus": "dev",
+      "content": "figure: x-img(src=\"images/las-vegas.jpg\" alt=\"Las Vegas Strip\" width=760 height=345)\n\nDuring the summer of 1961, Thorp and Shannon successfully tried their computer\nin Las Vegas. But while they made some money, the computer – which even\ncontained parts of model airplanes – was not robust enough to be used at a\nlarger scale.\n\nThorp wrote about their results in a scientific paper, and of course, computers\nwere later forbidden in casinos. Thorp even got banned from all casinos in Las\nVegas, but by then he had already moved on to yet more profitable ventures:\nusing mathematics and computers on the stock market.\n\n    // Shannon cryptography and code-breaking during World War II, and would go\n    // on to become known as the father of information theory - and, indeed, the\n    // information age. Shannon taught him to juggle three balls, and that he\n    // rode a unicycle on a steel cable strung between two tree stumps. \"He\n    // later reached his goal,\" he wrote, \"which was to juggle the balls while\n    // riding the unicycle on the tightrope.\"\n\n\n\n--------------------------------------------------------------------------------\n\n\n\n## Data Visualisation\n\n\nTODO"
+    },
+    {
+      "section": "center-and-spread",
+      "sectionStatus": "dev",
+      "content": "## Center and Spread of Data\n\n\nTODO"
+    },
+    {
+      "section": "sampling",
+      "sectionStatus": "dev",
+      "content": "## Sampling and Estimation\n\n\nTODO"
+    },
+    {
+      "section": "wisdom-of-crowds",
+      "sectionStatus": "dev",
+      "goals": "guess",
+      "id": "guess-1",
+      "content": "## The Wisdom of Crowds\n\n\nIn this chapter, we’ll try an actual statistical experiment, where you can participate together with\nas all other Mathigon users.\n\nWhen you click the button below, we'll show you a simple question, and you have 10 seconds to\nsubmit an answer. Do not try to calculate the answer – just guess using your gut feeling:\n\n::: box\n::: column.grow\n\n__Question 1__\nHow many jelly beans are in this jar?\n\n    input.form-field()\n    button.btn Start…\n    .timer bar\n\n::: column(width=280)\n\n    x-img(src=\"\" width=280 height=320)\n\n:::\n:::"
+    },
+    {
+      "id": "guess-2",
+      "content": "We'll return to this question shortly, to see how close your guess was to the actual answer, and\nhow everyone else did. Before we do that, let's try a slightly different problem.\n\nIn this case, you'll have one minute to make a more precise estimate of the answer For example, we\ncould guess how many jelly beans are in a single \"layer\" of the jar, and then multiply that number\nby the approximate [[number of layers|height of the jar|diameter of the jat]]:\n\n::: box\n::: column.grow\n\nHow many M&Ms are in this jar?\n\n    input.form-field()\n    button.btn Start…\n    .timer bar\n\n::: column(width=280)\n\n    x-img(src=\"\" width=280 height=320)\n\n:::\n:::"
+    },
+    {
+      "id": "guess-3",
+      "content": "Now you have to make a prediction: Which of these two estimates do you think is more accurate?\n\n::: column(width=340 tabindex=\"0\")\n\n(B) Your rough calculations done in less than one minute\n\n::: column(width=340 tabindex=\"0\")\n\n(A) The average of all the answers to the first question (in less than 10 seconds), made by you and\nother users.\n\n:::"
+    },
+    {
+      "content": "Now\n\nThe answer might surprise you.\n\nACTUAL AMOUNT: XXX\nYOUR INITIAL GUESS: XXX\nA: AVERAGE OF ALL USER INITIAL GUESSES: XXX\nB: YOUR ROUGH CALCULATION: XXX\n\nTurns out the average (mean) of all user guesses is pretty accurate!\n\nEven though an individual guess might be way off, when we take many guesses from many different people and average them together we get a REALLY GOOD guess.\n\nIt’s kind of like magic and known as the wisdom of the crowd. It’s similar to what we covered in the last chapter on random sampling (link) where each human guess is like a random sample.\n\nThere might  be some really ‘good guessers’ in the crowd, who happen to be closer to the answer, but the majority of people will probably be quite far off: some will overestimate the number of beans, while others will underestimate it. Luckily,  these errors will cancel each other out. This is because for every large overestimate there is likely someone with a large underestimate. When we average these values together their average (mean) will be in the middle, near the good guesses.\n\nThat means that adding more and more guesses will make our prediction XXX [more accurate, less accurate].\n\n----\n\nAs we increase the number of people in our crowd of guessers we will get a more accurate answer.\n\nThis phenomena was popularized in the 19th Century when Francis Galton asked people at a county fair to guess the weight of an ox. When he averaged those guesses he found that it was much more accurate than the guess of a single expert.\n\nLet’s try this out one more time. Instead of an ox let’s try the biggest truck in the world (the BelAZ 75710). How heavy do you think it is?\n\nYOUR ANSWER: XXX kg\n\n[https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/BelAZ_75710.jpg/1280px-BelAZ_75710.jpg]\n\n------\nHere is the results:\n\nAVERAGE USER ANSWER: _____\n\nACTUAL ANSWER: 360,000 kg\n\nNot bad, the Mathigon users guessed within X% of the true answer!\n\nBONUS CASE STUDY: The Challenger Accident\n\nAnother place we see the wisdom of the crowds in action is in the stock market. Stock prices represent a guess of the future value of a company. We can think of each investor who buys/sells stock as making a guess that the value should be “higher” or “lower”.\n\nA famous example of this took place immediately after the tragic Challenger accident when the space shuttle crashes soon after take off.\n\nAt first, nobody knew what caused the accident, there were many different parts that could have failed and each was made by a different company. At this time investors who held stock in companies which made these parts had to make a quick decision, to sell or not. This is because the company which caused the accident would be hit with fines & bad publicity and would drop in value immediately.\n\nLet’s have a look at the prices of the top 4 component suppliers to the Space Shuttle within hours of the accident:\n\nLockheed: -5%\nMarietta: -3%\nRockwell: -5%\nThiokol: -12%\n\nWhich company do you think created the part which caused the accident? XXX\n\nIt turns out the market was right to guess Thiokol. Weeks later it was confirmed that the component made by Thiokol was the cause. They manufactured a rubber seal which froze on take off causing it to fail. Here is a short clip of physicist Richard Feynman who identified the problem long after the market predicted it.\n\nhttps://www.youtube.com/watch?v=8qAi_9quzUY\n\nSo while one of the greatest physicists of the 20th Century figured out the answer to this question in a few weeks, a collection of investors figured it out collectively much faster, in just hours.\n\nRemember the wisdom of crowds next time you have a challenging answer to solve...it may just save you some time!\n\n    // ---\n\n    // ## Spreadsheets and Frequency Tables\n\n    // > section: spreadsheets\n    // > sectionStatus: dev\n\n    // TODO"
+    },
+    {
+      "section": "linear-models",
+      "sectionStatus": "dev",
+      "content": "## Linear Models\n\n\nTODO"
+    }
+  ],
+  "title": "Statistics and Data"
+}

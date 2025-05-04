@@ -1,0 +1,32 @@
+{
+  "sections": [
+    {
+      "section": "introduction",
+      "sectionStatus": "dev",
+      "color": "\"#4757D3\"",
+      "level": "Advanced",
+      "content": "# Vectors\n\n## Introduction\n\n\n{.todo} COMING SOON"
+    },
+    {
+      "section": "arithmetic",
+      "sectionStatus": "dev",
+      "content": "## Vector Arithmetic\n\n\n{.todo} COMING SOON"
+    },
+    {
+      "section": "planes",
+      "sectionStatus": "dev",
+      "content": "## Scalar Products and Equations of Planes\n\n\n{.todo} COMING SOON"
+    },
+    {
+      "section": "lines",
+      "sectionStatus": "dev",
+      "content": "## Cross Products and Equations of Lines\n\n\n{.todo} COMING SOON"
+    },
+    {
+      "section": "geometry",
+      "sectionStatus": "dev",
+      "content": "## Geometry Problems\n\n\n{.todo} COMING SOON"
+    }
+  ],
+  "title": "Vectors"
+}

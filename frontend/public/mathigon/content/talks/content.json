@@ -1,0 +1,79 @@
+{
+  "sections": [
+    {
+      "id": "bridges",
+      "title": "The Bridges of Königsberg",
+      "section": "momath",
+      "color": "\"#A7208A\"",
+      "content": "# Talks and Workshops\n\n## MoMath Workshop\n\n\nCan you draw a path that crosses every bridge once, but _not more than once_, without entering the\nwater? You can start and end on any area of land.\n\n    x-tabbox.full-width\n      .tab\n        h3 Map 1#[span.check.incorrect(when=\"bridge-0\")]\n        x-solved\n        include ../graph-theory/svg/bridges-1.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 2#[span.check(when=\"bridge-1\")]\n        x-solved\n        include ../graph-theory/svg/bridges-2.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 3#[span.check(when=\"bridge-2\")]\n        x-solved\n        include ../graph-theory/svg/bridges-3.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 4 #[span.check.incorrect(when=\"bridge-3\")]\n        x-solved\n        include ../graph-theory/svg/bridges-4.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip"
+    },
+    {
+      "id": "utilities",
+      "title": "Three Utilities Puzzle",
+      "content": "Can you connect each of these utility companies to each of the houses, without any of the lines\nintersecting?\n\n    .box.no-padding\n      include ../graph-theory/svg/utilities.svg\n      button.btn Clear"
+    },
+    {
+      "id": "planarity",
+      "title": "Planarity Game",
+      "content": "::: .box.blue\n\n#### Planarity\n\n    x-solved\n    svg#planarity(viewBox=\"0 0 720 360\")\n\nThis is a planar graph, but the ${n}{n|7|5,20,1} vertices have been scrambled up. Rearrange the\nvertices so that none of the edges overlap.\n\n    p.btn-row: button.btn New Random Graph\n\n:::"
+    },
+    {
+      "id": "maps-1",
+      "title": "Map Colouring",
+      "content": "How many colours do you need for these maps, if adjacent countries or states cannot have the same\ncolour?\n\n    .four-colour-icons\n      for i in [1, 2, 3, 4, 5, 6, 7]\n        .four-colour-icon(tabindex=0)\n\n    x-tabbox.four-colours.full-width\n      .tab\n        h3 United States #[span.check(when=\"map-0\")]\n        x-solved\n        .colour-count(style=\"margin-bottom: -32px\") #[span 0] colours used\n        include ../graph-theory/svg/colours-1.svg\n        button.btn.clear Clear\n      .tab\n        h3 South America #[span.check(when=\"map-1\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-2.svg\n        button.btn.clear Clear\n      .tab\n        h3 Germany #[span.check(when=\"map-2\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-3.svg\n        button.btn.clear Clear\n      .tab\n        h3 England #[span.check(when=\"map-3\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-4.svg\n        button.btn.clear Clear"
+    },
+    {
+      "id": "salesman-4",
+      "title": "Travelling Salesperson Map",
+      "content": "Try rearranging the cities on this map, and watch how the shortest path between them changes. You\ncan remove cities by tapping them, and you can add cities by clicking anywhere on the map (up to 8):\n\n    figure: .tsm\n      svg(width=760 height=480 viewBox=\"0 0 760 480\")"
+    },
+    {
+      "id": "maps-v2",
+      "title": "Map Colouring",
+      "section": "mathsconf",
+      "content": "## NCTM 2021\n\n\n    .four-colour-icons\n      for i in [1, 2, 3, 4, 5, 6, 7]\n        .four-colour-icon(tabindex=0)\n\n    x-tabbox.four-colours.full-width\n      .tab\n        h3 United States #[span.check(when=\"map-0\")]\n        x-solved\n        .colour-count(style=\"margin-bottom: -32px\") #[span 0] colours used\n        include ../graph-theory/svg/colours-1.svg\n        button.btn.clear Clear\n      .tab\n        h3 South America #[span.check(when=\"map-1\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-2.svg\n        button.btn.clear Clear\n      .tab\n        h3 Germany #[span.check(when=\"map-2\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-3.svg\n        button.btn.clear Clear\n      .tab\n        h3 England #[span.check(when=\"map-3\")]\n        x-solved\n        .colour-count #[span 0] colours used\n        include ../graph-theory/svg/colours-4.svg\n        button.btn.clear Clear"
+    },
+    {
+      "title": "Three Body Problem",
+      "id": "three-bodies",
+      "content": "What happens when three plants orbit around each other in space?\n\n    figure: x-geopad.simulation.r(width=480 height=480)\n      canvas(width=960 height=960)\n      svg\n        circle.large.move.red(name=\"a\")\n        circle.large.move.blue(name=\"b\")\n        circle.large.move.green(name=\"c\")\n        path.thin(x=\"segment(a, a.translate(va))\" arrows=\"end\")\n        path.thin(x=\"segment(b, b.translate(vb))\" arrows=\"end\")\n        path.thin(x=\"segment(c, c.translate(vc))\" arrows=\"end\")\n      x-play-toggle\n      button.icon-btn.restore: x-icon(name=\"restart\")"
+    },
+    {
+      "id": "bridges-v2",
+      "title": "The Bridges of Königsberg",
+      "content": "Can you draw a path that crosses every bridge once, but _not more than once_, without entering the\nwater? You can start and end on any area of land.\n\n    x-tabbox.full-width\n      .tab\n        h3 Map 1#[span.check.incorrect(when=\"bridge-0\")]\n        x-solved\n        include ../graph-theory/svg/bridges-1.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 2#[span.check(when=\"bridge-1\")]\n        x-solved\n        include ../graph-theory/svg/bridges-2.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 3#[span.check(when=\"bridge-2\")]\n        x-solved\n        include ../graph-theory/svg/bridges-3.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip\n      .tab\n        h3 Map 4 #[span.check.incorrect(when=\"bridge-3\")]\n        x-solved\n        include ../graph-theory/svg/bridges-4.svg\n        button.btn Clear\n        button.btn.right(hidden) Skip"
+    },
+    {
+      "id": "utilities-v2",
+      "title": "Three Utilities Puzzle",
+      "content": "Can you connect each of these utility companies to each of the houses, without any of the lines\nintersecting?\n\n    .box.no-padding\n      include ../graph-theory/svg/utilities.svg\n      button.btn Clear"
+    },
+    {
+      "title": "Julia Sets",
+      "id": "julia2",
+      "content": "In this diagram, we highlight all points `pill(x_0,\"yellow\",\"x0\")` on the complex plane, for which\nthe recursive sequence `pill(x_n,\"yellow\") = pill(x_(n-1),\"yellow\")^2 + pill(c,\"red\",\"c\")` is\nbounded (it doesn't diverge).\n\n    x-geopad(width=720 height=480 x-axis=\"-1.8,1.8,1\" y-axis=\"-1.2,1.2,1\" axes grid padding=8 projections=\"no\" style=\"margin-bottom: 24px\" label-suffix=\",i\" axis-names=\"Real, Imaginary\")\n      canvas(width=1440 height=960)\n      svg\n        circle.move.yellow(name=\"x0\" x=\"point(0.5,0.5)\" target=\"x0\")\n        circle.move.red(name=\"c\" x=\"point(0,0)\" target=\"c\")\n        circle.yellow.transparent(name=\"x1\" x=\"iterate(x0,c)\" target=\"x1\")\n        circle.yellow.transparent(name=\"x2\" x=\"iterate(x1,c)\" target=\"x2\")\n        circle.yellow.transparent(name=\"x3\" x=\"iterate(x2,c)\" target=\"x3\")\n        path.yellow(x=\"spiral(x0,c)\")\n      .geo-legend\n        .formula.md `pill(x_n,\"yellow\") = pill(x_(n-1),\"yellow\")^2 + pill(var(\"complex(c)\"),\"red\",\"c\")`\n        .sequence\n          .md `pill(x_0,\"yellow\", \"x0\") = var(\"complex(x0)\")`\n          .md `pill(x_1,\"yellow\", \"x1\") = var(\"complex(x1)\")`\n          .md `pill(x_2,\"yellow\", \"x2\") = var(\"complex(x2)\")`\n          .md `pill(x_3,\"yellow\", \"x3\") = var(\"complex(x3)\")`\n          div\n            span.vdots …\n            strong.var.m-blue(:show=\"converges\" data-display=\"inline\") Bounded!\n            strong.var(:show=\"!converges\" data-display=\"inline\") Diverges!\n    x-slideshow(hidden): .legend-box: div"
+    },
+    {
+      "id": "mandel-paint",
+      "title": "The Mandelbrot Set",
+      "content": "For Julia sets, we chose a fixed value for `pill(c,\"red\",\"c\")`, and then changed the position of\n`pill(x_0,\"yellow\",\"x0\")` to colour the plane. Now let’s fix the value of\n`pill(x_0 = 0,\"yellow\",\"x0\")`, and instead change the value of `pill(c,\"red\",\"c\")`:\n\n    figure: x-geopad.no-background(width=720 height=480 x-axis=\"-2.1,1.1,1\" y-axis=\"-1.1,1.1,1\" axes grid padding=8 projections=\"no\" label-suffix=\",i\" axis-names=\"Real, Imaginary\")\n      img(src=\"/content/fractals/images/mandelbrot.png\" data-bounds=\"1,0.5,-1,-1.5\")\n      canvas(width=1440 height=960 style=\"opacity: 1\")\n      svg\n        circle.move.red.pulsate(name=\"c\" cx=0 cy=0 target=\"c\")\n        circle.yellow.transparent(name=\"x0\" x=\"point(0,0)\" target=\"x0\")\n        circle.yellow.transparent(name=\"x1\" x=\"iterate(x0,c)\" target=\"x1\")\n        circle.yellow.transparent(name=\"x2\" x=\"iterate(x1,c)\" target=\"x2\")\n        circle.yellow.transparent(name=\"x3\" x=\"iterate(x2,c)\" target=\"x3\")\n        path.yellow(x=\"spiral(x0,c)\")\n      .geo-legend\n        .formula.md `pill(x_n,\"yellow\") = pill(x_(n-1),\"yellow\")^2 + pill(var(\"complex(c)\"),\"red\",\"c\")`\n        .sequence\n          .md `pill(x_0,\"yellow\", \"x0\") = var(\"complex(x0)\")`\n          .md `pill(x_1,\"yellow\", \"x1\") = var(\"complex(x1)\")`\n          .md `pill(x_2,\"yellow\", \"x2\") = var(\"complex(x2)\")`\n          .md `pill(x_3,\"yellow\", \"x3\") = var(\"complex(x3)\")`\n          div\n            span.vdots …\n            strong.var.m-blue(:show=\"converges\" data-display=\"inline\") Bounded!\n            strong.var(:show=\"!converges\" data-display=\"inline\") Diverges!"
+    },
+    {
+      "id": "mandel-zoom",
+      "title": "Mandelbrot Zoom",
+      "content": "Like all fractals, we can “zoom into” the Mandelbrot set forever, finding new patterns at every\nscale. Here you can zoom into a part of the Mandelbrot set called the __Seahorse valley__:\n\n    .mandel-frame\n      - i = 1;\n      while i <= 27\n        img(src=\"/content/fractals/images/mandel/mandel-\" + i + \".jpg\" width=760 height=500)\n        - i += 1;\n      .scale.var Scale: ${pow(scale)}\n    x-slider(steps=27 continuous speed=0.1 :bind=\"scale\")"
+    },
+    {
+      "id": "fractal-builder",
+      "title": "The Chaos Game",
+      "content": "The __chaos game__ is a way to generate fractals using a simple rule. You start with a point,\nrepeatedly pick a random vertex of a polygon, and then mark the midpoint of the line from your\noriginal point to that vertex. Then you continue from that new point. What shapes can you make?\n\n    include ../fractals/components/chaos-game"
+    },
+    {
+      "id": "circles",
+      "title": "Apollonian Gasket",
+      "section": "alex",
+      "content": "## Alex Kontorovich\n\nCan you place all smaller circles inside the big one?\n\n    svg.circles(width=600 height=600 viewBox=\"0 0 320 320\")\n      circle.outer(cx=160 cy=160 r=108.07)"
+    }
+  ],
+  "title": "Talks and Workshops"
+}

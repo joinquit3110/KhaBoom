@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "section": "spherical",
+      "url": "/world/Dimensions_and_Distortions#spherical",
+      "color": "\"#6D3BBF\"",
+      "level": "Intermediate",
+      "content": "# Non-Euclidean Geometry\n\n## Spherical Geometry\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "maps",
+      "url": "/world/Dimensions_and_Distortions#projections",
+      "content": "## Map Projections\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "hyperbolic",
+      "url": "/world/Dimensions_and_Distortions#hyperbolic",
+      "content": "## Hyperbolic Geometry\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "metric",
+      "url": "/world/Dimensions_and_Distortions#metric",
+      "content": "## Metric Spaces\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "topology",
+      "url": "/world/Dimensions_and_Distortions#topology",
+      "content": "## Topology\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "dimensions",
+      "sectionStatus": "dev",
+      "content": "## Higher Dimensions\n\n\n{.todo} Coming Soon!"
+    }
+  ],
+  "title": "Non-Euclidean Geometry"
+}

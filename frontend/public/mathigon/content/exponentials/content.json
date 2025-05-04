@@ -1,0 +1,90 @@
+{
+  "sections": [
+    {
+      "section": "carbon-dating",
+      "id": "egypt",
+      "color": "\"#EF551E\"",
+      "level": "Intermediate",
+      "next": "probability",
+      "content": "# Exponential Functions\n\n## Carbon Dating\n\n\n::: column.grow\n\nA group of archaeologists has discovered a new tomb in the Egyptian desert.\nThey carefully open the hidden entrance, climb through several rooms filled with\nancient treasures, until they arrive in the burial chamber. The sarcophagus\nis still sealed and contains the mummy of a Pharaoh.\n\nAfter cataloguing every item in the tomb and carefully transporting them to a\nnearby museum, they try to answer their most pressing question: who is this\nPharaoh, and when did he die?\n\n::: column(width=300)\n\n    x-img(src=\"images/egypt.jpg\" alt=\"Egyptian Tomb\" lightbox width=300 height=312)\n\n:::\n\nUnfortunately, none of the drawings and inscriptions on the walls of the tomb\nseem to contain any names or dates. However, there is an ingenious method to\naccurately determine the age of ancient artefacts like mummies or fossils,\nwhich solely relies on physics and mathematics: __Carbon dating__.\n[Continue](btn:next)"
+    },
+    {
+      "id": "carbon-1",
+      "content": "figure: x-img(src=\"images/sarcophagus.jpg\" alt=\"Egyptian Sarcophagus\" width=600 height=180)\n\nAll living organisms on Earth – plants, animals and humans – contain carbon\n[atoms](gloss:atom). Usually, the core of a carbon atom consists of six\n[protons](gloss:proton) and six [neutrons](gloss:neutron), but a small\nproportion of carbon atoms contain additional neutrons. These different\n“variants” of carbon are called __isotopes__:\n\n::: column(width=170)\n\n    x-atom(protons=6 neutrons=6 size=150)\n\n{.text-center} __Carbon-12__<br>\n6 protons, 6 neutrons<br>\n98.8%\n\n::: column(width=170)\n\n    x-atom(protons=6 neutrons=7 size=150)\n\n{.text-center} __Carbon-13__<br>\n6 protons, 7 neutrons<br>\n1.1%\n\n::: column(width=170)\n\n    x-atom(protons=6 neutrons=8 size=150)\n\n{.text-center} __Carbon-14__<br>\n6 protons, 8 neutrons<br>\n0.1%\n\n:::\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "carbon-2",
+      "content": "The proportion at which these isotopes occur is almost exactly the same,\neverywhere on Earth – and this will be very important later. In our example, we\nare particularly interested in carbon-14, which is abbreviated as <sup>14</sup>C.\nIt contains 6 protons and 8 neutrons, and it is created when cosmic rays coming\nfrom outer space hit particles high in our atmosphere.\n\nAny sample of carbon atoms consists of [[0.1]]% of these special <sup>14</sup>C atoms. You might\nthink that this is an insignificant amount, but your body contains around `8 × 10^26` carbon atoms,\nwhich means that you also contain around `8 × 10^23` carbon-14 atoms. That’s almost a\nmillion-million-million-million atoms!\n\n    // Carbon is an essential part of our body, because it can form long,\n    // complex molecules."
+    },
+    {
+      "id": "radioactive-1",
+      "goals": "decay",
+      "content": "::: column(width=300)\n\n    .decay-box\n      x-atom(protons=6 neutrons=8 size=68 style=\"cursor: pointer;\")\n      x-atom(hidden protons=7 neutrons=7 size=68 style=\"left: 100px\")\n      x-atom(hidden protons=1 color=\"fd8c00\" size=68 style=\"left: 178px\")\n      x-atom(hidden protons=1 color=\"22ab24\" size=68 style=\"left: 244px\")\n      .label #[strong Carbon-14]#[br]6 protons#[br]8 neutrons\n      .label(hidden style=\"left: 100px\") #[strong Nitrogen]#[br]7 protons#[br]7 neutrons\n      .label(hidden style=\"left: 178px\"): strong Antineutrino\n      .label(hidden style=\"left: 244px\"): strong Electron\n      .operator(hidden style=\"left: 76px\") →\n      .operator(hidden style=\"left: 176px\") +\n      .operator(hidden style=\"left: 240px\") +\n    x-gesture(target=\".decay-box x-atom\")\n\n{.caption}\n\n::: column.grow\n\nCarbon-14 is useful because it is [__radioactive__](gloss:radioactive). The\natom is unstable, and it might __decay__ into other, more stable elements. We\nare actually surrounded by many radioactive materials, but their concentration\nis not high enough to be dangerous.\n\n:::"
+    },
+    {
+      "id": "radioactive-2",
+      "content": "::: column.grow\n\nDuring our life, as we eat and breathe, our body absorbs <sup>14</sup>C atoms.\nWhen we die, we stop absorbing new <sup>14</sup>C atoms, and the ones that are\nalready in our body slowly start to [[decay|multiply|disappear]].\n\n{.reveal(when=\"blank-0\")} All radioactive elements decay at a very predictable\nrate – this is determined by their __half-life__. Carbon-14, for example, has a\nhalf-life of approximately 6,000 years. This means that if you have a block of\n<sup>14</sup>C atoms, it will take 6,000 years for half of them to decay. After\nanother 6,000 years, half of the remaining atoms will have also decayed, so\nyou’re left with just [[a quarter|a third|1/8|none]] of the original amount.\n\n::: column(width=220)\n\n    x-img(src=\"images/atom.jpg\" alt=\"Atom\" width=220 height=310)\n\n:::"
+    },
+    {
+      "id": "radioactive-table-1",
+      "content": "Let’s assume we start with a block of 1,200 carbon-14 atoms. Using the half-life,\nwe can calculate the remaining amount of <sup>14</sup>C atoms over time:\n\n::: .overflow-wrap.overflow-table\n\n|            | _{div.col}_ | _{div.col.c1}_ | _{div.col.c2}_ | _{div.col.c3}_ | _{div.col.c4}_ |\n| __Years__  | 0           | 6000           | 12,000         | 18,000         | 24,000         |\n| __Amount__ | 1200        | [[600]]        | [[300]]        | [[150]]        | [[75]]         |\n{.grid.col-grid}\n\n:::"
+    },
+    {
+      "id": "radioactive-table-2",
+      "content": "As you can see, we’re multiplying by `§1/2` at every step, just like a\n[[geometric|arithmetic|Fibonacci]] sequence."
+    },
+    {
+      "id": "radioactive-equation",
+      "content": "Using exponents, we can write down an equation for the amount left after `t` years:\n\n{.text-center} `§\"amount\" = 1200 × (1/2)^(t/6000)`\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "radioactive-equation-1",
+      "content": "Of course, 1200 and 6000 were just arbitrary numbers. A more general equation\nis:\n\n::: x-algebra-flow\n\n`\"amount\" = \"initial\" × (1/2)^(t/\"half-life\")`\n\n* Using the exponents laws, we can flip the fraction `1/2` into a 2, if we\n  multiply the exponent by `–1`.\n* {.new-row} This equation describes how many atoms are left after _t_ number of\n  years.\n\n:::"
+    },
+    {
+      "id": "radioactive-chart",
+      "content": "Since the equation contains an _exponent_ and the number of atoms _decreases_,\nwe call this process __exponential decay__.\n\nWe can plot the amount of <sup>14</sup>C atoms over time in a coordinate system.\nIf we start with an initial amount of ${format(x0)}{x0|3000|100,4000,100} atoms,\nand the half-life is ${format(hl)}{hl|5000|200,10000,200} years, then the decay\nlooks like this:\n\n    x-coordinate-system(width=600 height=400 x-axis=\"0,18000\" y-axis=\"0,4000\" axis-names=\"Years,Carbon-14 Atoms\" padding=\"20 20 20 40\")"
+    },
+    {
+      "id": "radioactive-chart-2",
+      "content": "The points on the graph show when the number of atoms has halved. Notice that\nwe can calculate the remaining number of atoms at _any point in time_, not just\nthese specific intervals. This is the main difference compared to geometric\nsequences.\n\nThe decay of radioactive atoms is random, and it is impossible to predict\n_when exactly_ an individual <sup>14</sup>C is going to decay. The graph shows\nthe _average_ number of atoms we _expect_ to be left at a specific time. That’s\nalso why the remaining number of atoms might not always be an integer – even\nthough you can’t have “half an atom”. You will learn more about this in our\n[course on probability](/course/probability/randomness).\n[Continue](btn:next)"
+    },
+    {
+      "id": "spectrometer",
+      "content": "::: column.grow\n\nNow we have all the information needed to determine the age of the Pharaoh. The\narchaeologists decided to cut a tiny sample out of the mummy’s skin. Using a\ncomplex machine called a __mass spectrometer__, they were able to “count” the\nnumber of <sup>12</sup>C and <sup>14</sup>C atoms in the sample.\n\nIn our example, they found 800 carbon-14 atoms. Given the ratios of\n<sup>12</sup>C and <sup>14</sup>C atoms, they also estimate that the same\nsample should have contained 1200 <sup>14</sup>C atoms when the Pharaoh was\nstill alive.\n\n::: column(width=320)\n\n    x-img(src=\"images/spectrometer.jpg\" alt=\"Accelerator Mass Spectrometer\" lightbox width=320 height=280)\n\n{.caption} Accelerator Mass Spectrometer in the Oxford Radiocarbon Accelerator Unit\n\n:::\n\nAll we have to do now is calculate how long it takes for the 400 missing\n<sup>14</sup>C atoms to decay. That number is precisely the [[time since the\nPharaoh died|age of the Pharaoh when he died]]."
+    },
+    {
+      "id": "carbon-solver",
+      "content": "We can use the equation we found above and fill in the required parameters:\n\n::: x-algebra-flow\n\n`input(1200,\"initial\") × 2^((-t)/input(6000,\"half-life\")) = input(800,\"amount\")`\n\n* Fill in the three parameters from above!\n* Let’s start by dividing both sides of the equation by 1200.\n* {.new-row} We can find the decimal value of the fraction on the right-hand\n  side of the equation.\n* Now, we have to deal with the exponent on the left-hand side. To do that, we\n  can use a special function called the __Logarithm__, which you’ll learn more\n  about later.\n* {.new-row} Using a calculator, we can find the value of `log_2(0.667)`.\n* {.new-row} The rest should be simple: let’s multiply both sides of the\n  equation by 6000.\n* {.new-row} We can simplify the right-hand side of the equation.\n* We can also remove the – sign on both sides of the equation.\n* Thus, we see that it takes 3510 years for the required number\n  of <sup>14</sup>C atoms to decay.\n\n:::"
+    },
+    {
+      "id": "carbon-end-1",
+      "content": "::: column(width=280)\n\n    x-img(src=\"images/mummy.jpg\" alt=\"Egyptian Mummy\" lightbox width=280 height=170)\n\n::: column.grow\n\nThis means that the Pharaoh died approximately 3510 years ago, or in\n[[1490 ± 10]] BC. This time period was the beginning of the _New Kingdom_ in\nEgyptian history: a “golden age” which marked the peak of Egypt’s power. And all\nwe needed was a tiny piece of skin tissue, together with clever mathematics!\n\n:::"
+    },
+    {
+      "id": "carbon-end-2",
+      "content": "Geologists and biologists can use the same method to determine the age of\nfossils. This helps them understand when certain layers of rock in our Earth’s\ncrust formed, or the evolutionary ancestry between extinct animals.\n\nCarbon dating was developed in the late 1940s at the University of Chicago, by\nWillard Libby, who received the Nobel Prize in Chemistry for his work in 1960.\nIt has become an indispensable method in many areas of science.\n\n    figure: x-img(src=\"images/dinosaur.jpg\" alt=\"Fossil\" width=760, height=360)\n\nNote that we have greatly simplified the process of carbon dating in this\nchapter. There are many other things to consider, such as sample contamination,\nor how the concentration of carbon-14 in our atmosphere has changed over time."
+    },
+    {
+      "section": "growth-decay",
+      "sectionStatus": "dev",
+      "content": "## Exponential Growth and Decay\n\n\n    img.text-wrap(src=\"images/fossil.jpg\" style=\"shape-outside: url(images/fossil.png)\" width=320 height=295)\n\nIn the previous section, we looked at the __exponential decay__ of radioactive\nmaterials, and how it can help scientists determine the age of fossils and\nmummies using carbon dating. But there are also some things that behave in\nexactly the opposite way: they _grow_ exponentially.\n\n{.todo} TODO"
+    },
+    {
+      "section": "comparing-models",
+      "sectionStatus": "dev",
+      "content": "## Comparing Models\n\n\nRadioactive decay follows a _constant rate_: during equal time intervals, the\nnumber of atoms changes by a __fixed proportion__{.red} (e.g. 50%). This gives\nrise to an __exponential model__{.red}, either exponential growth or\nexponential decay.\n\nExponential models are very different from __linear models__{.blue}, where the\nvalue changes by a __fixed value__{.blue} during equal time intervals.\n\ndiagram {.todo}\n\nHere are a few examples of processes in nature or everyday life. Try to decide\nwhich ones are exponential or linear. (Note that some models are increasing,\nand others are decreasing.)\n\n{.todo} cell division\n\n{.todo} interest\n\n{.todo} speed of computers, Moore's Law"
+    },
+    {
+      "section": "compound-interest",
+      "sectionStatus": "dev",
+      "content": "## Compound Interest\n\n\nTODO"
+    },
+    {
+      "section": "population-dynamics",
+      "sectionStatus": "dev",
+      "content": "## Population Dynamics\n\n\nTODO"
+    }
+  ],
+  "title": "Exponential Functions"
+}

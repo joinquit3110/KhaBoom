@@ -1,0 +1,127 @@
+{
+  "sections": [
+    {
+      "id": "intro",
+      "section": "introduction",
+      "description": "Cards, dice, roulette and game shows – probability is one of the most fun areas of mathematics, full of surprises and real life applications.",
+      "color": "\"#CD0E66\"",
+      "level": "Intermediate",
+      "next": "statistics",
+      "content": "# Probability\n\n## Introduction\n\n    // SOURCES\n    // http://onlineroulette.org.uk/stories/karl-pearson/\n    // http://www.eprisner.de/MAT109/FermatPascal.html\n    // http://mathforum.org/isaac/problems/prob1.html\n    // https://en.wikipedia.org/wiki/Penney%27s_game\n    // https://en.wikipedia.org/wiki/Edward_O._Thorp\n    // http://edwardothorp.com/id26.html\n\n\nProbabilities and likelihoods are everywhere around us, from weather forecasting\nto games, insurance or election polls. However, in the history of mathematics,\nprobability is actually a very recent idea. While numbers and geometry were\nstudied by ancient Greek mathematicians more than 2500 years ago, the concepts\nof probability only emerged in the 17th and 18th century.\n\n::: column.grow\nAccording to legend, two of the greatest mathematicians, [Blaise\nPascal](bio:pascal) and [Pierre de Fermat](bio:fermat), would regularly meet up\nin a small cafe in Paris.\n\nTo distract from the difficult mathematical theories they were discussing, they\noften played a simple game: they repeatedly tossed a coin – every _heads_ was a\npoint for Pascal and every _tails_ was a point for Fermat. Whoever had fewer\npoints after three coin tosses had to pay the bill.\n::: column(width=360)\n\n    img(src=\"images/paris.jpg\" width=360 height=254)\n\n:::\n\nOne day, however, they get interrupted after the first coin toss and Fermat has\nto leave urgently. Later, they wonder who should pay the bill, or if there is a\nfair way to split it. The first coin landed _heads_ (a point for Pascal), so\nmaybe Fermat should pay everything. However, there is a small chance that Fermat\ncould have still won if the [[two next tosses|next coin toss]] had been _tails_."
+    },
+    {
+      "id": "intro-1",
+      "content": "Pascal and Fermat decided to write down all possible ways the game could have\ncontinued:\n\n::: column.grow(width=120)\n\n    img(src=\"images/coins-1.png\" width=136 height=48 alt=\"HHH\")\n\n{.caption} Pascal wins\n::: column.grow(width=120)\n\n    img(src=\"images/coins-2.png\" width=136 height=48 alt=\"HHT\")\n\n{.caption} Pascal wins\n::: column.grow(width=120)\n\n    img(src=\"images/coins-3.png\" width=136 height=48 alt=\"HTH\")\n\n{.caption} Pascal wins\n::: column.grow(width=120)\n\n    img(src=\"images/coins-4.png\" width=136 height=48 alt=\"HTT\")\n\n{.caption} Fermat wins\n:::\n\nAll four possible outcomes are equally likely, and Pascal wins in\n[[three|four|two]] of them. _{span.reveal(when=\"blank-0\")}Thus they decided that\nFermat should pay 3/4 of the bill and Pascal should pay 1/4._"
+    },
+    {
+      "id": "intro-2",
+      "content": "Pascal and Fermat had discovered the first important equation of probability: if\nan experiment has multiple possible outcomes which are all equally likely, then\n\n{.text-center} Probability of an event =\n`\"Number of ways the event could happen\"/\"Total number of possible outcomes\"`.\n\nIn our example, the probability of Pascal winning the game is `3/4 = 0.75`, and\nthe probability of Fermat winning the game is `1/4 = 0.25`."
+    },
+    {
+      "id": "prob-line",
+      "content": "### What are Probabilities\n\n\nA __probability__ is a number between 0 and 1 which describes the likelihood of\na certain __event__. A probability of 0 means that something is _impossible_; a\nprobability of 1 means that something is _certain_.\n\nFor example, it is [[impossible|certain]] that you will meet a real life dragon,\nand it is [[certain|impossible]] that the sun will rise tomorrow. The\nprobability of a coin landing _heads_ is exactly [[in the middle|the same]].\n\n{.reveal(when=\"blank-0 blank-1 blank-2\")} The probability of rolling a 6 on a\ndie, or picking a particular suit from a deck of cards is [[less|more]] than 0.5\n– which means unlikely. The probability of a good football team winning a match,\nor of a train arriving on time is [[more|less]] than 0.5 – which means likely.\n\n    .p-line.clearfix\n      img.reveal(src=\"images/line-1.png\" width=140 height=140 style=\"width: 18.42%\" when=\"blank-0\" animation=\"pop\" alt=\"dragon\")\n      img.reveal(src=\"images/line-2.png\" width=140 height=140 style=\"width: 10.53%\" when=\"blank-3\" animation=\"pop\" alt=\"dice\")\n      img.reveal(src=\"images/line-3.png\" width=140 height=140 style=\"width: 15.79%\" when=\"blank-3\" animation=\"pop\" delay=\"300\" alt=\"cards\")\n      img.reveal(src=\"images/line-4.png\" width=140 height=140 style=\"width: 11.84%\" when=\"blank-2\" animation=\"pop\" alt=\"coins\")\n      img.reveal(src=\"images/line-5.png\" width=140 height=140 style=\"width: 11.84%\" when=\"blank-4\" animation=\"pop\" alt=\"football\")\n      img.reveal(src=\"images/line-6.png\" width=140 height=140 style=\"width: 17.11%\" when=\"blank-4\" animation=\"pop\" delay=\"300\" alt=\"train\")\n      img.reveal(src=\"images/line-7.png\" width=140 height=140 style=\"width: 14.47%\" when=\"blank-1\" animation=\"pop\" alt=\"sun\")\n      img(src=\"images/line-8.png\" width=760 height=40 style=\"width: 100%\")"
+    },
+    {
+      "id": "prob-line-1",
+      "content": "Now drag the following events into the correct order, from likely to unlikely:\n\n    x-sortable\n      .item.md(data-index=\"3\") You throw a die :game-die: and it lands on 6.\n      .item.md(data-index=\"5\") Penguins :penguin: live on the North Pole.\n      .item.md(data-index=\"1\") It’s going to rain :cloud-with-rain: in November.\n      .item.md(data-index=\"0\") A baby will be born in China today. :baby-bottle:\n      .item.md(data-index=\"4\") You buy a lottery ticket and win the Jackpot :party-popper:.\n      .item.md(data-index=\"2\") A newborn baby will be a girl :girl:.\n\nWe often use probabilities and likelihoods in everyday life, usually without\nthinking about it. What is the chance of rain tomorrow? How likely is it that I\nwill miss the bus? What is the probability I will win this game?"
+    },
+    {
+      "id": "prob-line-2",
+      "content": "Tossing a (fair) coin has two possible outcomes, _heads_ and _tails_, which are\nboth equally likely. According to the equation above, the probability of a coin\nlanding _heads_ must be `1/2` = 0.5, or 50%.\n\n    // TODO However, the equation is not very helpful if the different outcomes\n    // are not all equally likely, or if there are infinitely many possible outcomes.\n\nNote that this probability is _in between_ 0 and 1, even though only one of the\noutcomes can actually happen. But probabilities have very little to do with\nactual results: if we toss a coin many times we know that\n[[approximately half|exactly half|all|none]] of the results are heads – but we\nhave no way of predicting _exactly which_ tosses landed heads.\n\nEven events with tiny probabilities (like winning the lottery :party-popper:) _can\nstill happen_ – and they _do happen_ all the time (but to a very small\nproportion of the people who participate)."
+    },
+    {
+      "id": "prob-line-3",
+      "content": "Probabilities also depend on how much each of us knows about the event. For\nexample, you might estimate that the chance of rain today is about 70%, while a\nmeteorologist with detailed weather data might say the chance of rain is 64.2%.\n\nOr suppose that I toss a coin and cover it up with my hands – the probability of\ntails is 50%. Now I peek at the result, but don’t tell you. I know for certain\nwhat has happened, but for you the probability is [[still 50%|100%|not 50%]]."
+    },
+    {
+      "id": "prob-line-4",
+      "content": "There are many different ways to think about probabilities, but in practice they\noften give the same results:\n\n::: column(width=230 parent=\"padded-thin\")\n\n    img(src=\"images/classical.png\" width=240 height=75 alt=\"classical probability\")\n\n{.text-center} The __classical__ probability of landing heads is the proportion\nof _possible outcomes_ that are heads.\n::: column(width=230)\n\n    img(src=\"images/frequentist.png\" width=240 height=75 alt=\"frequentist probability\")\n\n{.text-center} The __frequentist__ probability is the proportion of heads we get\nif we toss the coin _many times_.\n::: column(width=230)\n\n    img(src=\"images/subjectivist.png\" width=240 height=75 alt=\"subjectivist probability\")\n\n{.text-center} The __subjectivist__ probability tells us how strongly we\n_believe_ that the coin will land heads.\n:::\n\n    // TODO Notice that subjectivist probabilities may be different for\n    // different people – often depending on how much they know.\n\nRemember that while probabilities are great for _estimating and forecasting_, we\ncan never tell what _actually_ will happen."
+    },
+    {
+      "id": "future",
+      "content": "### Predicting the Future\n\n\nIf we roll a die, the result is a number between 1 and 6, and all outcomes are\nequally likely. If we roll two dice at once and add up their scores we can get\nresults from [[2]] up to [[12]]. However, in this case they are not all equally\nlikely.\n\n    include mixins\n    p.md Some results can only happen one way (to get #[span.dice.outline 12] you have to roll #[span.dice #[+dice(6)]] + #[span.dice #[+dice(6)]]) while others can happen in multiple different ways (to get #[span.dice.outline 5] you could roll #[span.dice #[+dice(1)]] + #[span.dice #[+dice(4)]] or #[span.dice #[+dice(2)]] + #[span.dice #[+dice(3)]])."
+    },
+    {
+      "id": "future-1",
+      "content": "This table shows all possible outcomes:\n\n    include mixins\n    table.dice-table\n      tr\n        td #[.dice.outline 2]\n        td #[.dice.outline 3]\n        td #[.dice.outline 4]\n        td #[.dice.outline 5]\n        td #[.dice.outline 6]\n        td #[.dice.outline 7]\n        td #[.dice.outline 8]\n        td #[.dice.outline 9]\n        td #[.dice.outline 10]\n        td #[.dice.outline 11]\n        td #[.dice.outline 12]\n      tr\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(1)]]\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(2)]]\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(3)]]\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(4)]]\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(5)]]\n        td #[.dice #[+dice(1)]] #[.dice #[+dice(6)]]\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(6)]]\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(6)]]\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(6)]]\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(6)]]\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(6)]]\n      tr\n        td\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(1)]]\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(2)]]\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(3)]]\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(4)]]\n        td #[.dice #[+dice(2)]] #[.dice #[+dice(5)]]\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(5)]]\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(5)]]\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(5)]]\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(5)]]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(1)]]\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(2)]]\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(3)]]\n        td #[.dice #[+dice(3)]] #[.dice #[+dice(4)]]\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(4)]]\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(4)]]\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(4)]]\n        td(colspan=2)\n      tr\n        td(colspan=3)\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(1)]]\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(2)]]\n        td #[.dice #[+dice(4)]] #[.dice #[+dice(3)]]\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(3)]]\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(3)]]\n        td(colspan=3)\n      tr\n        td(colspan=4)\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(1)]]\n        td #[.dice #[+dice(5)]] #[.dice #[+dice(2)]]\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(2)]]\n        td(colspan=4)\n      tr\n        td(colspan=5)\n        td #[.dice #[+dice(6)]] #[.dice #[+dice(1)]]\n        td(colspan=5)\n\nThe most likely result when rolling two dice is _{span.dice.outline}7_. There\nare [[6]] outcomes where the sum is 7, and [[36]] outcomes in total,\n_{span.reveal(when=\"blank-0 blank-1\")}so the probability of getting a 7 is\n`6/36 = 0.1666`._"
+    },
+    {
+      "id": "future-2",
+      "content": "The least likely outcomes are _{span.dice.outline}2_ and _{span.dice.outline}12_,\neach with a probability of `1/36 = 0.0277`.\n\nIt is impossible to forecast the outcome of a single coin toss or die roll.\nHowever, using probability we can very accurately predict the outcome of _many_\ndice.\n\nIf we throw a die 30 times, we know that we would get around `1/6 × 30 = 5`\nsixes. If we roll it 300 times, there will be around `1/6 × 300 = 50` sixes.\nThese predictions get more and more accurate as we repeat the predictions more\nand more often."
+    },
+    {
+      "id": "dice-simulation",
+      "goals": "roll",
+      "title": "Rolling Dice",
+      "content": "In this animation you can roll many “virtual” dice at once and see how the\nresults compare to the predicted probabilities:\n\n::: .box.red\n\n#### Rolling Dice\n\n    .probTable.var(:html=\"probTable(d)\")\n\nWe roll ${d}{d|2|1,6,1} dice at once and record the _{span.dice(style=\"width: auto; padding: 0 4px;\")} SUM_\nof their scores. The __{.m-green} green lines__ represent the probabilities of every possible\noutcome predicted by probability theory and the __{.m-blue} blue bars__ show how often each outcome\nhappened in this computer generated experiment.\n\n    p.btn-row.no-voice\n      button.btn Roll once\n      button.btn Roll 100 times\n      button.btn Roll 1000 times\n\n:::\n\n{.reveal(when=\"roll\")} Notice how, as we roll more and more dice, the observed\nfrequencies become closer and closer to the frequencies we predicted using\nprobability theory. This principle applies to all probability experiments and is\ncalled the __law of large numbers__.\n\n{.reveal(when=\"roll\")} Similarly, as we increase the number of dice rolled at\nonce, you can also see that the probabilities change from a straight line (one\ndie) to a triangle (two dice) and then to a “bell-shaped” curve. This is known\nas the __central limit theorem__, and the bell-shaped curve is called the\n__normal distribution__."
+    },
+    {
+      "section": "trees",
+      "sectionStatus": "dev",
+      "content": "## Probability Trees and Venn Diagrams\n\n\n{.todo} TODO"
+    },
+    {
+      "id": "galton-board",
+      "content": "::: .box.red\n#### Galton Board\n\nHere is a Galton Board:\n\n    figure\n      svg(width=400 height=445).galton\n      .ballTable.var(:html=\"ballTable(rows, p)\")\n    p.btn-row.no-voice\n      button.btn Drop one ball\n      button.btn Drop 10 balls\n      button.btn Drop 100 balls\n\nThe Galton Board has ${rows}{rows|8|2,9,1} rows. The probability the ball bounces to the **right** is ${p}{p|0.5|0,1,0.1}.\n:::"
+    },
+    {
+      "section": "conditional",
+      "sectionStatus": "dev",
+      "content": "## Conditional Probability\n\n\nTODO"
+    },
+    {
+      "content": "Sort these events into whether they are independent or not:\n\n    x-buckets.independent\n      .inputs\n        .input(bucket=\"0\") Winning the lottery and running out of milk.\n        .input(bucket=\"1\") Boarding a plane first and finding a good seat.\n        .input(bucket=\"0\") Owning a dog and growing your own herb garden.\n        .input(bucket=\"0\") Getting a parking ticket and winning the lottery.\n        .input(bucket=\"1\") Robbing a bank and going to jail.\n        .input(bucket=\"1\") Driving a car and having a traffic accident.\n      .buckets\n        .bucket\n          .title Independent\n        .bucket\n          .title Dependent"
+    },
+    {
+      "id": "monty-hall",
+      "sectionBackground": "dark gameshow",
+      "goals": "game",
+      "section": "monty-hall",
+      "content": "## The Monty Hall Problem\n\n\nWelcome to the most spectacular game show on the planet! You now have a\nonce-in-a-lifetime chance of winning a fantastic sports car which is hidden\nbehind one of these three doors. Unfortunately, there are only goats behind the\nother two doors. Select one to make your choice!\n\n    .monty-hall.selectable\n      .door-box: .door\n      .door-box: .door\n      .door-box: .door\n      .floor\n\n{.monty-reveal} Are you sure about that? You can still change your mind and\nselect a different door…\n\n    p.text-center.monty-reveal: button.btn.sure I’m sure!\n\n{.monty-reveal} A great choice, but let me make life a little easier for you.\nI’ll open one of the other doors with a goat, so that there are only two doors\nleft for you to pick from. Do you want to stick with your choice, or do you want\nto swap?\n\n    p.text-center.monty-reveal\n      button.btn.swap I want to stay!\n      button.btn.swap I want to swap!\n\n{.monty-reveal} Ok – let’s see how you did…\n\n    p.text-center.monty-reveal: button.btn.show Open the doors…\n\n{.monty-reveal} _{span.monty-option}Looks like you made the right choice.\nCongratulations, you just won a beautiful new sports car!_\n_{span.monty-option.hidden} Sorry – it seems like this time you only won a\ngoat. But don’t worry, you can play again!_\n\n    p.text-center.monty-reveal: button.btn.reset Replay game"
+    },
+    {
+      "id": "monty-hall-1",
+      "content": "If you play this game many times, you’ll notice that you’re more likely to win\nif you [[swap|don’t swap]] after the first door is opened,\n_{.reveal(when=\"blank-0\")}rather than sticking with your initial choice._\n\n{.reveal(when=\"blank-0\")} But how can this be – surely the car is equally likely\nto be behind each of the two remaining doors?"
+    },
+    {
+      "id": "monty-hall-2",
+      "content": "The explanation is very subtle. When you pick the initial door, the probability\nof being correct is `1/3` and the probability of being wrong is `2/3`.\n\n    p.text-center: include svg/monty-1.svg"
+    },
+    {
+      "id": "monty-hall-3",
+      "content": "After the game master opens one of the other doors, the probability of being\nwrong is _still_ `2/3`, except now all this probability is on just one door.\nThis means that swapping doors [[doubles|triples|halves]] your chance of winning.\n\n    p.text-center: include svg/monty-2.svg"
+    },
+    {
+      "id": "monty-hall-4",
+      "content": "Even if this doesn’t seem very intuitive, we can prove that it is correct –\nsimply by listing all different possibilities:\n\n    figure: img(src=\"images/monty.png\" width=694 height=468)\n\nOut of the 9 possibilities, there are [[6]] where you need you to switch doors, in order to win.\nThis gives a  chance of `6/9 = 2/3` like before."
+    },
+    {
+      "section": "birthdays",
+      "sectionStatus": "dev",
+      "content": "## The Birthday Problem\n\n\nTODO"
+    },
+    {
+      "id": "quantum",
+      "section": "randomness",
+      "content": "## True Randomness\n\n\n::: column.grow\nMost of this course relied on the fact that things like coins, or dice, or\nroulette wheels are completely random. However, that is not really true – we\nalready learned that Edward Thorpe managed to predict the outcome of roulette.\n\nSuppose we toss a coin: the chance of it landing heads is 0.5. If we knew which\nway the coin was facing just before it left the hand, we might be able to make a\nslightly better prediction, such as 0.58 or 0.41. If we also knew the weight and\nsize of the coin, and the angle, position and speed as it left the hand, we\ncould use the laws of physics – gravity, friction and air resistance – to model\nthe motion of the coin and to predict the outcome. Finally, if we knew the exact\nposition of every atom in the coin and of all the air molecules surrounding it,\nwe could create a computer simulation to accurately predict what will happen.\n::: column(width=240)\n\n    x-img(src=\"images/coins.jpg\" alt=\"Flipping a Coin\" width=240 height=343)\n\n:::"
+    },
+    {
+      "id": "quantum1",
+      "content": "One could argue that tossing a coin really isn’t random at all – it is\n_chaotic_. That means that the underlying physical principles are so complex\nthat even tiny changes to the starting conditions (speed, angle) can have a\ndramatic effect on the final outcome. We can use coins in games and gambling not\nbecause they are random, but because it is so incredibly difficult (and for\npractical purposes impossible) to predict the result.\n\nThe same principle applies to many other “random” events in life, including dice\nand roulette wheels. They are not really _random_, we simply don’t have the\ntools to do the mathematical calculations accurately enough to predict the\noutcome."
+    },
+    {
+      "id": "radioactive",
+      "goals": "decay",
+      "content": "But _true randomness_ does exists – at the very foundations of matter. A block\nof radioactive material consists of billions of atoms which decay over time:\nthey fall apart into smaller atoms while emitting dangerous radiation.\n\n::: column.grow\n\nPhysicists can calculate the probability that a particular atom will decay in a\ncertain period of time, but it is impossible to work out _which one_ will decay\nnext – even if you know the exact properties of every atom.\n\nThe overall rate of decay, on the other hand, is so steady that it can be used\nto calculate the age of fossils that died thousands of years ago on Earth. This\nprocess is called __Carbon dating__.\n\n::: column(width=300)\n\n    p: svg.radioactive(width=300 height=200 viewBox=\"0 0 300 200\")\n    p.text-center.btn-row.no-voice: button.btn Start Decay\n\n:::\n\n    // TODO Possible probability distributions of the position of an electron in\n    // a hydrogen atom. Lighter areas represent more likely locations of the electron."
+    },
+    {
+      "id": "radioactive-1",
+      "content": "[Radioactive decay](gloss:radioactive) of atoms is caused by forces which act at\nmuch smaller scales within atoms, and which can be explained using [Quantum\nmechanics](gloss:quantum). During the last century, physicists like [Max\nPlanck](bio:planck) and [Paul Dirac](bio:dirac) discovered that fundamental\nparticles have a mind-blowing property: they can be in multiple different places\n_at the same time_. They don’t have a fixed position, but instead a probability\ndistribution (also called _wave function_) which tells us how likely it is that\nwe’ll find them at a particular position.\n\nThis incredible property is used by Quantum computers. Conventional computers\ncan only ever do one computation at a time. Quantum computers can use the\nproperties of subatomic particles to do many calculations at the same time – and\nthat makes them significantly faster.\n\n    figure: x-img(lightbox src=\"images/quantum.jpg\" alt=\"Quantum Mechanics\" width=760 height=390)"
+    },
+    {
+      "id": "radioactive-2",
+      "content": "We can’t really _understand_ or _explain_ quantum mechanics – we just have to\naccept that it is what is predicted by mathematical theory and confirmed by\nphysical observations. The curious quantum effects have only ever been observed\non tiny scales of a few atoms, and it is not clear how they affect us in\neveryday life. But it is the only known effect in nature that produces _true\nrandomness_."
+    }
+  ],
+  "title": "Probability"
+}

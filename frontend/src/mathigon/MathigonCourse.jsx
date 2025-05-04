@@ -90,7 +90,7 @@ const MathigonCourse = () => {
           if (!window.mathigonConfig) {
             window.mathigonConfig = {};
           }
-          window.mathigonConfig.contentFormat = 'md'; // Use markdown instead of JSON
+          window.mathigonConfig.contentFormat = 'json'; // Use json instead of markdown
           
           const textbook = new TextbookLoaderClass({
             courseId,
@@ -100,7 +100,7 @@ const MathigonCourse = () => {
             assetsPrefix: `${basePath}mathigon/assets/`,
             language: 'en',
             progress: true,
-            contentFormat: 'md', // Important: specify we're using markdown files
+            contentFormat: 'json', // Important: specify we're using JSON files
             onSectionComplete: (sectionId) => {
               console.log(`Completed section ${sectionId}`);
             },

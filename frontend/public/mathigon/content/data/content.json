@@ -1,0 +1,32 @@
+{
+  "sections": [
+    {
+      "section": "introduction",
+      "sectionStatus": "dev",
+      "color": "\"#8D2CA1\"",
+      "level": "Foundations",
+      "content": "# Data and Statistics\n\n## Introduction\n\n\nTODO"
+    },
+    {
+      "section": "center-spread",
+      "sectionStatus": "dev",
+      "content": "## Center and Spread\n\n\nTODO"
+    },
+    {
+      "section": "visualisation",
+      "sectionStatus": "dev",
+      "content": "## Visualising Data\n\n\nTODO"
+    },
+    {
+      "section": "sampling",
+      "sectionStatus": "dev",
+      "content": "## Sampling\n\n\nTODO"
+    },
+    {
+      "section": "linear-models",
+      "sectionStatus": "dev",
+      "content": "## Scatter Plots and Linear Models\n\n\nTODO"
+    }
+  ],
+  "title": "Data and Statistics"
+}

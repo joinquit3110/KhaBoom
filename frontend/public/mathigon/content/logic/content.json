@@ -1,0 +1,27 @@
+{
+  "sections": [
+    {
+      "section": "spherical",
+      "url": "/world/Logic_and_Paradoxes",
+      "color": "\"#EB4726\"",
+      "level": "Advanced",
+      "content": "# Logic, Sets and Proof\n\n## Logic and Paradoxes\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "maps",
+      "url": "/world/Axioms_and_Proof",
+      "content": "## Axioms and Proof\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "hyperbolic",
+      "url": "/world/Axioms_and_Proof#induction",
+      "content": "## Proof by Induction\n\n\n{.todo} Coming Soon!"
+    },
+    {
+      "section": "metric",
+      "url": "/world/Infinity",
+      "content": "## Infinity and Hilbert’s Hotel\n\n\n{.todo} Coming Soon!"
+    }
+  ],
+  "title": "Logic, Sets and Proof"
+}

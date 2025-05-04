@@ -1,0 +1,207 @@
+{
+  "sections": [
+    {
+      "section": "factors-and-multiples",
+      "id": "divisibility1",
+      "description": "Prime numbers represent both the most basic properties and the most complex unsolved problems. Here you can learn about the building blocks of mathematics.",
+      "color": "\"#1AA845\"",
+      "level": "Foundations",
+      "content": "# Divisibility and Primes\n\n## Factors and Multiples\n\n\nBy now you should be comfortable with addition, subtraction and multiplication\nof integers. Division is slightly different, because you can’t always divide any\ninteger by any other. For example 17 divided by 3 is not a whole number – it is\nsomewhere in between 5 and 6. You either have to give a remainder (2), or\nexpress the answer as a decimal number (5.66…).\n\n    .row.padded\n      .grow\n        include svg/divisibility-1.svg\n        p.caption 12 is divisible by 3\n      .grow\n        include svg/divisibility-2.svg\n        p.caption 10 is not divisible by 4\n\nIf you can divide a number __{.m-red}A__ by a number __{.m-blue}B__, without\nremainder, we say that __{.m-blue}B__ is a __factor__ (or __divisor__) of\n__{.m-red}A__, and that __{.m-red}A__ is a __multiple__ of __{.m-blue}B__. We often\nwrite __{.m-blue}B__|__{.m-red}A__, where the vertical bar simply means _“divides”_.\n\nFor example, __{.m-green}7__ × 3 = __{.m-orange}21__, so __{.m-green}7__ is a\n[[factor|multiple]] of __{.m-orange}21__. Similarly, __{.m-orange}21__ is a [[multiple|factor]]\nof __{.m-green}7__, and we can write __{.m-green}7__|__{.m-orange}21__."
+    },
+    {
+      "id": "divisibility-game",
+      "content": "In this short game you have to determine which numbers are factors or multiples:\n\n::: .box.blue.no-padding\n#### Factors and Multiples Quiz\n\n    x-gameplay.factors-quiz\n      .circled ${x}\n      | is a\n      .factor-value\n        .factor-bubble: .btn.btn-blue factor\n        .factor-bubble: .btn.btn-blue multiple\n        .factor-bubble: .btn.btn-blue neither\n      | of\n      .circled ${y}\n\n:::"
+    },
+    {
+      "id": "factors",
+      "content": "It is often useful to find _all_ the factors of a number. For example, the\nfactors of 60 are 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30 and 60.\n\nOf course, you don’t want to check all numbers up to 60 if they are factors.\nInstead, there is a simple technique which relies on the fact that factors\nalways appear in [[pairs|triples|halves]]."
+    },
+    {
+      "id": "factors1",
+      "content": "In the case of 60 we have 60 = 1 × 60 = 2 × 30 = 3 × 20 = 4 × 15 = 5 × 12 =\n6 × 10. Or, in a different notation,\n\n    include mixins\n    +divisor-table([1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60], [5, 4, 3, 2, 1, 0])\n\nTo find all factors of a number we simply start at both ends of this list,\nuntil we meet in the middle."
+    },
+    {
+      "id": "factors2",
+      "content": "include mixins\n    x-slideshow\n      .stage(slot=\"stage\")\n        +divisor-table([1, 2, 3, 6, 7, 14, 21, 42], [3, 2, 1, 0])\n      .legend(slot=\"legend\") For example, the first factor pair of 42 is simply 1 and 42, and we write them down with much space in between.\n      .legend(slot=\"legend\") After 1 at the beginning, we check if 2 divides 42. It does, and the corresponding pair is 42 ÷ 2 = 21.\n      .legend(slot=\"legend\") Next, we check if 3 divides 42. It does, and the corresponding pair if 42 ÷ 3 = 14.\n      .legend(slot=\"legend\") Now we check if 4 divides 42. It does not, however, so we move on.\n      .legend(slot=\"legend\") 5 also doesn’t divide 42 so we move on.\n      .legend(slot=\"legend\") 6 does divide 42 again. Its pair is 42 ÷ 6 = 7. Notice how we’ve met in the middle after only a few attempts, without having to test all numbers from 7 to 42.\n\nThe only special case with this method is for square numbers: in that case, you\nwill meet at just a single number in the middle, like 64 = 8 × 8.\n\n    //- TODO Factorisation exercises"
+    },
+    {
+      "id": "divisibility2",
+      "section": "rules",
+      "content": "## Divisibility Rules\n\n\nThere are a few different rules that can make it surprisingly easy to check if a\nnumber is divisible by another. In this section we will have a look at some of\nthem…\n\n\n### Divisibility by 2 and 5\n\nEvery number is divisible by 1. To determine if a number is divisible by 2, we\nsimply have to check if it’s even: any number that ends in 0, 2, 4, 6, or 8 is\ndivisible by 2.\n\n    include mixins\n    +grid(30)"
+    },
+    {
+      "id": "divisibility5",
+      "content": "To see if a number is divisible by 5, we similarly just have to check that its\nlast digit is 0 or 5:\n\n    include mixins\n    +grid(30)"
+    },
+    {
+      "id": "divisibility5a",
+      "content": "The reason why these rules for 2 and 5 are so simple has to do with our number\nsystem. The base of our number system is 10, which means that every digit in a\nnumber is worth 10 times as much as the next one to the right. If we take the\nnumber 6382 as an example,\n\n    table.base-10.base-10-fixed\n      tr.base-10-large\n        td: strong 6\n        td: strong 3\n        td: strong 8\n        td: strong 2\n      tr.caption\n        td: | =6000\n        td: | =300\n        td: | =80\n        td: | =2\n\nNow we can separate the last digit of a number from all its other digits:\n\n    table.table-tiny\n      tr.base-10-large\n        td #[strong.m-red abc]#[strong.m-green d]\n        td: | =\n        td #[strong.m-red abc × 10]\n        td +\n        td #[strong.m-green d]\n      tr.caption\n        td #[strong.m-red 638]#[strong.m-green 2]\n        td: | =\n        td #[strong.m-red 638 × 10]\n        td +\n        td #[strong.m-green 2]\n\nBoth 2 and 5 are factors of 10, so they will [[always divide|never divide|sometimes divide]]\n__{.m-red}abc × 10__, no matter what the values of __{.m-red}a__, __{.m-red}b__\nand __{.m-red}c__ are. Therefore we only have to check the last digit: if\n__{.m-green}d__ is divisible by 2 then [[the whole number|abc]] is also\ndivisible by 2. If __{.m-green}d__ is divisible by 5 then the whole number is\ndivisible by 5."
+    },
+    {
+      "id": "divisibility4b",
+      "content": "The easiest is the divisibility rule for 10: we just need to check if the\n[[last digit is a 0|first digit is a 1|last digit is even]]."
+    },
+    {
+      "id": "divisibility4",
+      "content": "### Divisibility by 4 and 8\n\nUnfortunately 4 doesn’t divide 10, so we can’t just look at the last number –\nbut 4 _does_ divide 100, so we just have to slightly modify our rule from above.\nNow we write __{.m-red}ab__**{.m-green}cd** = __{.m-red}ab × 100__ +\n__{.m-green}cd__. We know that 4 will always divide __{.m-red}ab × 100__, so we\nhave to look at the last [[two]] digits to check if a number is divisible by 4.\n\nFor example, __{.m-green}24__ is divisible by 4 so __{.m-red}2735__**{.m-green}24**\n[[is also|is not]] divisible by 4, and __{.m-green}18__ is not divisible by 4 so\n__{.m-red}1947__**{.m-green}18** [[is also not|is also]] divisible by 4."
+    },
+    {
+      "id": "divisibility4a",
+      "content": "The divisibility rules for 8 get even more difficult, because 100 is not\ndivisible by 8. Instead we have to go up to [[1000|800|108]] and look at the\nlast [[three]] digits of a number.\n\nFor example, __{.m-green}120__ is divisible by 8 so\n__{.m-red}271__**{.m-green}120** is also divisible by 8."
+    },
+    {
+      "id": "divisibility3a",
+      "content": "### Divisibility by 3 and 9\n\nThe divisibility rule for 3 is rather more difficult. 3 doesn’t divide 10, and\nit also doesn’t divide 100, or 1000, or any larger power of 10. Simply looking\nat the last few digits of a number isn’t going to work.\n\nInstead we need to use the __digit sum__ of a number, which is simply the sum of\nall its individual digits. For example, the digit sum of ${13×n+123}{n|3|0,20,1}\nis ${digitSumString(123+13×n)} = ${digitSum(123+13×n)} and the digit sum of 3524\nis [[14]]."
+    },
+    {
+      "id": "divisibility3b",
+      "content": "include mixins\n    +grid(40, function(n) { if (!(n % 3)) { var s = '' + n; return +s[0] + (+s[1] || 0); } })\n\nHere we’ve highlighted all numbers which are multiples of three. You can see\nthat their digit sums are always [[a multiple of 3|either 0 or 3|odd numbers]].\n\n{.reveal(when=\"blank-0\")} So to determine if any number is divisible by 3, you\njust have to calculate its digit sum, and check if the result is also divisible\nby 3."
+    },
+    {
+      "id": "divisibility9",
+      "content": "Next, let’s look at multiples of 9:\n\n    .number-grid\n      for x in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]\n        .number-cell.yellow= x*9\n          .number-badge= (x == 11 ? 18 : 9)\n\nIt seems that all the numbers divisible by 9 have a digit sum which is\n[[also|not]] divisible by 9. _{span.reveal(when=\"blank-0\")}For example, the\ndigit sum of 4752 is [[18]], so 4752 [[is|is not]] divisible by 9._"
+    },
+    {
+      "id": "divisibility9a",
+      "content": "Of course, these curious patterns for numbers divisible by 3 and 9 must have\nsome reason – and like before it has to do with our base 10 numbers system. As\nwe saw, writing the number __{.m-red}6__**{.m-blue}3**__{.m-green}8__**{.m-yellow}4**\nreally means\n\n{.text-center} __{.m-red}6 × 1000__ + __{.m-blue}3 × 100__ + __{.m-green}8 × 10__ + __{.m-yellow}4__.\n\nWe can split up each of these products into two parts:\n\n{.text-center} __{.m-red}*{span.digit-sum-else}6 × 999* + *{span.digit-sum-is}6*__ +\n__{.m-blue}*{span.digit-sum-else}3 × 99* + *{span.digit-sum-is}3*__ +\n__{.m-green}*{span.digit-sum-else}8 × 9* + *{span.digit-sum-is}8*__ +\n__{.m-yellow.digit-sum-is}4__.\n\nOf course, __{.m-green}9__, __{.m-blue}99__, __{.m-red}999__, and so on are\nalways divisible by 3 (or by 9). All that remains is to check that what’s left\nover is also divisible by 3 (or 9):\n\n{.text-center} __{.m-red}6__ + __{.m-blue}3__ + __{.m-green}8__ + __{.m-yellow}4__\n\nThis just happens to be the digit sum! So if the [{.no-margins}digit sum](->.digit-sum-is) is a\nmultiple of 3, and we know that [{.no-margins}everything else](->.digit-sum-else) is a multiple of\n3, then the result must also be a multiple of 3."
+    },
+    {
+      "id": "divisibility6",
+      "goals": "btn2 btn3",
+      "content": "### Divisibility by 6\n\nWe’ve still skipped number 6 – but we’ve already done all the hard work.\nRemember that 6 = 2 × 3.\n\n    include mixins\n    +grid(40)\n    p.btn-row.text-center.no-voice(style=\"margin-bottom:1em\")\n      button.btn.btn-small(data-display=\"visibility\") Show multiple of 2\n      button.btn.btn-small(data-display=\"visibility\") Show multiple of 3\n\nTo check if a number is divisible by 6 we just have to check that it is\ndivisible by 2 [[and also|or]] divisible by 3. Note that this happens to work\nfor 6, but certainly not for _any_ number that is the product of two others.\nMore on that later…\n\n    //- TODO Practice exercises"
+    },
+    {
+      "id": "primes",
+      "section": "primes",
+      "content": "## Prime Numbers\n\n\nWhen calculating these factor pairs, it can happen that a number doesn’t have\nany factors except for the first pair. One example is 13 – its only factors\nare 1 and 13 itself. These special numbers are called __Prime numbers__. They\ncan’t be broken up into products of smaller numbers, which, in a way, makes them\nthe “atoms of numbers”.\n\nNote that 1 itself is _not_ a prime number, so the first few prime numbers are\n2, 3, 5, 7, 11, 13, …\n\n    //- TODO Exercises"
+    },
+    {
+      "id": "primes1",
+      "content": "Any number which is not prime can be written as the product of prime numbers: we\nsimply keep dividing it into more parts until all factors are prime. For example,\n\n    table.table-tiny\n      tr\n        td(colspan=4)\n        td: .number-ball.legs.b.a 84\n      tr\n        td(colspan=2)\n        td: .number-ball.blue 2\n        td(colspan=3) ×\n        td: .number-ball.blue.legs.b 42\n      tr\n        td(colspan=4)\n        td: .number-ball.green 2\n        td(colspan=2) ×\n        td: .number-ball.green.legs(style=\"margin: 0 -10px\") 21\n      tr.td-border-bottom\n        td(colspan=6)\n        td: .number-ball.yellow 3\n        td ×\n        td: .number-ball.yellow 7\n      tr\n        td: .number-ball 84\n        td: | =\n        td: .number-ball.blue 2\n        td ×\n        td: .number-ball.green 2\n        td ×\n        td: .number-ball.yellow 3\n        td ×\n        td: .number-ball.yellow 7\n\nNow 2, 3 and 7 are prime numbers and can’t be divided further. The product\n2 × 2 × 3 × 7 is called the __prime factorisation__ of 84, and 2, 3 and 7 are\nits __prime factors__. Note that some primes, like 2 in this case, can appear\nmultiple times in a prime factorisation.\n\nEvery integer has a prime factorisation and no two integers have the same prime\nfactorisation. Furthermore, there is only a single way to write any number as a\nproduct of primes – unless we count different orderings of the primes. This is\ncalled the __Fundamental Theorem of Arithmetic__ (FTA).\n\nUsing the FTA can make many problems in mathematics much easier: we divide\nnumbers into their prime factors, we solve the problem for the individual\nprimes, which can often be much easier, and then we combine these results to\nsolve the initial problem.\n\n    //- TODO Exercises"
+    },
+    {
+      "id": "eratosthenes",
+      "content": "### The Sieve of Eratosthenes\n\nIt turned out to be quite difficult to determine if a number is prime: you\nalways had to find _all_ its prime factors, which gets more and more challenging\nas the numbers get bigger. Instead, the Greek mathematician [Eratosthenes of\nCyrene](bio:eratosthenes) came up with a simple algorithm to find all prime\nnumbers up to 100: the __Sieve of Eratosthenes__.\n\n    include mixins\n    x-slideshow\n      .stage(slot=\"stage\")\n        +grid(100)\n      .legend(slot=\"legend\") First we need to write down all numbers up to 100.\n      .legend(slot=\"legend\") We know that 1 is not prime, so we delete it.\n      .legend(slot=\"legend\") The smallest prime number is #[strong.m-red 2]. Any multiple of 2 can’t be prime, since it has 2 as a factor. Therefore we can cross out all multiples of 2.\n      .legend(slot=\"legend\") The next number in our list is #[strong.m-blue 3] – again a prime number. All multiples of 3 can’t be prime, since they have 3 as a factor. Therefore we can cross these out as well.\n      .legend(slot=\"legend\") The next number, 4, is already crossed out so we move on to #[strong.m-green 5]: it is a prime number and again we cross out all multiples of 5.\n      .legend.md(slot=\"legend\") The next prime number must be [[7]], since 6 is crossed out. Once more, we cross out all of its multiples.\n      .legend.md(slot=\"legend\") The next prime number is [[11]]. Notice, however, that all of its multiples are [[already crossed out|multiples of 3]]. The same is actually true for all other remaining numbers. Therefore all these remaining numbers must be prime.\n\nNow we can count that, in total, there are [[25]] prime numbers less than 100."
+    },
+    {
+      "id": "primes3",
+      "content": "### How many Prime Numbers are there?\n\n::: column.grow\nOf course we can also use the Sieve of Eratosthenes to find larger prime\nnumbers. There are 21 primes between 100 and 200, 16 primes between 200 and 300,\n17 primes between 400 and 500 and only 11 between 10,000 and 10,100.\n\nThe primes seem to keep getting more and more spread out, but do they ever stop?\nIs there a _biggest_ or a _last_ prime number?\n\nThe ancient Greek mathematician [Euclid of Alexandria](bio:euclid) first proved\nthat there are infinitely many prime numbers, using the following argument:\n::: column(width=220)\n\n    x-img(lightbox width=220 height=300 src=\"images/euclid.jpg\" alt=\"Euclid of Alexandria Portrait\")\n\n:::\n\n    ol.proof\n      li Suppose there were only finitely many prime numbers.\n        .text-center #[em.number-ball.blue P], #[em.number-ball.blue P], #[em.number-ball.blue P], #[em.number-ball.blue P], #[em.number-ball.blue P]\n      li Let us multiply all of them together, to get a very large number which we call #[em N].\n        .text-center #[em.number-ball N] = #[em.number-ball.blue P] × #[em.number-ball.blue P] × #[em.number-ball.blue P] × #[em.number-ball.blue P] × #[em.number-ball.blue P]\n      li Now let’s think about #[em N] + 1. Any prime number that divides #[em N] can’t also  divide #[em N] + 1. And since all prime numbers we have found so far divide #[em N], none of these can also divide #[em N] + 1.\n        .text-center #[em.number-ball.blue P], #[em.number-ball.blue P], #[em.number-ball.blue P], #[em.number-ball.blue P], #[.number-ball.blue P] #[span.divides] #[em.number-ball N]\n        .text-center #[em.number-ball.blue.cross P], #[em.number-ball.blue.cross P], #[em.number-ball.blue.cross P], #[em.number-ball.blue.cross P], #[.number-ball.blue.cross P] #[span.divides] #[em.number-ball N] + 1\n      li.md We know from the [Fundamental Theorem of Arithmetic](gloss:fta) that #[em N] + 1, must have a prime factor. Either #[em N] + 1 is itself prime, or there is some other new prime #[em P’] that divides #[em N] + 1.\n        .text-center #[em.number-ball.green P’] #[span.divides] #[em.number-ball N] + 1\n      li In both cases we’ve found a new prime not in our original list – but we assumed that #[em all] primes were in this list.\n      li Clearly something went wrong! But since steps #[span.proof-step 2]–#[span.proof-step 4] were definitely valid, the only possibility is that our initial assumption in #[span.proof-step 1] was wrong. This means there must actually be infinitely many primes.\n\n    // Notice that any prime that divides N cannot divide N + 1. (If it would,\n    // it also had to divide the difference between N and N + 1 which is 1. But\n    // the only number that divides 1 is 1 itself.)"
+    },
+    {
+      "id": "primes4",
+      "content": "Euclid’s explanation is one of the first examples in history of a formal\nmathematical __proof__ – a logical argument that shows a statement must\ndefinitely be true. This example is often called __proof by contradiction__: we\nstart with an assumption, deduce something impossible, and thus know that our\nassumption must be incorrect."
+    },
+    {
+      "id": "prime-test",
+      "goals": "calculator",
+      "section": "distribution-of-primes",
+      "content": "## The Distribution of Primes\n\n\nThe easiest way to check if a number is prime is to try to divide it by all\nsmaller integers. Computers can do this very quickly and efficiently. For _very\nlarge_ numbers, with hundreds of digits, there are also more efficient\nalgorithms. Some of these even use probability to determine if a number is\n_almost certainly_ prime.\n\nHere is a calculator that allows you to check if any number is prime:\n\n    .calculator\n      h3 Prime Checker\n      input(type=\"number\" min=\"2\")\n      .result.var(:html=\"result\")"
+    },
+    {
+      "id": "prime-test-1",
+      "content": "::: column.grow\n\nThroughout history, people have tried to find larger and larger prime numbers.\nIn 1460, the largest known prime was 131,071. In 1772, [Leonard Euler](bio:euler)\nshowed that 2,147,483,647 is also prime.\n\nWith the arrival of computers in the 20th century, calculating large primes\nbecame much easier. The largest currently known prime was discovered in\nDecember 2018 and has 24,862,048 digits. You would need 8000 sheets of paper to\nprint it out!\n\n::: column(width=300)\n\n    img(src=\"images/network.jpg\" width=300 height=200)\n\n{.caption} GIMPS (_Great Internet Mersenne Prime Search_) is a collaborative\nproject, where volunteers can find primes using free software.\n\n:::"
+    },
+    {
+      "id": "prime-generator",
+      "goals": "calculator",
+      "content": "Calculating these large prime numbers might seem like just a waste of time, but\nlater in this course you’ll learn about various real life applications where\ncomputers have to use large primes.\n\nHere you can generate your own prime numbers with a given number of digits:\n\n    .calculator\n      h3 Prime Generator\n      p.no-voice.md Number of digits: ${d}{d|6|2,16,1}\n      p.no-voice(style=\"margin: 10px 0\"): button.btn.btn-white Generate\n      .result.var(:html=\"result\")"
+    },
+    {
+      "id": "ulam",
+      "content": "//- Stanislaw M. Ulam was doodling during the presentation of a \"long and very boring paper\" at a scientific meeting in 1963.\n\n### The Ulam Spiral\n\nThe Polish mathematician [Stanisław Ulam](bio:ulam) came up with a cool way to\nshow the distribution of large prime numbers, while doodling during a _“long and\nvery boring”_ meeting in 1963.\n\n    .number-grid.ulam-grid\n      for x in [37, 36, 35, 34, 33, 32, 31]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [38, 17, 16, 15, 14, 13, 30]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [39, 18,  5,  4,  3, 12, 29]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [40, 19,  6,  1,  2, 11, 28]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [41, 20,  7,  8,  9, 10, 27]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [42, 21, 22, 23, 24, 25, 26]\n        .number-cell(data-display=\"visibility\")= x\n      for x in [43, 44, 45, 46, 47, 48, 49]\n        .number-cell(data-display=\"visibility\")= x\n\nWe write down all integers in a rectangular grid, starting with 1 in the middle\nand then spiralling outwards. Then we highlight all numbers which are prime."
+    },
+    {
+      "id": "ulam1",
+      "content": "So far, the Ulam spiral doesn’t look particularly exciting. But if we zoom out,\ninteresting patterns emerge. Here are the primes up to 160,000:\n\n    figure: img(src=\"images/ulam.png\" width=399 height=399)\n\n::: column.grow\nRather than appearing randomly, as one might expect, it seems that certain\ndiagonals are much more popular with primes than others. This creates a curious\n“plaid” pattern.\n\n_{.lgrey}It turns out that these diagonals all correspond to certain quadratic\nequations which seem to generate prime numbers more often than average. However\nit is unknown why that would be the case…_\n::: column(width=200)\n\n    x-img(lightbox credit=\"© Scientific American\" width=200 height=272 src=\"images/magazine.jpg\" alt=\"Scientific American Magazine Cover\")\n\n{.caption} Cover of the March 1964 issue of Scientific American\n:::"
+    },
+    {
+      "id": "goldbach1",
+      "goals": "calculator",
+      "content": "### The Goldbach Conjecture\n\nIn 1742, the German mathematician [Christian Goldbach](bio:goldbach) made a\ncurious discovery: he noticed that all even integers (except 2) can be written\nas the sum of two prime numbers. For example, 8 = 5 + 3 and 24 = 13 + 11. This\nis quite surprising, because primes are defined using multiplication and factors\n– and shouldn’t have much to do with addition.\n\n    .calculator\n      h3 Goldbach Calculator\n      p.no-voice Pick any even number, to calculate how it#[br]can be written as the sum of two primes.\n      input(type=\"number\", min=4, step=2)\n      .result.var(:html=\"result\")\n\nGoldbach wrote about his observation in a letter to the famous mathematician\n[Leonhard Euler](bio:euler), but neither of them was able to prove it. It became\nknown as the __Goldbach Conjecture__.\n\nComputers have checked that the Goldbach Conjecture works for every even number\nup to 4 × 10<sup>18</sup> (that’s a 4 with 18 zeros), but mathematicians have still\nnot found a proof that it works for _all_ even integers. And that is a big\ndifference, because there are infinitely many integers, so we couldn’t possibly\ncheck all of them.\n\nIts apparent simplicity made the Goldbach conjecture one of the most famous\nunsolved problems in mathematics."
+    },
+    {
+      "id": "twin-primes",
+      "content": "### Twin Primes\n\nWe have already seen that prime numbers get more spread out as they get bigger.\nBut they always seem to appear completely random, and occasionally we find two\nprimes right next to each other, just one number apart: these are called __Twin\nPrimes__.\n\n    p.text-center\n      span.twin\n        span.number-ball 3\n        span.number-ball 5\n      | ,\n      span.twin\n        span.number-ball.blue 11\n        span.number-ball.blue 13\n      | ,\n      span.twin\n        span.number-ball.green 41\n        span.number-ball.green 43\n      | ,\n      span.twin\n        span.number-ball.yellow 101\n        span.number-ball.yellow 103\n      | ,\n      span.twin\n        span.number-ball 2027\n        span.number-ball 2029\n      | ,\n      span.twin\n        span.number-ball.blue 108,377\n        span.number-ball.blue 108,379\n      | ,\n      span.twin\n        span.number-ball.green 1,523,651\n        span.number-ball.green 1,523,653\n\nThe largest known pair of twin primes has an incredible 58,711 digits! But are\nthere infinitely many twin primes, just like there are infinitely many primes?\nNobody knows – the _Twin Prime conjecture_ is another one of the many unsolved\nproblems surrounding the primes."
+    },
+    {
+      "id": "riemann",
+      "goals": "zoom",
+      "title": "Distribution of the Primes",
+      "content": "### The Riemann Hypothesis\n\nMathematicians have spent many centuries exploring the pattern and distribution\nof prime numbers. They seem to appear completely randomly – sometimes there are\nhuge gaps in between consecutive primes, and sometimes we find [twin\nprimes](gloss:twin-primes) right next to each other.\n\nWhen only 15 years old, the German mathematician [Carl Friedrich Gauss](bio:gauss)\nhad a groundbreaking new idea: he counted the number of primes up to a certain\npoint, and showed the results in a chart:\n\n    figure(style=\"max-width:680px; position:relative;\")\n      svg(width=680 height=300 viewBox=\"0 0 680 300\")\n        line.axis(x1=0 y1=280 x2=680 y2=280)\n        g.chart\n          path.pi(fill=\"none\" stroke=\"#0f82f2\")\n          path.log(fill=\"none\" stroke=\"#cd0e66\")\n          g.small-primes\n        g.numbers\n      .zoom-icon: svg(viewBox=\"0 0 32 32\" class=\"icon\" width=32 height=32)\n        use(xlink:href=\"/icons.svg#search\")\n\nAlong the x-axis you can see all integers. Whenever there is a prime, the\n_{span.m-blue}Prime Counting Function_ (shown in __{.m-blue}blue__) increases by\none. As we [zoom out](->#riemann_.zoom-icon), the blue line becomes very smooth.\nGauss noticed that the shape of this function looks very similar to the function\n_{span.m-red}`x/(log(x))`_ (shown in __{.m-red}red__). He predicted that the two\nfunctions are always “approximately similar”, and this was proven in 1896."
+    },
+    {
+      "id": "riemann1",
+      "title": "The Riemann Hypothesis",
+      "content": "However, as you can see above, there is still a significant error between the\nactual number of primes, and Gauss’s approximation. In 1859, the mathematician\n[Bernhard Riemann](bio:riemann) discovered an approximation that looked much\nbetter, but he wasn’t able to prove that it would _always_ work. His idea\nbecame known as the __Riemann Hypothesis__.\n\nHundreds of mathematicians have tried to prove Riemann’s hypothesis, but all\nwithout success. It is often considered one of the most difficult and most\nimportant unsolved problems in mathematics. In 2000, the Clay Mathematics\nInstitute named it one of seven [__Millennium Prize Problems__](gloss:millennium-prize)\nand promised $1,000,000 to any mathematician who solves it."
+    },
+    {
+      "id": "race",
+      "goals": "race",
+      "section": "lcm",
+      "content": "## Lowest Common Multiples\n\n\nTwo runners are training on a circular racing track. The __{.m-blue}first runner__\ntakes __{.m-blue}60__ seconds for one lap. The __{.m-green}second runner__ only\ntakes __{.m-green}40__ seconds for one lap. If both leave at the same time from\nthe start line, when will they meet again at the start?\n\n    figure: include svg/race.svg"
+    },
+    {
+      "id": "race1",
+      "content": "This question really isn’t about the geometry of the race track, or about\nvelocity and speed – it is about multiples and divisibility.\n\nThe first runner crosses the start line after 60 seconds, 120 seconds, 180 seconds, 240 seconds,\nand so on. These are simply the [[multiples|factors]] of __{.m-blue}60__. The second runner crosses\nthe start line after 40 _{span(voice=\"seconds\")}s_, 80 _{span(voice=\"seconds\")}s_, 120\n_{span(voice=\"seconds\")}s_, 160 _{span(voice=\"seconds\")}s_, and so on. The first time both runners\nare back at the start line is after [[120]] seconds.\n\n{.reveal(when=\"blank-0 blank-1\")} What we’ve just found is the smallest number\nwhich is both a multiple of __{.m-green}40__ and a multiple of __{.m-blue}60__.\nThis is called the __lowest common multiple__ or __lcm__."
+    },
+    {
+      "id": "race2",
+      "content": "To find the lcm of any two numbers, it is important to realise that if\n__{.m-yellow}a__ divides __{.m-blue}b__, then __{.m-blue}b__ needs to have all\nthe prime factors of __{.m-yellow}a__ (plus some more):\n\n    table.table-tiny\n      tr\n        td.text-right: .number-ball.yellow 12\n        td: .divides\n        td(style=\"text-align: left\"): .number-ball.blue 60\n      tr\n        td\n          .number-ball.l-yellow 2\n          | &nbsp;×&nbsp;\n          .number-ball.l-yellow 2\n          | &nbsp;×&nbsp;\n          .number-ball.l-yellow 3\n        td\n        td\n          .number-ball.l-yellow 2\n          | &nbsp;×&nbsp;\n          .number-ball.l-yellow 2\n          | &nbsp;×&nbsp;\n          .number-ball.l-yellow 3\n          | &nbsp;×&nbsp;\n          .number-ball.l-blue 5\n\nThis is easy to verify: if a prime factor divides __{.m-yellow}a__, and\n__{.m-yellow}a__ divides __{.m-green}b__, then that prime factor must _also_\ndivide __{.m-green}b__."
+    },
+    {
+      "id": "race3",
+      "content": "To find the lcm of __{.m-green}40__ and __{.m-blue}60__, we first need to find\nthe [prime factorisation](gloss:factorisation) of both:\n\n    table.table-tiny\n      tr\n        td: .number-ball.blue 40\n        td: | =\n        td: .number-ball.l-blue 2\n        td: | ×\n        td: .number-ball.l-blue 2\n        td: | ×\n        td: .number-ball.l-blue 2\n        td(colspan=3): | ×\n        td: .number-ball.l-blue 5\n      tr\n        td: .number-ball.green 60\n        td: | =\n        td: .number-ball.l-green 2\n        td: | ×\n        td: .number-ball.l-green 2\n        td(colspan=3): | ×\n        td: .number-ball.l-green 3\n        td: | ×\n        td: .number-ball.l-green 5\n\nSuppose that __{.m-red}X__ is the lcm of __{.m-green}40__ and __{.m-blue}60__.\nThen __{.m-green}40__ divides __{.m-red}X__, so _{span.number-ball.small.l-blue}2_,\n_{span.number-ball.small.l-blue}2_, _{span.number-ball.small.l-blue}2_ and\n_{span.number-ball.small.l-blue}5_ must be prime factors of __{.m-red}X__. Also,\n__{.m-blue}60__ divides __{.m-red}X__, so __{span.number-ball.small.l-green}2__,\n_{span.number-ball.small.l-green}2_, _{span.number-ball.small.l-green}3_ and\n_{span.number-ball.small.l-green}5_ must be prime factors of __{.m-red}X__."
+    },
+    {
+      "id": "race4",
+      "content": "To find __{.m-red}X__, we simply combine all the prime factors of __{.m-green}40__\nand __{.m-blue}60__, but any duplicates we only need once:\n\n{.text-center} __{.m-red}X__ &nbsp;=&nbsp; _{span.number-ball.l-blue-green}2_ ×\n_{span.number-ball.l-blue-green}2_ × _{span.number-ball.l-blue}2_ ×\n_{span.number-ball.l-green}3_ × _{span.number-ball.l-blue-green}5_\n\nThis gives us that __{.m-red}X__ = 120, just like we saw above. Notice that if\nthe same prime factor appears multiple times, like 2 above, we need to keep the\nmaximum occurrences in one of the two numbers (3 times in __{.m-green}40__ is\nmore than 2 times in __{.m-blue}60__)."
+    },
+    {
+      "id": "race5",
+      "content": "Now we have a simple method for finding the lcm of two numbers:\n\n    ol.proof\n      li Find the prime factorisation of each number.\n      li Combine all prime factors, but only count duplicates once.\n\nWe can use the same method to find the lcm of three or more numbers at once,\nlike __{.m-blue}12__, __{.m-green}30__ and __{.m-yellow}45__:\n\n    table.table-tiny\n      tr\n        td: .number-ball.blue 12\n        td: | =\n        td: .number-ball.l-blue 2\n        td: | ×\n        td: .number-ball.l-blue 2\n        td: | ×\n        td: .number-ball.l-blue 3\n      tr\n        td: .number-ball.green 30\n        td: | =\n        td: .number-ball.l-green 2\n        td(colspan=3): | ×\n        td: .number-ball.l-green 3\n        td(colspan=3): | ×\n        td: .number-ball.l-green 5\n      tr\n        td: .number-ball.yellow 45\n        td: | =\n        td(colspan=4)\n        td: .number-ball.l-yellow 3\n        td: | ×\n        td: .number-ball.l-yellow 3\n        td: | ×\n        td: .number-ball.l-yellow 5\n\nTherefore the lcm of __{.m-blue}12__, __{.m-green}30__ and __{.m-yellow}45__ is\n2 × [[2]] × 3 × 3 × [[5]] = 180."
+    },
+    {
+      "id": "race6",
+      "content": "Prime numbers are a special case: the lcm of two different primes is simply\ntheir [[product|sum|difference]], because they don’t have any common prime\nfactors which would get “canceled”.\n\n    //- TODO Exercises"
+    },
+    {
+      "id": "cicadas",
+      "goals": "bound-low bound-high",
+      "content": "### Cicadas\n\n::: column.grow\nNorth America is home to various broods of cicadas. These have the curious\nproperty that they only emerge every few years during the summer to breed – the\nremaining time they spend underground.\n\nFor example, the cicadas in Florida and Mississippi appear every 13 years. The\ncicadas in Illinois and Iowa only appear every 17 years. But there are no\ncicadas with 12, 14, 15 or 16 year cycles.\n::: column(width=360)\n\n    x-img(width=360 height=240 src=\"images/cicadas.jpg\" alt=\"Cicadas\")\n\n:::\n\nBoth 13 and 17 are prime numbers – and that has a very good reason. Imagine that\nthere are predators in the forest which kill cicadas. These predators also\nappear in regular intervals, say every 6 years.\n\nNow imagine that a brood of cicadas appears every ${n}{n|13|4,20,1} years\n(${isPrime(n) ? 'prime' : 'not prime'}). The two animals would meet every\n${lcm(n,6)} years, which is the [[lcm|product|average]] of 6 and ${n}.\n\n    figure\n      include svg/cicadas.svg\n      p.caption Time until cicadas and predators meet, for various different cicada cycle lengths."
+    },
+    {
+      "id": "cicadas1",
+      "content": "This number seems to be much larger if the cicada cycle is a prime number like\n13 and 17. That’s because prime numbers don’t share any factors with 6, so\nwhen calculating the lcm we don’t cancel any duplicate factors.\n\nOf course, cicadas have no idea what prime numbers are – but over millions of\nyears, evolution has worked out that prime cycles are the safest. The predator\nanimal seems to have gone extinct over time, but the prime number cycles remain.\n\n    //- TODO Exercises"
+    },
+    {
+      "id": "gcd",
+      "section": "gcf",
+      "content": "## Greatest Common Factors\n\n\nAn architect is planning the floor for a large courtyard that measures 18m by\n30m. She wants it to be covered in quadratic tiles, without any gaps or overlaps\nalong the sides. What is the largest size of squares she can use?\n\n    figure\n      include svg/floorplan.svg\n      p.text-center.md The tiles have a size of ${x}{x|3|1,18,1}m.#[br]#[span.result.var.no-voice]"
+    },
+    {
+      "id": "gcd1",
+      "content": "Just like before, this question is not about geometry - it is about\ndivisibility. The length of the sides of the tiles has to divide both 18 and 30,\nand the largest possible number with that property is [[6]]. This is called the\n__Greatest Common Factor__ or __gcf__ of 18 and 30."
+    },
+    {
+      "id": "gcd2",
+      "content": "Once again, we can use the [prime factorisation](gloss:factorisation) to\ncalculate the gcf of any two numbers. Remember that any factor of a number\nmust have some of the prime factors of that number.\n\n    table.table-tiny\n      tr\n        td: .number-ball.blue 18\n        td: | =\n        td: .number-ball.l-blue 2\n        td: | ×\n        td: .number-ball.l-blue 3\n        td: | ×\n        td: .number-ball.l-blue 3\n      tr\n        td: .number-ball.green 30\n        td: | =\n        td: .number-ball.l-green 2\n        td: | ×\n        td: .number-ball.l-green 3\n        td(colspan=3): | ×\n        td: .number-ball.l-green 5\n\nSuppose that __{.m-red}X__ is the gcf of __{.m-green}18__ and __{.m-blue}30__.\nThen __{.m-red}X__ divides __{.m-green}18__ so the prime factors of __{.m-red}X__\nmust be among _{span.number-ball.small.l-blue}2_, _{span.number-ball.small.l-blue}3_\nand _{span.number-ball.small.l-blue}3_. Also, __{.m-red}X__ divides __{.m-blue}30__\nso the prime factors of __{.m-red}X__ must be among _{span.number-ball.small.l-green}2_,\n_{span.number-ball.small.l-green}3_ and _{span.number-ball.small.l-green}5_."
+    },
+    {
+      "id": "gcd3",
+      "content": "To find __{.m-red}X__, we simply need to multiply all numbers which are  prime\nfactors of [[both|one of]] __{.m-green}18__ and __{.m-blue}30__:\n\n{.text-center} __{.m-red}X__ &nbsp;=&nbsp; _{span.number-ball.l-blue-green}2_ ×\n_{span.number-ball.l-blue-green}3_ &nbsp;=&nbsp; 6."
+    },
+    {
+      "id": "gcd4",
+      "content": "Now we have a simple method for finding the gcf of two numbers:\n\n    ol.proof\n      li Find the prime factorisation of each number.\n      li Multiply the prime factors which are in both numbers.\n\nOnce again prime numbers are special: the gcf of two different primes is always\n[[1]], because they don’t share any prime factors."
+    },
+    {
+      "id": "crypto",
+      "content": "### Cryptography\n\n::: column.grow\nOne of the most important modern applications of prime numbers is in a field of\nmathematics called __Cryptography__. For thousands of years, people have tried\nto conceal messages so that only the intended recipient could read them – this\nis called encryption. It is used by everyone from generals exchanging secret\norders during wars to personal emails or online banking details.\n\nPeople always tried to come up with better, more secure encryption methods, but\nafter some time, they were all broken using yet more advanced algorithms. In the\nSecond World War, the German army used the Enigma: a complex machine consisting\nof a keyboard, rotating wheels and plugs. It encrypted messages using one of 158\nmillion million million possibilities (that’s a 158 followed by 18 zeros!). The\ncode was widely believed to be unbreakable, but the British Secret Service, led\nby mathematician Alan Turing, built some of the first computers that managed to\ndecode it.\n::: column(width=240)\n\n    x-img(lightbox credit=\"Magnus Manske, via Wikipedia\" width=240 height=344 src=\"images/enigma.jpg\" alt=\"Enigma Machine\")\n    p.caption German four-rotor Enigma machine\n\n:::\n\nToday’s computers are much more advanced, capable of trying millions of\npossibilities every second. To develop better encryption algorithms, you have to\nfind a mathematical operation that is difficult even for powerful computers.\nComputers are incredibly fast at addition, subtraction, multiplication and\ndivision. However, as it turns out, computers are very slow at factorising\nlarge integers into primes…"
+    },
+    {
+      "id": "crypto1",
+      "content": "{.todo} COMING SOON – RSA example with Alice and Bob\n\nThis encryption algorithm is called __RSA Cryptography__, after its three\ninventors, Ron Rivest, Adi Shamir and Leonard Adleman who published it in 1977.\nIt turns out that a very similar method was known to the British Secret Service\nsince 1973, but remained classified until much later.\n\nToday, prime numbers are used by computers all over the world to exchange data.\nAs you browse the internet or send chat messages, your phone or laptop will\nquietly generate large prime numbers and exchange public keys with other\ncomputers."
+    }
+  ],
+  "title": "Divisibility and Primes"
+}

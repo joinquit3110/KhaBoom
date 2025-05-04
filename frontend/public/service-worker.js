@@ -88,8 +88,8 @@ const shouldCacheResponse = (response, url) => {
   
   // Special handling for content.json requests which should really be content.md
   if (url.includes('/content.json')) {
-    console.warn(`Redirecting ${url} to .md version`);
-    return false;
+    // We now have proper JSON files, so no need to redirect
+    return true;
   }
   
   // Default: cache if it's a successful response
@@ -173,23 +173,6 @@ self.addEventListener('fetch', (event) => {
             });
         });
       })
-    );
-    return;
-  }
-  
-  // Redirect content.json requests to content.md for Mathigon courses
-  if (requestURL.pathname.includes('/mathigon/content/') && requestURL.pathname.endsWith('/content.json')) {
-    const mdUrl = requestURL.pathname.replace('/content.json', '/content.md');
-    console.log(`Redirecting ${requestURL.pathname} to ${mdUrl}`);
-    
-    event.respondWith(
-      fetch(new Request(mdUrl, {
-        method: event.request.method,
-        headers: event.request.headers,
-        mode: event.request.mode,
-        credentials: event.request.credentials,
-        redirect: event.request.redirect
-      }))
     );
     return;
   }

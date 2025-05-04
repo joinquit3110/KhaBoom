@@ -1,0 +1,76 @@
+{
+  "sections": [
+    {
+      "content": "# 2D Shapes and Perimeter\n\n## Introduction\n\nThere are four levels of geometric thinking that students progress through in K–5. In earlier grades, students describe, compare, and sort two-dimensional shapes. This work is known as the visual and descriptive levels. In third grade, they apply their understandings in more analytic and abstract ways.\n\nFor example, when looking at the given shape, students might talk about it in different ways, depending on their current level of geometric thinking.\n\n    figure: img(src=\"images/intro1.png\" width=600)\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "In this course, you will learn how third grade students reason about the attributes of two-dimensional shapes and then apply these understandings to measure of [perimeter](gloss:perimeter)\n\n    figure: img(src=\"images/intro2.png\" width=400)"
+    },
+    {
+      "content": "## Attributes of 2D Shapes\n\nIn third grade, students see that [quadrilaterals](gloss:quadrilateral) can be classified based on their sides (whether some are of equal length) and their corners (whether one or more square corners are present). They sort shapes using language and attributes that are familiar to them.\n\n    iframe.pp(src=\"https://mathigon.org/polypad/embed/SUuz3WzmCSqKhA?key=mathigon\")\n    // iframe.pp(src=\"https://mathigon.org/polypad/embed/fQSU8mcO3jgXg?key=mathigon\")\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "quadrilaterals",
+      "goals": "tabs",
+      "content": "Quadrilaterals can be used to create patterns that are visually appealing and interesting. Look at how the pattern changes as we highlight the shapes in the design:\n\n    x-select.segmented.var(:bind=\"type\")\n      div(value=\"quadrilateral\" style=\"width:130px\") Quadrilateral\n      div(value=\"rhombus\") Rhombus\n      div(value=\"rectangle\") Rectangle\n      div(value=\"square\") Square\n    figure: img.var(src=\"images/${type}.png\" width=300)"
+    },
+    {
+      "content": "A quadrilateral consists of [[4 | 1 | 2 | 3]] sides and [[4 | 1 | 2 | 3]] corners. Students come to understand that a shape can have more than one name."
+    },
+    {
+      "content": "A [rectangle](gloss:rectangle) is a quadrilateral with equal angles:\n\n    figure: x-geopad(width=210 height=120): svg\n      circle.move(name=\"a\" cx=40 cy=15)\n      circle.move(name=\"b\" cx=40 cy=105)\n      circle.move(name=\"c\" cx=180 cy=105 project=\"line(a,b).perpendicular(b)\")\n      circle(name=\"d\" x=\"c.add(a).subtract(b)\")\n      path.fill.yellow.light(x=\"polygon(a,b,c,d)\")\n      path.blue(x=\"angle(a,b,c)\" target=\"angle\")\n      path.blue(x=\"angle(b,c,d)\" target=\"angle\")\n      path.blue(x=\"angle(c,d,a)\" target=\"angle\")\n      path.blue(x=\"angle(d,a,b)\" target=\"angle\")\n      path.red(x=\"segment(a,b)\")\n      path.red(x=\"segment(b,c)\")\n      path.red(x=\"segment(c,d)\")\n      path.red(x=\"segment(d,a)\")\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "A [square](gloss:square) is a quadrilateral with equal sides and angles:\n\n    x-geopad(width=210 height=120): svg\n      circle.move(name=\"a\" cx=60 cy=15)\n      circle.move(name=\"b\" cx=60 cy=105)\n      circle(name=\"c\" x=\"a.rotate(pi/2,b)\")\n      circle(name=\"d\" x=\"b.rotate(-pi/2,a)\")\n      path.fill.yellow.light(x=\"polygon(a,b,c,d)\")\n      path.blue(x=\"angle(a,b,c)\" target=\"angle\")\n      path.blue(x=\"angle(b,c,d)\" target=\"angle\")\n      path.blue(x=\"angle(c,d,a)\" target=\"angle\")\n      path.blue(x=\"angle(d,a,b)\" target=\"angle\")\n      path.red(x=\"segment(a,b)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(b,c)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(c,d)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(d,a)\" target=\"side\" mark=\"bar\")\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "A [rhombus](gloss:rhombus) is a quadrilateral with equal sides.\n\n    x-geopad(width=210 height=120): svg\n      circle.move(name=\"e\" cx=50 cy=60)\n      circle.move(name=\"f\" cx=105 cy=15)\n      circle.move(name=\"h\" cx=105 cy=105 project=\"circle(e,distance(e,f))\")\n      circle(name=\"g\" x=\"h.add(f).subtract(e)\")\n      path.fill.yellow.light(x=\"polygon(e,f,g,h)\")\n      path.red(x=\"segment(e,f)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(f,g)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(g,h)\" target=\"side\" mark=\"bar\")\n      path.red(x=\"segment(h,e)\" target=\"side\" mark=\"bar\")\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "Students also see that some [quadrilaterals](gloss:quadrilateral) aren’t [squares](gloss:square), [rhombuses](gloss:rhombus), or [rectangles](gloss:rectangle) because they don’t have the defining attributes of these shapes.\n\n    figure: img(src=\"images/venn.png\" width=600)\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "For example, here are three quadrilaterals. The first one is a rectangle, a rhombus, and a square. The other two [[are not | are]] squares, rhombuses, or rectangles.\n\n    figure: img(src=\"images/examples.png\" width=400)"
+    },
+    {
+      "content": "Here are two more examples:\n\n::: column(width=300)\n\n    figure: img(src=\"images/e1.png\" width=300)\n\n::: column(width=300)\n\n    figure: img(src=\"images/e2.png\" width=300)\n\n:::\n\nIt is [[True | False]] that both shapes are quadrilaterals.\n\nIt is [[False | True ]] that both shapes have one or more square corners.\n\nIt is [[False | True ]] that both shapes have two equal-side lengths."
+    },
+    {
+      "content": "## Using Attributes of 2D Shapes to Find Perimeter\n\nIn third grade, students are introduced to the idea of [perimeter](gloss:perimeter).\n\nProgression of finding the perimeter:\n\n(1) Students use concrete object (like paperclips) to build the boundary\n\n    figure: img(src=\"images/clips.png\" width=280)\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "q1",
+      "goals": "tabs",
+      "content": "(2) Students find the distance around the shape by counting the [intervals](gloss:interval) or\nadding the number of units on each side.\n\n    x-select.segmented.var(:bind=\"type\")\n      div(value=\"q1\") Question\n      div(value=\"q2\") Answer\n    figure: img.var(src=\"images/${type}.png\" width=440)"
+    },
+    {
+      "id": "q2",
+      "goals": "tabs",
+      "content": "(3) Students use the geometric attributes of shapes to find perimeter more efficiently (by\nrecognizing sides that are the same length and using multiplication).\n\n    x-select.segmented.var(:bind=\"type\")\n      div(value=\"q3\") Question\n      div(value=\"q4\") Answer\n    figure: img.var(src=\"images/${type}.png\" width=520)"
+    },
+    {
+      "content": "Try these activities by entering some correct and incorrect values, to see what students will experience. Click on each of the images below to try it:\n\n::: column(width=220 parent=\"padded-thin\")\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/621922800267e14121270128?collections=6203f4d0058a1e12161434e0#preview/bba0e5a0-cbc0-42d1-834a-c42bdb267ce9\" style=\"display:block\" target=\"_blank\"): img(src=\"images/bird1.png\" width=220)\n\n::: column(width=220)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/621922800267e14121270128?collections=6203f4d0058a1e12161434e0#preview/7519d907-ddf5-4d67-a827-60265a134eb3\" style=\"display:block\" target=\"_blank\"): img(src=\"images/bird2.png\" width=220)\n\n::: column(width=220)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/621922800267e14121270128?collections=6203f4d0058a1e12161434e0#preview/589e00f4-7c68-4b52-bdb3-50f3613f45d7\" style=\"display:block\" target=\"_blank\"): img(src=\"images/bird3.png\" width=220)\n\n:::\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "When finding perimeter, there are complexities in understanding linear measurements on grids.  Consider the following problem.  Who is correct?\n\nThree students were asked to find the perimeter of this square:\n\n    figure: img.var(src=\"images/grid.png\" width=220)\n\n* Tyler: perimeter is 12 units\n* Lexi: perimeter is 16 units\n* Maggie: perimeter is 8 units\n\n[Continue](btn:next)"
+    },
+    {
+      "id": "buckets",
+      "goals": "buckets",
+      "content": "The correct student is [[Tyler | Lexi | Maggie]]. Consider ways to illuminate these types of\nmisconceptions with students: Drag the statements into the box for the correct student.\n\n    x-buckets\n      .inputs\n        .input(bucket=\"2\") Counted 2 tick marks along the bottom of the square and multiplied that by 4.\n        .input(bucket=\"0\") Saw that 3 square units fit along each side. Therefore the perimeter of the entire square is 4 times that length.\n        .input(bucket=\"1\") Counted 4 tick marks along the bottom of the square, and multiplied that by 4.\n      .buckets\n        .bucket\n          .title Tyler (12 units)\n        .bucket\n          .title Lexi (16 units)\n        .bucket\n          .title Maggie (8 units)"
+    },
+    {
+      "content": "## Relating Perimeter and Area\n\nAs students solve problems relating [perimeter](gloss:perimeter) and [area](gloss:area), they begin to see that shapes that have the same perimeter can have different areas.  They also see that shapes that have the same areas can have different perimeters.\n\n::: column(width=320)\n\n    img(src=\"images/p1a.png\" width=320)\n\n::: column(width=320)\n\n    img(src=\"images/p2a.png\" width=320)\n\n:::\n\n[Continue](btn:next)"
+    },
+    {
+      "content": "Try these activities by entering some correct and incorrect values, to see what students will experience!  Click on each of the images below to try  it.\n\n::: column(width=500)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/6203f4fecb3f9b1f5c872cc8?collections=6203f4d0058a1e12161434e0#preview/1f0e7182-08fb-4761-9c7a-e33cf1f4d154\" style=\"display:block\" target=\"_blank\"): img(src=\"images/d3.png\" width=500)\n\n::: column(width=500)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/6203f4fecb3f9b1f5c872cc8?collections=6203f4d0058a1e12161434e0#preview/24004b27-8365-4b19-82a1-352197ae4078\" style=\"display:block\" target=\"_blank\"): img(src=\"images/d4.png\" width=500)\n\n:::"
+    },
+    {
+      "content": "It is important that students understand the differences and relationships between area and perimeter.  Let’s think through five examples that highlight the difference between the two for students.\n\n::: column.grow\n\n1. If we need to know how much carpet to buy to for our living room floor, we would need to find the [[area | perimeter]] of our living room floor.\n3. {.reveal(when=\"blank-0\")} If we need to know how much ribbon we need to decorate the outside a mirror, we would need to find the [[perimeter | area]] of the mirror.\n2. {.reveal(when=\"blank-1\")} If we need to know much fencing is needed to surround a field, we would need to find the [[perimeter | area]] of the field.\n4. {.reveal(when=\"blank-2\")} If we need to determine how much coastline there is of an island, we would need to find the [[perimeter | area]] of the island.\n5. {.reveal(when=\"blank-3\")} If we need to know how much material is needed to replace the floor of a gym, we would need to find the [[area | perimeter]] of the gym.\n\n::: column(width=200)\n\n    img(src=\"images/floor.png\" width=200 style=\"margin-bottom: 12px\")\n    img.reveal(src=\"images/grass.png\" width=200 style=\"margin-bottom: 12px\" when=\"blank-1\")\n    img.reveal(src=\"images/coast.png\" width=200 when=\"blank-2\")\n\n:::"
+    },
+    {
+      "content": "Try it!  What are the possible solutions your students might come up with?\n\n::: column(width=500)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/6203f4fecb3f9b1f5c872cc8?collections=6203f4d0058a1e12161434e0#preview/1f0e7182-08fb-4761-9c7a-e33cf1f4d154\" style=\"display:block\" target=\"_blank\"): img(src=\"images/d2.png\" width=500)\n\n::: column(width=500)\n\n    a(href=\"https://teacher.desmos.com/activitybuilder/custom/6203f4fecb3f9b1f5c872cc8?collections=6203f4d0058a1e12161434e0#preview/24004b27-8365-4b19-82a1-352197ae4078\" style=\"display:block\" target=\"_blank\"): img(src=\"images/d1.png\" width=500)\n\n:::\n\n    style .next-section { display: none !important; }"
+    }
+  ],
+  "title": "2D Shapes and Perimeter"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "khaboom-build-tools",
+  "version": "1.0.0",
+  "description": "Build tools for KhaBoom Learning Platform",
+  "type": "module",
+  "scripts": {
+    "convert": "node build-content-json.js"
+  }
+} 

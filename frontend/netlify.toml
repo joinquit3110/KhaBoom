@@ -5,7 +5,7 @@
 
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "npm run build && node build-content-json.js"
 
 [[headers]]
   for = "/*"
