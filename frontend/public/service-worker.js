@@ -59,7 +59,10 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             // Update cache in background
             fetch(event.request).then((response) => {
-              if (response.ok) {
+              // Check if response is valid JavaScript (not an HTML error page)
+              if (response.ok && 
+                  (response.headers.get('content-type') || '').includes('javascript') &&
+                  !response.text().then(text => text.trim().startsWith('<'))) {
                 cache.put(event.request, response.clone());
               }
             }).catch(() => {/* Ignore network errors */});
@@ -69,7 +72,9 @@ self.addEventListener('fetch', (event) => {
           
           // Otherwise fetch from network and cache
           return fetch(event.request).then((response) => {
-            if (response.ok) {
+            // Only cache JavaScript files (not HTML error pages)
+            if (response.ok && 
+                !(response.headers.get('content-type') || '').includes('text/html')) {
               cache.put(event.request, response.clone());
             }
             return response;
@@ -90,8 +95,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful responses
-        if (response.ok && response.type === 'basic') {
+        // Cache successful responses (but not HTML error pages)
+        if (response.ok && response.type === 'basic' && 
+            !(response.headers.get('content-type') || '').includes('text/html')) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);

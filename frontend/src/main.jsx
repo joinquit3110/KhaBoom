@@ -56,14 +56,16 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
   };
 })();
 
-// Register service worker
+// Register service worker with better error handling
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').then(registration => {
-      console.log('Service Worker registered with scope:', registration.scope);
-    }).catch(error => {
-      console.warn('Unable to register Service Worker.', error);
-    });
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch(error => {
+        console.warn('Unable to register Service Worker.', error);
+      });
   });
 }
 

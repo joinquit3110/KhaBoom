@@ -1,0 +1,356 @@
+/**
+ * Mathigon integration styles for KhaBoom
+ * This matches and extends the original Mathigon textbook styles
+ */
+
+.mathigon-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.mathigon-container {
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.5s ease;
+}
+
+/* Match Mathigon's textbook container styles */
+.textbook-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+}
+
+.textbook-container-main {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+/* Loading state */
+.mathigon-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.mathigon-loading .spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #1f7aff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error messages */
+.mathigon-error-message {
+  max-width: 600px;
+  margin: 100px auto;
+  padding: 30px;
+  background-color: #fff4f4;
+  border: 1px solid #ffcaca;
+  border-radius: 8px;
+  text-align: center;
+  color: #d00;
+}
+
+.mathigon-error-message h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.mathigon-error-message button {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: #1f7aff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 10px;
+}
+
+.mathigon-error-message .fallback-button {
+  background-color: #4caf50;
+}
+
+.mathigon-error-message .retry-button {
+  background-color: #1f7aff;
+}
+
+.mathigon-error-message button:hover {
+  opacity: 0.9;
+}
+
+.mathigon-error-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: #fff4f4;
+  border: 1px solid #ffcaca;
+  padding: 10px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.mathigon-error-banner p {
+  margin: 0 20px 0 0;
+  color: #d00;
+}
+
+.mathigon-error-banner button {
+  padding: 4px 10px;
+  background-color: #1f7aff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.mathigon-error-banner button:first-of-type {
+  background-color: #4caf50;
+}
+
+/* Fix for proper Mathigon step boxes */
+.step {
+  background: #f6f7f9;
+  padding: 12px 16px;
+  margin: 1.5em 0;
+  border-radius: 6px;
+  border-left: 4px solid #1f7aff;
+  position: relative;
+}
+
+/* Properly style elements like in the original Mathigon */
+.blank-space {
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  background: rgba(31, 122, 255, 0.1);
+  border-radius: 4px;
+  margin: 0 4px;
+  vertical-align: middle;
+  position: relative;
+}
+
+/* Interactive element styles */
+.interactive-element {
+  width: 100%;
+  min-height: 240px;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1.5em 0;
+  position: relative;
+}
+
+/* Table styles */
+table.static {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+table.static td,
+table.static th {
+  padding: 8px 12px;
+  border: 1px solid #e2e2e2;
+}
+
+table.static th {
+  background-color: #f6f7f9;
+  font-weight: 600;
+}
+
+/* Math and equations */
+.math {
+  font-family: "KaTeX_Main", serif;
+}
+
+/* Override any problematic styles from the main app */
+#mathigon-textbook * {
+  box-sizing: border-box;
+}
+
+/* Fix header and sidebar spacing */
+#mathigon-textbook .header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#mathigon-textbook .sidebar {
+  position: fixed;
+  top: 60px;
+  bottom: 0;
+}
+
+/* Make sure iframe elements are fully visible */
+#mathigon-textbook iframe {
+  border: none;
+  width: 100%;
+}
+
+/* Fix any popup positioning issues */
+.popup-content {
+  position: fixed;
+  z-index: 1000;
+}
+
+/* Match colors and styles to Mathigon original */
+:root {
+  --blue: #1f7aff;
+  --red: #ff5354;
+  --yellow: #ffd448;
+  --green: #31b304;
+  --purple: #b767ff;
+  --orange: #ff941f;
+}
+
+/* Ensure glossary terms look interactive */
+.term {
+  color: var(--blue);
+  border-bottom: 1px dotted var(--blue);
+  cursor: pointer;
+}
+
+.biography {
+  color: var(--purple);
+  border-bottom: 1px dotted var(--purple);
+  cursor: pointer;
+}
+
+/* Ensure buttons have the correct appearance */
+button.btn {
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+}
+
+button.btn:hover {
+  transform: translateY(-1px);
+}
+
+button.btn:active {
+  transform: translateY(1px);
+}
+
+/* Ensure correct panel sliding animations */
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+.slide-enter {
+  animation: slide-in 0.3s forwards;
+}
+
+.slide-exit {
+  animation: slide-out 0.3s forwards;
+}
+
+/* Fix for interactive elements and steps */
+.x-step, .step {
+  background-color: #f0f4f9;
+  border-left: 4px solid #1f7aff;
+  padding: 16px;
+  margin: 24px 0;
+  border-radius: 6px;
+}
+
+.x-step.completed, .step.completed {
+  border-left-color: #4caf50;
+}
+
+/* Interactive geopad */
+.geopad {
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-height: 300px;
+  position: relative;
+}
+
+/* Blanks */
+.blank-input, x-blank {
+  display: inline-block;
+  background-color: rgba(31, 122, 255, 0.1);
+  border: 1px solid rgba(31, 122, 255, 0.2);
+  border-radius: 4px;
+  min-width: 60px;
+  padding: 2px 8px;
+  text-align: center;
+  color: #1f7aff;
+}
+
+.blank-input.correct, x-blank.correct {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.blank-input.incorrect, x-blank.incorrect {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+/* Gloss terms */
+x-gloss, .glossary-term {
+  color: #1f7aff;
+  cursor: pointer;
+  border-bottom: 1px dotted;
+  text-decoration: none;
+}
+
+/* Gallery and sliders */
+.slider, x-slider {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  margin: 24px 0;
+  border-radius: 6px;
+  background: #f5f5f5;
+}
+
+/* Make sure all SVG elements render properly */
+svg {
+  overflow: visible;
+} 
