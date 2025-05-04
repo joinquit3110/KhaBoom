@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense } from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import CourseRoutes from "./routes/CourseRoutes";
 import Navbar from "./components/Navbar";
@@ -10,6 +10,18 @@ import CourseView from "./components/CourseView";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./components/NotFound";
+
+// Protected Route component that checks for authentication
+function ProtectedRoute({ children, user }) {
+  const location = useLocation();
+  
+  if (!user) {
+    // Redirect to login and save the location they were trying to access
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
+  return children;
+}
 
 export default function App() {
   const [message, setMessage] = useState("");
@@ -68,11 +80,13 @@ export default function App() {
             {/* Redirect /dashboard to /courses */}
             <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
             
-            {/* Course routes with dedicated error boundary */}
+            {/* Protected course routes that require authentication */}
             <Route path="/courses/*" element={
-              <ErrorBoundary courseId="true">
-                <CourseRoutes userId={user?.id} user={user} />
-              </ErrorBoundary>
+              <ProtectedRoute user={user}>
+                <ErrorBoundary courseId="true">
+                  <CourseRoutes userId={user?.id} user={user} />
+                </ErrorBoundary>
+              </ProtectedRoute>
             } />
             
             <Route path="/" element={

@@ -14,8 +14,10 @@ import Notification from '../components/Notification';
 import ChatBot from '../components/ChatBot';
 import LazyImage from './LazyImage';
 import axios from 'axios';
+import './courseReader.css';
 
-// Lazy load the InteractiveComponent to reduce initial bundle size
+// Lazy load the Mathigon components to reduce initial bundle size
+const MathigonLoader = lazy(() => import('./MathigonLoader'));
 const InteractiveComponent = lazy(() => import('../interactive/InteractiveComponent'));
 
 const CourseView = () => {
@@ -56,6 +58,32 @@ const CourseView = () => {
   const [progress, setProgress] = useState(0);
   const [completedSections, setCompletedSections] = useState([]);
   
+  // Mathigon-specific states
+  const [mathigonLoaded, setMathigonLoaded] = useState(false);
+  const [mathigonError, setMathigonError] = useState(null);
+  const [isExactMathigonCourse, setIsExactMathigonCourse] = useState(false);
+  
+  // Function to load external Mathigon scripts
+  const loadMathigonAssets = useCallback(async () => {
+    try {
+      // Check if we're dealing with a Mathigon course format
+      const isMathigonFormat = courseContent?.content?.format === 'mathigon' || 
+                               (courseContent?.content?.sections && 
+                                courseContent?.content?.sections[0]?.id);
+      
+      setIsExactMathigonCourse(isMathigonFormat);
+      
+      if (isMathigonFormat) {
+        console.log('Loading Mathigon assets for course:', courseId);
+        // MathigonLoader component will handle the script loading
+        setMathigonLoaded(true);
+      }
+    } catch (err) {
+      console.error('Failed to load Mathigon assets:', err);
+      setMathigonError(err.message);
+    }
+  }, [courseId, courseContent]);
+  
   // Function to calculate progress percentage based on completed sections
   const calculateProgress = useCallback((completedSecs, totalSections) => {
     if (!totalSections || totalSections === 0) return 0;
@@ -76,6 +104,12 @@ const CourseView = () => {
       // Set course sections for navigation if available
       if (courseData.course && courseData.course.sections) {
         console.log(`Course has ${courseData.course.sections.length} sections`);
+      }
+      
+      // Special case for Mathigon format courses
+      if (isExactMathigonCourse) {
+        console.log('Using Mathigon format for rendering');
+        return { __html: '<div id="mathigon-textbook-container" class="mathigon-container"></div>' };
       }
       
       // Handle different content formats
@@ -117,12 +151,7 @@ const CourseView = () => {
       setError('Failed to parse course content. Please try again later.');
       return { __html: '<div class="error-message">Failed to parse course content</div>' };
     }
-  }, []);
-
-  // Memoize the iframe setup to prevent unnecessary re-renders
-  const setupIframe = useCallback(() => {
-    // No iframe setup needed
-  }, []);
+  }, [isExactMathigonCourse]);
 
   // Function to generate correct icon and content URLs
   const getResourceUrl = useCallback((path) => {
@@ -176,6 +205,9 @@ const CourseView = () => {
         
         // Try to load progress data
         loadProgressData(courseInfo);
+        
+        // Load Mathigon assets after content is loaded
+        loadMathigonAssets();
       } catch (err) {
         console.error(`Error fetching course content: ${err.message}`);
         

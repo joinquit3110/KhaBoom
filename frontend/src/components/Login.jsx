@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-const Login = ({ setUser, redirectTo }) => {
+const Login = ({ setUser }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -10,6 +10,10 @@ const Login = ({ setUser, redirectTo }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e) => {
     setFormData({
@@ -38,8 +42,8 @@ const Login = ({ setUser, redirectTo }) => {
       // Update app state
       setUser(user);
       
-      // Redirect to specified path or default to dashboard
-      navigate(redirectTo || '/dashboard');
+      // Redirect to the page they were trying to access or dashboard
+      navigate(from);
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed. Please try again.');
     } finally {
