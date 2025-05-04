@@ -12,13 +12,11 @@
   VITE_API_BASE = "https://kha-boom-backend.onrender.com"
   NODE_ENV = "production"
   VITE_SITE_URL = "https://khaboom.netlify.app"
-  MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-address>/khaboom?retryWrites=true&w=majority"
 
 # Branch deploy context: all deploys that aren't from a pull request or from the main branch
 [context.branch-deploy.environment]
   VITE_API_BASE = "https://kha-boom-backend-staging.onrender.com"
   NODE_ENV = "staging"
-  MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-address>/khaboom-staging?retryWrites=true&w=majority"
 
 # Handle SPA routing
 [[redirects]]
@@ -26,67 +24,15 @@
   to = "/index.html"
   status = 200
 
-# Special MongoDB proxy for database health checks
-[[redirects]]
-  from = "/api/health/db"
-  to = "https://kha-boom-backend.onrender.com/api/health/db"
-  status = 200
-  force = true
-  headers = { 
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS" 
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  }
-
-# Auth endpoints proxy
-[[redirects]]
-  from = "/api/auth/*"
-  to = "https://kha-boom-backend.onrender.com/api/auth/:splat"
-  status = 200
-  force = true
-  headers = { 
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  }
-
-# Progress tracking proxy - critical for MongoDB
-[[redirects]]
-  from = "/api/progress/*"
-  to = "https://kha-boom-backend.onrender.com/api/progress/:splat"
-  status = 200
-  force = true
-  headers = { 
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  }
-  
-# User profile proxy
-[[redirects]]
-  from = "/api/user/*"
-  to = "https://kha-boom-backend.onrender.com/api/user/:splat"
-  status = 200
-  force = true
-  headers = { 
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  }
-
-# General API proxy - catch all other API routes
+# Proxy API requests to Render backend
 [[redirects]]
   from = "/api/*"
   to = "https://kha-boom-backend.onrender.com/api/:splat"
   status = 200
   force = true
-  headers = { 
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  }
+  headers = { Access-Control-Allow-Origin = "*", Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS", Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept" }
 
-# Mathigon content redirects - placed AFTER API redirects but BEFORE the SPA redirect
+# Mathigon content redirects - placed BEFORE the SPA redirect
 [[redirects]]
   from = "/mathigon/*"
   to = "/mathigon/:splat"
@@ -104,7 +50,7 @@
     Content-Security-Policy = """
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.mathigon.org https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com;
-      connect-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com https://kha-boom-backend.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com https://*.mongodb.net https://*.mongodb-analytics.com;
+      connect-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com https://kha-boom-backend.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com;
       img-src 'self' data: blob: https://*.mathigon.org https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
@@ -165,5 +111,5 @@
 # Redirect rules
 [[redirects]]
   from = "/course/:id/*"
-  to = "/:id/:splat"
+  to = "/courses/:id/:splat"
   status = 301
