@@ -37,7 +37,7 @@ if (!fs.existsSync(headersPath)) {
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.render.com https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.render.com https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app; manifest-src 'self'; object-src 'none'; media-src 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://www.google-analytics.com https://*.netlify.app https://*.mathigon.org https://*.render.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.netlify.app https://*.mathigon.org; connect-src 'self' https://*.render.com https://kha-boom-backend.onrender.com https://kha-boom-backend-staging.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://www.google-analytics.com https://*.mongodb.net http://localhost:* https://*.netlify.app https://overbridgenet.com; font-src 'self' data: https://fonts.gstatic.com https://*.netlify.app https://*.mathigon.org; img-src 'self' data: blob: https://*.render.com https://api.dicebear.com https://kha-boom-backend.onrender.com https://*.netlify.app https://*.mathigon.org; manifest-src 'self'; object-src 'none'; media-src 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
@@ -131,32 +131,7 @@ const placeholderCoursePath = path.join(distDir, 'cloud-courses.json');
 if (!fs.existsSync(placeholderCoursePath)) {
   console.log('📝 Creating placeholder course info for cloud content...');
   
-  const courses = [
-    {
-      id: 'probability',
-      title: 'Introduction to Probability',
-      description: 'Learn about randomness, games, and chance',
-      color: '#CD0E66',
-      level: 'Foundations',
-      category: 'Statistics'
-    },
-    {
-      id: 'circles',
-      title: 'Circles and Pi',
-      description: 'Discover the properties of circles and the famous number Pi',
-      color: '#5A49C9',
-      level: 'Intermediate',
-      category: 'Geometry'
-    },
-    {
-      id: 'vectors',
-      title: 'Vectors',
-      description: 'Understand quantities with direction and magnitude',
-      color: '#6D3BBF',
-      level: 'Advanced',
-      category: 'Mathematics'
-    }
-  ];
+  const courses = [];
   
   fs.writeFileSync(placeholderCoursePath, JSON.stringify({ courses }, null, 2));
   console.log('✅ Created placeholder course info for cloud content');
