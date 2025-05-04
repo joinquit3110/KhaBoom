@@ -57,6 +57,7 @@
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
       object-src 'none';
+      frame-src https://player.vimeo.com https://www.youtube.com https://*.mathigon.org;
     """
 
 # Content types for JavaScript files

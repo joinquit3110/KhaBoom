@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import './styles/courseReader.css'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // Clean up any browser extension errors and filter error messages

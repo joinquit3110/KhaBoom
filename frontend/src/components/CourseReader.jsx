@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { parseMathigonMd } from '../utils/mathigonParser';
+import './courseReader.css';
 
 /**
  * CourseReader Component
@@ -28,7 +29,6 @@ const CourseReader = () => {
         // Try different possible paths for the content, prioritizing the content directory
         const possiblePaths = [
           `/content/${courseId}/content.md`,                  // Direct content directory
-          `/public/content/${courseId}/content.md`,           // Public content directory
           `/${courseId}/content.md`,                          // Root path
           `/originalweb/textbooks-master/content/${courseId}/content.md` // Original source (fallback)
         ];

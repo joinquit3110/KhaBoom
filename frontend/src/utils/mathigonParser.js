@@ -160,6 +160,10 @@ export const processMathigonContent = (content) => {
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
       .replace(/_([^_]+)_/g, '<em>$1</em>')
       
+      // Process video embeds
+      .replace(/\[vimeo:([^\]]+)\]/g, '<div class="video-container"><iframe src="https://player.vimeo.com/video/$1" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>')
+      .replace(/\[youtube:([^\]]+)\]/g, '<div class="video-container"><iframe src="https://www.youtube.com/embed/$1" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>')
+      
       // Process links and special link types
       .replace(/\[([^\]]+)\]\(gloss:([^)]+)\)/g, '<span class="glossary-term" data-term="$2">$1</span>')
       .replace(/\[([^\]]+)\]\(bio:([^)]+)\)/g, '<span class="biography" data-person="$2">$1</span>')
