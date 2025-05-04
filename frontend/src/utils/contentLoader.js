@@ -464,7 +464,17 @@ const addFallbackCourses = async () => {
             'complex': '#22AB24',
             'combinatorics': '#AD1D84',
             'codes': '#1F7AED',
-            'chaos': '#009EA6'
+            'chaos': '#009EA6',
+            'basic-probability': '#CD0E66',
+            'non-euclidean-geometry': '#5A49C9',
+            'logic': '#1F7AED',
+            'linear-functions': '#22AB24',
+            'functions': '#AD1D84',
+            'exponentials': '#0F82F2',
+            'exploding-dots': '#CA0E66',
+            'data': '#4AB72A',
+            'shapes': '#CD0E66',
+            'polygons': '#5A49C9'
           };
           
           // Convert directory name to display title with appropriate formatting
@@ -487,8 +497,7 @@ const addFallbackCourses = async () => {
         discoveredCourses.forEach(course => {
           availableCourses.push({
             ...course,
-            thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
-            sections: [{ id: 'introduction', title: 'Introduction' }]
+            thumbnail: generateThumbnailUrl(course.id)
           });
         });
         
@@ -501,110 +510,146 @@ const addFallbackCourses = async () => {
     
     // If API fails, try direct access to content folder
     try {
-      // Try direct fetch to each course's content.md to extract proper metadata
-      for (const courseId of ['probability', 'circles', 'vectors']) {
-        try {
-          const response = await fetch(getApiUrl(`/content/${courseId}/content.md`));
-          if (response.ok) {
-            const content = await response.text();
-            
-            // Parse metadata from content
-            const metadata = {};
-            const metadataRegex = /> ([a-zA-Z-]+): (.+)/g;
-            let match;
-            while ((match = metadataRegex.exec(content)) !== null) {
-              metadata[match[1]] = match[2];
-            }
-            
-            // Extract sections from content
-            const sections = [];
-            const sectionRegex = /## ([^\n]+)\s*\n+> section: ([^\n]+)/g;
-            while ((match = sectionRegex.exec(content)) !== null) {
-              sections.push({
-                title: match[1],
-                id: match[2]
-              });
-            }
-            
-            // Add the course with proper metadata
-            if (metadata.title) {
-              availableCourses.push({
-                id: courseId,
-                title: metadata.title,
-                description: metadata.description || `Learn about ${courseId.replace(/-/g, ' ')}.`,
-                color: metadata.color || '#1F7AED',
-                level: metadata.level || 'Intermediate',
-                category: metadata.category || 'Mathematics',
-                thumbnail: getApiUrl(`/content/${courseId}/hero.jpg`),
-                sections: sections.length > 0 ? sections : [{ id: 'introduction', title: 'Introduction' }]
-              });
-              console.log(`Added course ${courseId} from direct content.md parsing`);
-            }
+      // Try to fetch a list of directories directly from the content folder
+      const response = await fetch('/content/');
+      
+      if (response.ok) {
+        const html = await response.text();
+        
+        // Extract directory names from the HTML response (this is a simple approach that might need adjustment)
+        const dirRegex = /<a[^>]*href="([^"\/]+)\/"[^>]*>/g;
+        const directories = [];
+        let match;
+        
+        while ((match = dirRegex.exec(html)) !== null) {
+          const dir = match[1];
+          if (dir !== 'shared' && !dir.startsWith('_') && !dir.startsWith('.')) {
+            directories.push(dir);
           }
-        } catch (courseError) {
-          console.warn(`Error loading course ${courseId}:`, courseError);
         }
+        
+        console.log('Discovered directories from content folder:', directories);
+        
+        // Create course objects for each directory using the same approach as above
+        const colorMap = {
+          'probability': '#CD0E66',
+          'circles': '#5A49C9',
+          'vectors': '#1F7AED',
+          'triangles': '#5A49C9',
+          'transformations': '#1F7AED',
+          'statistics': '#CD0E66',
+          'solids': '#5A49C9',
+          'sequences': '#22AB24',
+          'quadratics': '#AD1D84',
+          'polyhedra': '#5A49C9',
+          'matrices': '#1F7AED',
+          'graph-theory': '#0F82F2',
+          'game-theory': '#CA0E66',
+          'fractals': '#4AB72A',
+          'euclidean-geometry': '#CD0E66',
+          'divisibility': '#0F82F2',
+          'complex': '#22AB24',
+          'combinatorics': '#AD1D84',
+          'codes': '#1F7AED',
+          'chaos': '#009EA6',
+          'basic-probability': '#CD0E66',
+          'non-euclidean-geometry': '#5A49C9',
+          'logic': '#1F7AED',
+          'linear-functions': '#22AB24',
+          'functions': '#AD1D84',
+          'exponentials': '#0F82F2',
+          'exploding-dots': '#CA0E66',
+          'data': '#4AB72A',
+          'shapes': '#CD0E66',
+          'polygons': '#5A49C9'
+        };
+        
+        directories.forEach(dir => {
+          const title = dir
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          
+          availableCourses.push({
+            id: dir,
+            title: title,
+            description: `Learn about ${title.toLowerCase()}`,
+            color: colorMap[dir] || getRandomColor(),
+            level: 'Intermediate',
+            category: 'Mathematics',
+            thumbnail: generateThumbnailUrl(dir)
+          });
+        });
+        
+        console.log(`Added ${directories.length} courses from direct content directory access`);
+        return;
       }
     } catch (directError) {
-      console.warn('Error directly accessing content files:', directError);
+      console.warn('Error directly accessing content directory:', directError);
     }
     
-    // If all else fails, add fallback courses
-    if (availableCourses.length === 0) {
-      const allCourses = [
-        {
-          id: 'probability',
-          title: 'Introduction to Probability',
-          description: 'Learn about randomness, games, and chance',
-          color: '#CD0E66',
-          level: 'Foundations',
-          category: 'Statistics'
-        },
-        {
-          id: 'circles',
-          title: 'Circles and Pi',
-          description: 'Discover the properties of circles and the famous number Pi',
-          color: '#5A49C9',
-          level: 'Intermediate',
-          category: 'Geometry'
-        },
-        {
-          id: 'vectors',
-          title: 'Vectors',
-          description: 'Explore the mathematics of direction and magnitude',
-          color: '#1F7AED',
-          level: 'Advanced',
-          category: 'Algebra'
-        }
-      ];
+    // If all else fails, use manual list based on content directory structure
+    const contentDirectories = [
+      'probability', 'circles', 'vectors', 'triangles', 'transformations', 'statistics', 
+      'solids', 'shapes', 'sequences', 'quadratics', 'polyhedra', 'polygons', 'matrices', 
+      'logic', 'linear-functions', 'graph-theory', 'game-theory', 'functions', 'fractals', 
+      'exponentials', 'exploding-dots', 'euclidean-geometry', 'divisibility', 'data', 
+      'complex', 'combinatorics', 'codes', 'chaos', 'basic-probability', 'non-euclidean-geometry'
+    ];
+    
+    const colorMap = {
+      'probability': '#CD0E66',
+      'circles': '#5A49C9',
+      'vectors': '#1F7AED',
+      'triangles': '#5A49C9',
+      'transformations': '#1F7AED',
+      'statistics': '#CD0E66',
+      'solids': '#5A49C9',
+      'sequences': '#22AB24',
+      'quadratics': '#AD1D84',
+      'polyhedra': '#5A49C9',
+      'matrices': '#1F7AED',
+      'graph-theory': '#0F82F2',
+      'game-theory': '#CA0E66',
+      'fractals': '#4AB72A',
+      'euclidean-geometry': '#CD0E66',
+      'divisibility': '#0F82F2',
+      'complex': '#22AB24',
+      'combinatorics': '#AD1D84',
+      'codes': '#1F7AED',
+      'chaos': '#009EA6',
+      'basic-probability': '#CD0E66',
+      'non-euclidean-geometry': '#5A49C9',
+      'logic': '#1F7AED',
+      'linear-functions': '#22AB24',
+      'functions': '#AD1D84',
+      'exponentials': '#0F82F2',
+      'exploding-dots': '#CA0E66',
+      'data': '#4AB72A',
+      'shapes': '#CD0E66',
+      'polygons': '#5A49C9'
+    };
+    
+    contentDirectories.forEach(dir => {
+      const title = dir
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
       
-      // Add fallback courses
-      allCourses.forEach(course => {
-        availableCourses.push({
-          ...course,
-          thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
-          sections: [{ id: 'introduction', title: 'Introduction' }]
-        });
+      availableCourses.push({
+        id: dir,
+        title: title,
+        description: `Learn about ${title.toLowerCase()}`,
+        color: colorMap[dir] || getRandomColor(),
+        level: 'Intermediate',
+        category: 'Mathematics',
+        thumbnail: generateThumbnailUrl(dir)
       });
-      
-      console.log(`Added ${allCourses.length} fallback courses`);
-    }
+    });
+    
+    console.log(`Added ${contentDirectories.length} courses from predefined content list`);
   } catch (error) {
     console.error('Error loading courses from content directory:', error);
-    
-    // Add minimal fallback course if everything else fails
-    if (availableCourses.length === 0) {
-      availableCourses.push({
-        id: 'probability',
-        title: 'Introduction to Probability',
-        description: 'Learn about randomness, games, and chance',
-        color: '#CD0E66',
-        level: 'Foundations',
-        category: 'Statistics',
-        thumbnail: getApiUrl('/content/probability/hero.jpg'),
-        sections: [{ id: 'introduction', title: 'Introduction' }]
-      });
-    }
   }
 };
 
