@@ -46,9 +46,9 @@ const CourseReader = () => {
         
         // Try different possible paths for the content
         const possiblePaths = [
-          `/content/${courseId}/content.md`,                  // Direct content directory
-          `/${courseId}/content.md`,                          // Root path
-          `/originalweb/textbooks-master/content/${courseId}/content.md` // Original source
+          `/mathigon/content/${courseId}/content.md`,           // Mathigon content directory
+          `/content/${courseId}/content.md`,                     // Legacy path
+          `/${courseId}/content.md`                              // Root path
         ];
         
         let mdContent = null;

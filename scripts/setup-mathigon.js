@@ -1,8 +1,7 @@
 /**
  * Setup Complete Mathigon Integration
  * 
- * This script copies and integrates the entire Mathigon textbooks-master application
- * into our frontend for direct use.
+ * This script creates the necessary structure for Mathigon integration.
  */
 
 const fs = require('fs');
@@ -10,7 +9,6 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Paths
-const SOURCE_DIR = path.join(__dirname, '..', 'originalweb', 'textbooks-master');
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const PUBLIC_DIR = path.join(FRONTEND_DIR, 'public');
 const MATHIGON_PUBLIC_DIR = path.join(PUBLIC_DIR, 'mathigon');
@@ -24,74 +22,17 @@ function createDirIfNotExists(dirPath) {
   }
 }
 
-// Copy file function
-function copyFile(src, dest) {
-  try {
-    // Create the target directory if it doesn't exist
-    const destDir = path.dirname(dest);
-    createDirIfNotExists(destDir);
-    
-    // Copy the file
-    fs.copyFileSync(src, dest);
-    console.log(`Copied: ${src} -> ${dest}`);
-    return true;
-  } catch (err) {
-    console.error(`Error copying ${src}: ${err.message}`);
-    return false;
-  }
-}
-
-// Copy directory recursively
-function copyDirRecursive(src, dest) {
-  if (!fs.existsSync(src)) {
-    console.error(`Source directory does not exist: ${src}`);
-    return 0;
-  }
-  
-  createDirIfNotExists(dest);
-  let count = 0;
-  
-  const entries = fs.readdirSync(src, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    
-    if (entry.isDirectory()) {
-      count += copyDirRecursive(srcPath, destPath);
-    } else {
-      if (copyFile(srcPath, destPath)) {
-        count++;
-      }
-    }
-  }
-  
-  return count;
-}
-
 // Main function
 function setupMathigon() {
-  console.log('=== Setting up Complete Mathigon Integration ===');
+  console.log('=== Setting up Mathigon Integration ===');
   
   // 1. Setup directories
   createDirIfNotExists(MATHIGON_PUBLIC_DIR);
   createDirIfNotExists(MATHIGON_SRC_DIR);
+  createDirIfNotExists(path.join(MATHIGON_PUBLIC_DIR, 'content'));
+  createDirIfNotExists(path.join(MATHIGON_PUBLIC_DIR, 'assets'));
   
-  // 2. Copy frontend assets
-  const assetsDir = path.join(SOURCE_DIR, 'frontend', 'assets');
-  const destAssetsDir = path.join(MATHIGON_PUBLIC_DIR, 'assets');
-  console.log('Copying frontend assets...');
-  const assetsCount = copyDirRecursive(assetsDir, destAssetsDir);
-  console.log(`Copied ${assetsCount} asset files`);
-  
-  // 3. Copy content directory
-  const contentDir = path.join(SOURCE_DIR, 'content');
-  const destContentDir = path.join(MATHIGON_PUBLIC_DIR, 'content');
-  console.log('Copying content directory...');
-  const contentCount = copyDirRecursive(contentDir, destContentDir);
-  console.log(`Copied ${contentCount} content files`);
-  
-  // 4. Create direct wrapper component 
+  // 2. Create direct wrapper component 
   const wrapperComponent = `import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -166,10 +107,12 @@ const MathigonCourse = () => {
 export default MathigonCourse;`;
 
   const wrapperPath = path.join(MATHIGON_SRC_DIR, 'MathigonCourse.jsx');
-  fs.writeFileSync(wrapperPath, wrapperComponent);
-  console.log(`Created wrapper component at ${wrapperPath}`);
+  if (!fs.existsSync(wrapperPath)) {
+    fs.writeFileSync(wrapperPath, wrapperComponent);
+    console.log(`Created wrapper component at ${wrapperPath}`);
+  }
   
-  // 5. Create index.html for the Mathigon iframe
+  // 3. Create index.html for the Mathigon iframe
   const mathigonHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -190,20 +133,14 @@ export default MathigonCourse;`;
 </html>`;
 
   const htmlPath = path.join(MATHIGON_PUBLIC_DIR, 'index.html');
-  fs.writeFileSync(htmlPath, mathigonHtml);
-  console.log(`Created Mathigon HTML file at ${htmlPath}`);
-  
-  // 6. Modify routes to include Mathigon course rendering
-  console.log('Setup complete! Please update your CourseRoutes.jsx to use the new MathigonCourse component.');
-  
-  console.log('\nAdd the following import to CourseRoutes.jsx:');
-  console.log('import MathigonCourse from "../mathigon/MathigonCourse";');
-  
-  console.log('\nUpdate your routes to use the MathigonCourse component:');
-  console.log('<Route path="/courses/:courseId/:sectionId?" element={<MathigonCourse />} />');
+  if (!fs.existsSync(htmlPath)) {
+    fs.writeFileSync(htmlPath, mathigonHtml);
+    console.log(`Created Mathigon HTML file at ${htmlPath}`);
+  }
   
   console.log('\n=== Integration Complete ===');
-  console.log('Total files copied:', assetsCount + contentCount + 2);
+  console.log('Please ensure you have course content in frontend/public/mathigon/content/');
+  console.log('And course assets in frontend/public/mathigon/assets/');
 }
 
 // Run the setup

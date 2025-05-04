@@ -8,7 +8,8 @@
     "build:assets": "echo 'Skipping assets build in CI environment'",
     "build:vite": "vite build",
     "postbuild": "node postbuild.cjs",
-    "start": "vite preview"
+    "start": "vite preview",
+    "setup-mathigon": "node ../scripts/setup-mathigon.js"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",

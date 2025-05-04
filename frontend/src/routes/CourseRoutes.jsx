@@ -1,7 +1,5 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import CourseRenderer from '../components/CourseRenderer';
-import CourseReader from '../components/CourseReader';
 import Dashboard from '../components/Dashboard';
 import NotFound from '../components/NotFound';
 import MathigonCourse from '../mathigon/MathigonCourse';
@@ -21,12 +19,6 @@ const CourseRoutes = ({ userId, user }) => {
       {/* Course pages - Using MathigonCourse for exact Mathigon format */}
       <Route path="/:courseId" element={<MathigonCourse />} />
       <Route path="/:courseId/:sectionId" element={<MathigonCourse />} />
-      
-      {/* Legacy routes - keeping as fallbacks */}
-      <Route path="/reader/:courseId" element={<CourseReader />} />
-      <Route path="/reader/:courseId/:sectionId" element={<CourseReader />} />
-      <Route path="/legacy/:courseId" element={<CourseRenderer userId={userId} />} />
-      <Route path="/legacy/:courseId/:sectionId" element={<CourseRenderer userId={userId} />} />
       
       {/* 404 Not found */}
       <Route path="*" element={<NotFound />} />

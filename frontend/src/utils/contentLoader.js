@@ -267,8 +267,8 @@ const loadContentFile = async (courseId, userId = null) => {
     // Check if content directory exists
     const courseExists = true; // Always assume the course exists in the content directory
 
-    // Load course markdown content - directly from content directory
-    const contentPath = `/content/${courseId}/content.md`;
+    // Load course markdown content - from mathigon content directory
+    const contentPath = `/mathigon/content/${courseId}/content.md`;
     
     let contentData = null;
     
@@ -318,13 +318,13 @@ const availableCourses = [];
 
 // Function to load all available courses from the content directory
 const addFallbackCourses = async () => {
-  console.log('Loading courses from the content directory structure');
+  console.log('Loading courses from the mathigon content directory structure');
   
   // Clear existing courses first to avoid duplicates
   availableCourses.length = 0;
   
   try {
-    // Get content directories directly from the content folder
+    // Get content directories directly from the mathigon content folder
     const contentDirs = [
       'triangles', 'vectors', 'transformations', 'statistics', 'solids', 
       'shapes', 'sequences', 'quadratics', 'probability', 'polyhedra', 

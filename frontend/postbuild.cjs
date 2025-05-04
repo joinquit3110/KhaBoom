@@ -2,9 +2,14 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const { execSync } = require('child_process');
 
 console.log('🔧 Running post-build optimizations for Netlify...');
 const distDir = path.join(__dirname, 'dist');
+
+// Constants
+const MATHIGON_DIST_DIR = path.join(distDir, 'mathigon');
+const PUBLIC_MATHIGON_DIR = path.join(__dirname, 'public', 'mathigon');
 
 // Create _redirects file for SPA routing if it doesn't exist
 const redirectsPath = path.join(distDir, '_redirects');
@@ -136,5 +141,65 @@ if (!fs.existsSync(placeholderCoursePath)) {
   fs.writeFileSync(placeholderCoursePath, JSON.stringify({ courses }, null, 2));
   console.log('✅ Created placeholder course info for cloud content');
 }
+
+/**
+ * Post-build script to ensure proper deployment
+ */
+function main() {
+  console.log('Running post-build tasks...');
+  
+  // Check if Mathigon content exists in dist, if not, copy from public
+  if (!fs.existsSync(MATHIGON_DIST_DIR)) {
+    console.log('Mathigon content not found in dist folder, setting up...');
+    
+    // Check if Mathigon content exists in public folder
+    if (fs.existsSync(PUBLIC_MATHIGON_DIR)) {
+      console.log('Copying Mathigon content from public folder...');
+      // Create the dist/mathigon directory
+      fs.mkdirSync(MATHIGON_DIST_DIR, { recursive: true });
+      
+      // Copy the content recursively
+      copyDirRecursive(PUBLIC_MATHIGON_DIR, MATHIGON_DIST_DIR);
+      console.log('Mathigon content copied to dist folder.');
+    } else {
+      console.warn('Mathigon content source not found. Application may not function correctly.');
+    }
+  } else {
+    console.log('Mathigon content already exists in dist folder.');
+  }
+  
+  console.log('Post-build tasks completed.');
+}
+
+/**
+ * Copy directory recursively
+ */
+function copyDirRecursive(src, dest) {
+  if (!fs.existsSync(src)) {
+    return false;
+  }
+  
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+  
+  return true;
+}
+
+// Run the script
+main();
 
 console.log('🎉 Post-build optimizations complete!');
