@@ -59,10 +59,12 @@ export default defineConfig({
           'ui-vendor': ['framer-motion'],
           'utility-vendor': ['axios'],
         },
-        // Configure correct output formats
+        // Configure correct output formats and ensure proper extensions
         assetFileNames: 'assets/[name].[ext]',
         chunkFileNames: '[name].[hash].js',
         entryFileNames: '[name].[hash].js',
+        // Force all JSX files to be transformed into JS files
+        format: 'es'
       },
     },
     chunkSizeWarningLimit: 1000,
@@ -74,7 +76,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           // Fix MIME type for JSX files
-          if (req.url.endsWith('.jsx')) {
+          if (req.url.endsWith('.jsx') || req.url.includes('.jsx?')) {
             res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
           }
           next();
@@ -92,6 +94,18 @@ export default defineConfig({
   AddType application/javascript mjs
   AddType application/javascript ts
   AddType application/javascript tsx
+  
+  # Add proper types for module scripts
+  <FilesMatch "\\.(jsx|mjs|js|ts|tsx)$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+  </FilesMatch>
+</IfModule>
+
+# Force MIME types even if server doesn't have mod_mime
+<IfModule !mod_mime.c>
+  <FilesMatch "\\.(jsx|js|mjs|ts|tsx)$">
+    ForceType application/javascript
+  </FilesMatch>
 </IfModule>
         `;
         
@@ -102,8 +116,41 @@ export default defineConfig({
         fs.writeFileSync(path.join('dist', '.htaccess'), htaccessContent);
         
         console.log('✅ Added .htaccess file for proper MIME types');
+        
+        // Create a custom server routing file for Netlify
+        const redirectsContent = `
+# Proper MIME types for JavaScript modules
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+/*.jsx
+  Content-Type: application/javascript; charset=utf-8
+
+/*.mjs
+  Content-Type: application/javascript; charset=utf-8
+
+/*.ts
+  Content-Type: application/javascript; charset=utf-8
+
+/*.tsx
+  Content-Type: application/javascript; charset=utf-8
+
+# Handle SPA routing
+/*
+  Rewrite /index.html
+  Status: 200
+`;
+
+        fs.writeFileSync(path.join('dist', '_redirects'), redirectsContent);
+        console.log('✅ Added _redirects file for Netlify MIME type handling');
       }
     }
   ],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   root: './'
 });

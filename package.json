@@ -5,9 +5,14 @@
   "scripts": {
     "build": "cd frontend && npm run build",
     "deploy": "netlify deploy --prod",
-    "predeploy": "npm run build"
+    "predeploy": "npm run build",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
   "devDependencies": {
+    "concurrently": "^8.2.0",
     "netlify-cli": "^17.10.0"
   },
   "engines": {

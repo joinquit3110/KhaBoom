@@ -1,0 +1,22 @@
+{
+    "courses":  [
+                    {
+                        "id":  "probability",
+                        "description":  "Learn about randomness, games, and chance",
+                        "color":  "#CD0E66",
+                        "level":  "Foundations",
+                        "category":  "Statistics",
+                        "title":  "Introduction to Probability",
+                        "sections":  [
+                                         {
+                                             "id":  "introduction",
+                                             "title":  "Getting Started"
+                                         },
+                                         {
+                                             "id":  "samples",
+                                             "title":  "Random Samples"
+                                         }
+                                     ]
+                    }
+                ]
+}

@@ -32,7 +32,6 @@ const parseMathigonMd = (content) => {
   // Ensure content is a string to avoid 'includes is not a function' error
   if (typeof content !== 'string') {
     console.warn('Content is not a string or object:', typeof content);
-    // Return a safe fallback object
     return {
       metadata: {},
       html: `<p>Error: Received invalid content type (${typeof content})</p>`
@@ -41,54 +40,136 @@ const parseMathigonMd = (content) => {
   
   // Extract metadata from content
   const metadata = {};
-  const metadataRegex = /> ([\w-]+): (.+)/g;
-  let match;
-  while ((match = metadataRegex.exec(content)) !== null) {
-    metadata[match[1]] = match[2];
+  const lines = content.split('\n');
+  let contentStart = 0;
+  
+  // Look for metadata at the beginning of the file (Mathigon format)
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('> ')) {
+      const parts = line.substring(2).split(':');
+      if (parts.length >= 2) {
+        const key = parts[0].trim();
+        const value = parts.slice(1).join(':').trim();
+        metadata[key] = value;
+      }
+      contentStart = i + 1;
+    } else if (line !== '') {
+      break;
+    }
   }
+  
+  // Process the actual content, skipping metadata
+  const contentLines = lines.slice(contentStart);
+  const contentWithoutMetadata = contentLines.join('\n');
   
   // If content is already HTML, just return it with minimal processing
-  if (content.includes('<h1>') || content.includes('<div class="section">')) {
-    // Just do minimal processing for HTML content
-    return { metadata, html: content };
+  if (contentWithoutMetadata.includes('<h1>') || contentWithoutMetadata.includes('<div class="section">')) {
+    return { metadata, html: contentWithoutMetadata };
   }
   
-  // Convert sections
-  let html = content
-    // Process section headers
-    .replace(/## ([^\n]+)\n\n> section: ([^\n]+)/g, '<h2 id="$2">$1</h2><div class="section" data-section="$2">')
+  // Parse sections and subsections
+  let html = '';
+  const sections = [];
+  
+  // Split content by sections (## heading followed by > section: id)
+  const sectionMatches = contentWithoutMetadata.matchAll(/## ([^\n]+)\s*\n+> section: ([^\n]+)/g);
+  const sectionIndices = [];
+  
+  for (const match of sectionMatches) {
+    sectionIndices.push({
+      index: match.index,
+      title: match[1].trim(),
+      id: match[2].trim()
+    });
+  }
+  
+  // Process each section
+  if (sectionIndices.length > 0) {
+    for (let i = 0; i < sectionIndices.length; i++) {
+      const section = sectionIndices[i];
+      const nextSection = i < sectionIndices.length - 1 ? sectionIndices[i + 1] : null;
+      const startIndex = section.index;
+      const endIndex = nextSection ? nextSection.index : contentWithoutMetadata.length;
+      
+      // Extract section content
+      const sectionContent = contentWithoutMetadata.substring(startIndex, endIndex);
+      
+      // Process section content
+      const processedContent = processSectionContent(sectionContent);
+      
+      // Add to HTML
+      html += `<div class="section" id="${section.id}" data-section="${section.id}">
+        <h2>${section.title}</h2>
+        <div class="section-content">
+          ${processedContent}
+        </div>
+      </div>`;
+      
+      // Add to sections array
+      sections.push({
+        id: section.id,
+        title: section.title,
+        content: processedContent
+      });
+    }
+  } else {
+    // If no sections found, treat the whole content as one section
+    html = `<div class="section" id="content" data-section="content">
+      <div class="section-content">
+        ${processSectionContent(contentWithoutMetadata)}
+      </div>
+    </div>`;
+    
+    sections.push({
+      id: 'content',
+      title: metadata.title || 'Content',
+      content: processSectionContent(contentWithoutMetadata)
+    });
+  }
+  
+  return { 
+    metadata, 
+    html, 
+    sections 
+  };
+};
+
+// Helper function to process section content
+const processSectionContent = (sectionContent) => {
+  return sectionContent
     // Process subsection markers
     .replace(/> id: ([^\n]+)/g, '<div class="subsection" id="$1">')
+    .replace(/> end-id/g, '</div>')
     
     // Process column layouts
     .replace(/::: column\(width=(\d+)\)/g, '<div class="column" style="width: $1px;">')
     .replace(/::: column\.grow/g, '<div class="column grow">')
     .replace(/:::/g, '</div>')
     
-    // Process images with full path resolution
-    .replace(/x-img\(src="([^"]+)" width=(\d+) height=(\d+)\)/g, (match, src, width, height) => {
-      // Check if it's a relative path and construct proper URL
-      if (src.startsWith('./') || !src.startsWith('http')) {
-        const baseUrl = '/assets/';
-        src = `${baseUrl}${src.replace('./', '')}`;
+    // Process images with proper path resolution
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
+      // Handle relative paths
+      if (src.startsWith('./') || !src.startsWith('http') && !src.startsWith('/')) {
+        src = `/content/${src.replace('./', '')}`;
       }
-      return `<img src="${src}" width="${width}" height="${height}" class="mathigon-image" />`;
+      return `<img src="${src}" alt="${alt}" class="mathigon-image" />`;
     })
     
-    // Process gloss terms
-    .replace(/\[__([^_]+)__\]\(gloss:([^\)]+)\)/g, '<span class="term" data-gloss="$2">$1</span>')
+    // Process special x-tag elements - Match Mathigon format
+    .replace(/x-geopad\(([^)]*)\)/g, '<div class="interactive-element geopad" data-params=\'$1\'></div>')
+    .replace(/x-coordinate-system\(([^)]*)\)/g, '<div class="interactive-element graph" data-params=\'$1\'></div>')
+    .replace(/x-slider\(([^)]*)\)/g, '<div class="interactive-element slider" data-params=\'$1\'></div>')
+    .replace(/x-equation\(([^)]*)\)/g, '<div class="interactive-element equation" data-params=\'$1\'></div>')
+    .replace(/x-sortable\(([^)]*)\)/g, '<div class="interactive-element sortable" data-params=\'$1\'></div>')
+    .replace(/x-gesture\(([^)]*)\)/g, '<div class="interactive-element gesture" data-params=\'$1\'></div>')
+    .replace(/x-picker\(([^)]*)\)/g, '<div class="interactive-element picker" data-params=\'$1\'></div>')
+    .replace(/x-quizzes\(([^)]*)\)/g, '<div class="interactive-element quiz" data-params=\'$1\'></div>')
+    .replace(/x-code\(([^)]*)\)/g, '<div class="interactive-element code" data-params=\'$1\'></div>')
+    .replace(/x-simulation\(([^)]*)\)/g, '<div class="interactive-element simulation" data-params=\'$1\'></div>')
     
-    // Process all interactive elements types
-    .replace(/x-geopad\(([^\)]+)\)/g, '<div class="interactive-element geopad" data-params="$1"><div class="placeholder-text">Interactive Geometry</div></div>')
-    .replace(/x-coordinate-system\(([^\)]+)\)/g, '<div class="interactive-element graph" data-params="$1"><div class="placeholder-text">Interactive Graph</div></div>')
-    .replace(/x-slider\(([^\)]+)\)/g, '<div class="interactive-element slider" data-params="$1"><div class="placeholder-text">Interactive Slider</div></div>')
-    .replace(/x-equation\(([^\)]+)\)/g, '<div class="interactive-element equation" data-params="$1"><div class="placeholder-text">Interactive Equation</div></div>')
-    .replace(/x-sortable\(([^\)]+)\)/g, '<div class="interactive-element sortable" data-params="$1"><div class="placeholder-text">Drag and Sort</div></div>')
-    .replace(/x-gesture\(([^\)]+)\)/g, '<div class="interactive-element gesture" data-params="$1"><div class="placeholder-text">Draw Here</div></div>')
-    .replace(/x-picker\(([^\)]+)\)/g, '<div class="interactive-element picker" data-params="$1"><div class="placeholder-text">Multiple Choice</div></div>')
-    .replace(/x-quizzes\(([^\)]+)\)/g, '<div class="interactive-element quiz" data-params="$1"><div class="placeholder-text">Quiz</div></div>')
-    .replace(/x-code\(([^\)]+)\)/g, '<div class="interactive-element code" data-params="$1"><div class="placeholder-text">Code Editor</div></div>')
-    .replace(/x-simulation\(([^\)]+)\)/g, '<div class="interactive-element simulation" data-params="$1"><div class="placeholder-text">Interactive Simulation</div></div>')
+    // Process glossary terms
+    .replace(/\[([^\]]+)\]\(gloss:([^)]+)\)/g, '<span class="term" data-gloss="$2">$1</span>')
     
     // Process step blocks and tabs
     .replace(/{step.*?}/g, '<div class="step-block">')
@@ -101,15 +182,12 @@ const parseMathigonMd = (content) => {
     .replace(/\$([^$\n]+)\$/g, '<span class="math-inline">$1</span>')
     
     // Process basic markdown
-    .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/__([^_]+)__/g, '<em>$1</em>')
-    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
-    .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     
     // Process paragraphs (avoid wrapping existing HTML elements)
     .replace(/^(?!<[a-z]).+/gm, '<p>$&</p>');
-  
-  return { metadata, html };
 };
 
 // Function to generate glossary tooltip content
@@ -345,253 +423,176 @@ const addFallbackCourses = async () => {
   availableCourses.length = 0;
   
   try {
-    // Define course data based on the content directory structure
-    // This is based on the originalweb/textbooks-master organization
-    const allCourses = [
-      {
-        id: 'probability',
-        title: 'Introduction to Probability',
-        description: 'Learn about randomness, games, and chance',
-        color: '#CD0E66',
-        level: 'Foundations',
-        category: 'Statistics'
-      },
-      {
-        id: 'chaos',
-        title: 'Chaos Theory',
-        description: 'Explore the mathematics of unpredictable systems',
-        color: '#009EA6',
-        level: 'Advanced',
-        category: 'Mathematics'
-      },
-      {
-        id: 'circles',
-        title: 'Circles and Pi',
-        description: 'Discover the properties of circles and the famous number Pi',
-        color: '#5A49C9',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'codes',
-        title: 'Codes and Ciphers',
-        description: 'Explore encryption, encoding, and data security',
-        color: '#1F7AED',
-        level: 'Intermediate',
-        category: 'Computer Science'
-      },
-      {
-        id: 'combinatorics',
-        title: 'Combinatorics',
-        description: 'Master the art of counting and arrangement',
-        color: '#AD1D84',
-        level: 'Foundations',
-        category: 'Mathematics'
-      },
-      {
-        id: 'complex',
-        title: 'Complex Numbers',
-        description: 'Understand the fascinating world of imaginary numbers',
-        color: '#6D3BBF',
-        level: 'Advanced',
-        category: 'Mathematics'
-      },
-      {
-        id: 'data',
-        title: 'Data Analysis',
-        description: 'Learn how to analyze and interpret data',
-        color: '#8D2CA1',
-        level: 'Foundations',
-        category: 'Statistics'
-      },
-      {
-        id: 'divisibility',
-        title: 'Number Theory',
-        description: 'Explore the fascinating properties of numbers',
-        color: '#1AA845',
-        level: 'Foundations',
-        category: 'Mathematics'
-      },
-      {
-        id: 'euclidean-geometry',
-        title: 'Euclidean Geometry',
-        description: 'Study the classical geometry of Euclid',
-        color: '#0F82F2',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'exploding-dots',
-        title: 'Exploding Dots',
-        description: 'A revolutionary way to learn arithmetic and algebra',
-        color: '#2A7B23',
-        level: 'Foundations',
-        category: 'Mathematics'
-      },
-      {
-        id: 'exponentials',
-        title: 'Exponential Functions',
-        description: 'Understand growth, decay, and patterns of change',
-        color: '#CD0E66',
-        level: 'Intermediate',
-        category: 'Algebra'
-      },
-      {
-        id: 'fractals',
-        title: 'Fractals',
-        description: 'Explore infinite patterns and self-similarity',
-        color: '#1F7AED',
-        level: 'Advanced',
-        category: 'Mathematics'
-      },
-      {
-        id: 'functions',
-        title: 'Functions and Equations',
-        description: 'Master the building blocks of mathematics',
-        color: '#CE2016',
-        level: 'Foundations',
-        category: 'Algebra'
-      },
-      {
-        id: 'game-theory',
-        title: 'Game Theory',
-        description: 'Learn strategic decision making and competitive behavior',
-        color: '#CE2016',
-        level: 'Advanced',
-        category: 'Mathematics'
-      },
-      {
-        id: 'graph-theory',
-        title: 'Graph Theory',
-        description: 'Discover the mathematics of networks and connections',
-        color: '#0F82F2',
-        level: 'Intermediate',
-        category: 'Discrete Mathematics'
-      },
-      {
-        id: 'linear-functions',
-        title: 'Linear Functions',
-        description: 'Master the foundations of algebra and coordinate geometry',
-        color: '#1F7AED',
-        level: 'Foundations',
-        category: 'Algebra'
-      },
-      {
-        id: 'logic',
-        title: 'Logic and Proof',
-        description: 'Learn the language of mathematical reasoning',
-        color: '#CD0E66',
-        level: 'Intermediate',
-        category: 'Discrete Mathematics'
-      },
-      {
-        id: 'matrices',
-        title: 'Matrices and Transformations',
-        description: 'Understand linear algebra and its applications',
-        color: '#6D3BBF',
-        level: 'Advanced',
-        category: 'Algebra'
-      },
-      {
-        id: 'non-euclidean-geometry',
-        title: 'Non-Euclidean Geometry',
-        description: 'Explore geometries beyond flat space',
-        color: '#009EA6',
-        level: 'Advanced',
-        category: 'Geometry'
-      },
-      {
-        id: 'polygons',
-        title: 'Polygons and Polyhedra',
-        description: 'Discover the properties of 2D and 3D shapes',
-        color: '#5A49C9',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'polyhedra',
-        title: 'Polyhedra',
-        description: 'Study 3D geometric solids and their properties',
-        color: '#5A49C9',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'quadratics',
-        title: 'Quadratic Equations',
-        description: 'Master parabolas and second-degree equations',
-        color: '#1AA845',
-        level: 'Intermediate',
-        category: 'Algebra'
-      },
-      {
-        id: 'sequences',
-        title: 'Sequences and Patterns',
-        description: 'Discover mathematical patterns and series',
-        color: '#0F82F2',
-        level: 'Intermediate',
-        category: 'Algebra'
-      },
-      {
-        id: 'shapes',
-        title: 'Shapes and Solids',
-        description: 'Explore fundamental geometry and measurement',
-        color: '#009EA6',
-        level: 'Foundations',
-        category: 'Geometry'
-      },
-      {
-        id: 'statistics',
-        title: 'Statistics',
-        description: 'Learn to analyze data and draw conclusions',
-        color: '#CD0E66',
-        level: 'Intermediate',
-        category: 'Statistics'
-      },
-      {
-        id: 'transformations',
-        title: 'Geometric Transformations',
-        description: 'Study movements and changes in geometric space',
-        color: '#5A49C9',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'triangles',
-        title: 'Triangles and Trigonometry',
-        description: 'Master angles, ratios, and triangle relationships',
-        color: '#5A49C9',
-        level: 'Intermediate',
-        category: 'Geometry'
-      },
-      {
-        id: 'vectors',
-        title: 'Vectors',
-        description: 'Understand quantities with direction and magnitude',
-        color: '#6D3BBF',
-        level: 'Advanced',
-        category: 'Mathematics'
-      }
-    ];
-
-    // Process and add each course
-    allCourses.forEach(course => {
-      // Add thumbnail and dynamically identify sections if possible
-      availableCourses.push({
-        ...course,
-        thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
-        // We'll get actual sections from the content file when a course is selected
-        sections: course.sections || extractSectionsFromStructure(course.id) || [
-          { id: 'introduction', title: 'Introduction' }
-        ]
-      });
-    });
+    // Scan the content directory to find all available courses
+    const contentDir = '/content';
     
-    console.log(`Added ${availableCourses.length} courses from content directory`);
+    // Dynamic course discovery
+    try {
+      // Try to get a directory listing from the server
+      const response = await fetch(getApiUrl('/api/content/list'));
+      
+      if (response.ok) {
+        const directories = await response.json();
+        console.log('Discovered course directories:', directories);
+        
+        // Create course objects for each directory that is not _shared
+        const discoveredCourses = directories.filter(dir => 
+          dir !== 'shared' && !dir.startsWith('_')
+        ).map(dir => {
+          // Attempt to load course metadata from content.md
+          // This is a simplified version - in a full implementation we would parse the metadata
+          // from the content.md file using the same approach as in the backend
+          
+          // Use common color mapping from textbooks-master for consistency
+          const colorMap = {
+            'probability': '#CD0E66',
+            'circles': '#5A49C9',
+            'vectors': '#1F7AED',
+            'triangles': '#5A49C9',
+            'transformations': '#1F7AED',
+            'statistics': '#CD0E66',
+            'solids': '#5A49C9',
+            'sequences': '#22AB24',
+            'quadratics': '#AD1D84',
+            'polyhedra': '#5A49C9',
+            'matrices': '#1F7AED',
+            'graph-theory': '#0F82F2',
+            'game-theory': '#CA0E66',
+            'fractals': '#4AB72A',
+            'euclidean-geometry': '#CD0E66',
+            'divisibility': '#0F82F2',
+            'complex': '#22AB24',
+            'combinatorics': '#AD1D84',
+            'codes': '#1F7AED',
+            'chaos': '#009EA6'
+          };
+          
+          // Convert directory name to display title with appropriate formatting
+          const title = dir
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          
+          return {
+            id: dir,
+            title: title,
+            description: `Learn about ${title.toLowerCase()}`,
+            color: colorMap[dir] || getRandomColor(),
+            level: 'Intermediate',
+            category: 'Mathematics'
+          };
+        });
+        
+        // Add the discovered courses
+        discoveredCourses.forEach(course => {
+          availableCourses.push({
+            ...course,
+            thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
+            sections: [{ id: 'introduction', title: 'Introduction' }]
+          });
+        });
+        
+        console.log(`Added ${discoveredCourses.length} courses from content directory scanning`);
+        return;
+      }
+    } catch (error) {
+      console.warn('Error dynamically discovering courses:', error);
+    }
+    
+    // If API fails, try direct access to content folder
+    try {
+      // Try direct fetch to each course's content.md to extract proper metadata
+      for (const courseId of ['probability', 'circles', 'vectors']) {
+        try {
+          const response = await fetch(getApiUrl(`/content/${courseId}/content.md`));
+          if (response.ok) {
+            const content = await response.text();
+            
+            // Parse metadata from content
+            const metadata = {};
+            const metadataRegex = /> ([a-zA-Z-]+): (.+)/g;
+            let match;
+            while ((match = metadataRegex.exec(content)) !== null) {
+              metadata[match[1]] = match[2];
+            }
+            
+            // Extract sections from content
+            const sections = [];
+            const sectionRegex = /## ([^\n]+)\s*\n+> section: ([^\n]+)/g;
+            while ((match = sectionRegex.exec(content)) !== null) {
+              sections.push({
+                title: match[1],
+                id: match[2]
+              });
+            }
+            
+            // Add the course with proper metadata
+            if (metadata.title) {
+              availableCourses.push({
+                id: courseId,
+                title: metadata.title,
+                description: metadata.description || `Learn about ${courseId.replace(/-/g, ' ')}.`,
+                color: metadata.color || '#1F7AED',
+                level: metadata.level || 'Intermediate',
+                category: metadata.category || 'Mathematics',
+                thumbnail: getApiUrl(`/content/${courseId}/hero.jpg`),
+                sections: sections.length > 0 ? sections : [{ id: 'introduction', title: 'Introduction' }]
+              });
+              console.log(`Added course ${courseId} from direct content.md parsing`);
+            }
+          }
+        } catch (courseError) {
+          console.warn(`Error loading course ${courseId}:`, courseError);
+        }
+      }
+    } catch (directError) {
+      console.warn('Error directly accessing content files:', directError);
+    }
+    
+    // If all else fails, add fallback courses
+    if (availableCourses.length === 0) {
+      const allCourses = [
+        {
+          id: 'probability',
+          title: 'Introduction to Probability',
+          description: 'Learn about randomness, games, and chance',
+          color: '#CD0E66',
+          level: 'Foundations',
+          category: 'Statistics'
+        },
+        {
+          id: 'circles',
+          title: 'Circles and Pi',
+          description: 'Discover the properties of circles and the famous number Pi',
+          color: '#5A49C9',
+          level: 'Intermediate',
+          category: 'Geometry'
+        },
+        {
+          id: 'vectors',
+          title: 'Vectors',
+          description: 'Explore the mathematics of direction and magnitude',
+          color: '#1F7AED',
+          level: 'Advanced',
+          category: 'Algebra'
+        }
+      ];
+      
+      // Add fallback courses
+      allCourses.forEach(course => {
+        availableCourses.push({
+          ...course,
+          thumbnail: getApiUrl(`/content/${course.id}/hero.jpg`),
+          sections: [{ id: 'introduction', title: 'Introduction' }]
+        });
+      });
+      
+      console.log(`Added ${allCourses.length} fallback courses`);
+    }
   } catch (error) {
     console.error('Error loading courses from content directory:', error);
     
-    // If all else fails, add at least one default course
+    // Add minimal fallback course if everything else fails
     if (availableCourses.length === 0) {
       availableCourses.push({
         id: 'probability',

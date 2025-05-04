@@ -464,4 +464,37 @@ router.get("/:courseId", (req, res) => {
   res.json(content);
 });
 
+// Endpoint to list all directories in the content folder
+router.get("/list", (req, res) => {
+  try {
+    // Get the content directory root path
+    const contentDirPath = path.resolve(contentRoot);
+    
+    // Check if the directory exists
+    if (!fs.existsSync(contentDirPath)) {
+      return res.status(404).json({ 
+        error: 'Content directory not found',
+        directories: [] 
+      });
+    }
+    
+    // Read the content directory
+    const directories = fs.readdirSync(contentDirPath)
+      .filter(dir => {
+        const dirPath = path.join(contentDirPath, dir);
+        // Only include directories, not files
+        return fs.statSync(dirPath).isDirectory();
+      });
+    
+    console.log(`Found ${directories.length} course directories in ${contentDirPath}`);
+    res.json(directories);
+  } catch (error) {
+    console.error("Error listing content directories:", error);
+    res.status(500).json({ 
+      error: "Failed to list content directories",
+      directories: []
+    });
+  }
+});
+
 export default router;
