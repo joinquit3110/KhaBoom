@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathigon Test Page</title>
+  <link rel="stylesheet" href="/mathigon/assets/course.css">
+  <script>
+    // Global configuration
+    window.mathigonConfig = {
+      assetsPrefix: '/mathigon/assets/',
+      contentPrefix: '/mathigon/content/'
+    };
+    
+    // Default to circles course
+    window.courseId = 'circles';
+    window.steps = null;
+  </script>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; }
+    #mathigon-textbook { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="mathigon-textbook"></div>
+  <script src="/mathigon/assets/course.js"></script>
+</body>
+</html> 

@@ -3,16 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mathigon Textbook</title>
+  <title>Mathigon Textbooks</title>
   <link rel="stylesheet" href="/mathigon/assets/course.css">
-</head>
-<body>
   <script>
-    // Get course parameters from URL or parent frame
+    // Global configuration
+    window.mathigonConfig = {
+      assetsPrefix: '/mathigon/assets/',
+      contentPrefix: '/mathigon/content/'
+    };
+    
+    // Get course parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     window.courseId = urlParams.get('course') || 'circles';
     window.steps = urlParams.get('section') || null;
   </script>
+</head>
+<body>
+  <div id="mathigon-textbook"></div>
   <script src="/mathigon/assets/course.js"></script>
 </body>
 </html>

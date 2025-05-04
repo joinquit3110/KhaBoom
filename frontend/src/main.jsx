@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App'
 import './index.css'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
@@ -55,9 +56,28 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
   };
 })();
 
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log('Service Worker registered with scope:', registration.scope);
+    }).catch(error => {
+      console.warn('Unable to register Service Worker.', error);
+    });
+  });
+}
+
+// Global configuration for Mathigon
+window.mathigonConfig = {
+  assetsPrefix: '/mathigon/assets/',
+  contentPrefix: '/mathigon/content/'
+};
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
 )
 
