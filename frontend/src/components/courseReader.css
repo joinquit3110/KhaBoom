@@ -1,11 +1,171 @@
 /**
  * CourseReader Component Styles
+ * These override and extend Mathigon's original styles
  */
 
+/* Main container */
 .course-reader {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+}
+
+/* Direct raw content styling */
+.raw-mathigon-content {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Metadata styling */
+.meta-line {
+  font-family: monospace;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+/* Display x-components better */
+[class^="x-"] {
+  white-space: pre;
+  font-family: monospace;
+  padding: 5px;
+  margin: 10px 0;
+  border: 1px dashed #ccc;
+  color: #333;
+}
+
+/* x-picker component */
+.x-picker {
+  display: block;
+  margin: 20px 0;
+}
+
+/* Item components */
+.item-line {
+  display: block;
+  white-space: pre;
+  font-family: monospace;
+  padding: 2px;
+  margin: 5px 0;
+  color: #333;
+}
+
+/* SVG includes */
+.image-include {
+  display: inline-block;
+  margin: 10px;
+  padding: 5px;
+}
+
+.svg-include {
+  max-width: 150px;
+  max-height: 150px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.svg-include:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.svg-include[data-error="not-a-polygon-1"],
+.svg-include[data-error="not-a-polygon-2"],
+.svg-include[data-error="not-a-polygon-3"] {
+  border: 2px solid transparent;
+}
+
+/* Section separators */
+.section-separator {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+  margin: 20px 0;
+}
+
+/* Loading state */
+.course-reader-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #0077cc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.course-reader-error {
+  text-align: center;
+  padding: 50px 20px;
+  color: #d9534f;
+}
+
+.error-details {
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  text-align: left;
+}
+
+.error-actions {
+  margin-top: 30px;
+}
+
+.retry-button,
+.back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover,
+.back-button:hover {
+  background-color: #005599;
+}
+
+/* Empty state */
+.course-reader-empty {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.content-path-note {
+  margin-top: 20px;
+  font-family: monospace;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Development info */
+.dev-info {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: monospace;
 }
 
 .course-header {
@@ -177,14 +337,6 @@
   background-color: #f9f9f9;
 }
 
-[class^="x-"] {
-  margin: 20px 0;
-  padding: 10px;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  min-height: 50px;
-}
-
 /* Variable sliders */
 .variable-slider {
   display: flex;
@@ -258,91 +410,6 @@
 .next-section:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Loading state */
-.course-reader-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 50px 0;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-left-color: #0077cc;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Error state */
-.course-reader-error {
-  text-align: center;
-  padding: 50px 20px;
-  color: #d9534f;
-}
-
-.error-details {
-  margin: 30px 0;
-  padding: 20px;
-  border: 1px solid #eee;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  text-align: left;
-}
-
-.error-actions {
-  margin-top: 30px;
-}
-
-.retry-button,
-.back-button {
-  display: inline-block;
-  padding: 10px 20px;
-  margin: 0 10px;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-
-.retry-button:hover,
-.back-button:hover {
-  background-color: #005599;
-}
-
-/* Empty state */
-.course-reader-empty {
-  text-align: center;
-  padding: 50px 20px;
-}
-
-.content-path-note {
-  margin-top: 20px;
-  font-family: monospace;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
-
-/* Development info */
-.dev-info {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-family: monospace;
 }
 
 /* Responsive styles */
