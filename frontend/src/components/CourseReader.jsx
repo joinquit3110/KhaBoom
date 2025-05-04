@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { parseMathigonMd } from '../utils/mathigonParser';
 
 /**
@@ -15,6 +15,7 @@ const CourseReader = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSectionId, setActiveSectionId] = useState(sectionId || null);
+  const [contentPath, setContentPath] = useState('');
   const contentRef = useRef(null);
   
   useEffect(() => {
@@ -24,17 +25,40 @@ const CourseReader = () => {
         setLoading(true);
         setError(null);
         
-        // Attempt to load the content.md file directly
-        const contentPath = `/content/${courseId}/content.md`;
-        console.log(`Loading course content from: ${contentPath}`);
+        // Try different possible paths for the content, prioritizing the content directory
+        const possiblePaths = [
+          `/content/${courseId}/content.md`,                  // Direct content directory
+          `/public/content/${courseId}/content.md`,           // Public content directory
+          `/${courseId}/content.md`,                          // Root path
+          `/originalweb/textbooks-master/content/${courseId}/content.md` // Original source (fallback)
+        ];
         
-        const response = await fetch(contentPath);
+        let mdContent = null;
+        let usedPath = '';
         
-        if (!response.ok) {
-          throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        // Try each path until we find the content
+        for (const path of possiblePaths) {
+          console.log(`Attempting to load content from: ${path}`);
+          try {
+            const response = await fetch(path);
+            if (response.ok) {
+              mdContent = await response.text();
+              usedPath = path;
+              console.log(`Successfully loaded content from: ${path}`);
+              break;
+            } else {
+              console.warn(`Failed to load from ${path}: ${response.status} ${response.statusText}`);
+            }
+          } catch (err) {
+            console.warn(`Error loading from ${path}:`, err);
+          }
         }
         
-        const mdContent = await response.text();
+        if (!mdContent) {
+          throw new Error(`Could not find content.md for ${courseId} in any of the expected locations.`);
+        }
+        
+        setContentPath(usedPath);
         
         // Parse the markdown content using our Mathigon parser
         const parsedContent = parseMathigonMd(mdContent);
@@ -65,7 +89,7 @@ const CourseReader = () => {
   useEffect(() => {
     if (activeSectionId && activeSectionId !== sectionId) {
       // Update URL to reflect active section without reloading
-      navigate(`/${courseId}/${activeSectionId}`, { replace: true });
+      navigate(`/courses/${courseId}/${activeSectionId}`, { replace: true });
     }
     
     // Scroll to section when it changes
@@ -213,7 +237,15 @@ const CourseReader = () => {
       <div className="course-reader-error">
         <h2>Error loading course</h2>
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Try Again</button>
+        <div className="error-details">
+          <p>We tried to load content for: <strong>{courseId}</strong></p>
+          <p>Make sure the content directory is properly set up with Mathigon course files.</p>
+          <p>Expected path format: <code>/content/{courseId}/content.md</code></p>
+        </div>
+        <div className="error-actions">
+          <button onClick={() => window.location.reload()} className="retry-button">Try Again</button>
+          <Link to="/courses" className="back-button">Back to Courses</Link>
+        </div>
       </div>
     );
   }
@@ -224,6 +256,8 @@ const CourseReader = () => {
       <div className="course-reader-empty">
         <h2>No Content Available</h2>
         <p>This course doesn't have any content yet.</p>
+        <p className="content-path-note">Looking for content at: <code>{contentPath || 'unknown path'}</code></p>
+        <Link to="/courses" className="back-button">Back to Courses</Link>
       </div>
     );
   }
@@ -243,6 +277,13 @@ const CourseReader = () => {
             className="course-color-bar" 
             style={{ backgroundColor: content.metadata.color }}
           ></div>
+        )}
+        
+        {/* Show the content path in development mode */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="dev-info">
+            <small>Content path: {contentPath}</small>
+          </div>
         )}
       </div>
       
