@@ -4,7 +4,7 @@
  * Handles caching for Mathigon content and assets
  */
 
-const CACHE_NAME = 'khaboom-cache-v2';
+const CACHE_NAME = 'khaboom-cache-v4';
 const ASSETS_TO_CACHE = [
   '/index.html',
   '/mathigon/assets/course.js',
@@ -19,13 +19,31 @@ const isDeployedEnvironment = () => {
          self.location.hostname !== 'localhost';
 };
 
+// Log with console and client messaging
+async function debugLog(message) {
+  console.log(`[ServiceWorker] ${message}`);
+  
+  // Try to send to all clients
+  try {
+    const allClients = await self.clients.matchAll();
+    for (const client of allClients) {
+      client.postMessage({
+        type: 'sw-debug',
+        message
+      });
+    }
+  } catch (e) {
+    // Silent fail
+  }
+}
+
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  debugLog('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Caching core assets');
+        debugLog('Caching core assets');
         return cache.addAll(ASSETS_TO_CACHE);
       })
       .catch(error => {
@@ -39,13 +57,13 @@ self.addEventListener('install', (event) => {
 
 // Activate event - cleanup old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+  debugLog('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Removing old cache:', cacheName);
+            debugLog(`Removing old cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -57,12 +75,42 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Update the content type checking to handle HTML responses correctly
+// Improved content type checking
 const shouldCacheResponse = (response, url) => {
   // Don't cache error responses
   if (!response.ok) return false;
   
   const contentType = response.headers.get('content-type') || '';
+  
+  // For JSON files, validate proper JSON content
+  if (url.endsWith('.json')) {
+    if (!contentType.includes('application/json')) {
+      console.warn(`Skipping cache for ${url}: JSON file with incorrect content type ${contentType}`);
+      return false;
+    }
+    
+    return response.clone().text()
+      .then(text => {
+        try {
+          // Try to parse as JSON to validate
+          const content = text.trim();
+          if (content.startsWith('<!DOCTYPE html>') || content.startsWith('<html')) {
+            console.warn(`Skipping cache for ${url}: JSON file with HTML content`);
+            return false;
+          }
+          
+          JSON.parse(content);
+          return true;
+        } catch (e) {
+          console.warn(`Skipping cache for ${url}: Invalid JSON content - ${e.message}`);
+          return false;
+        }
+      })
+      .catch(err => {
+        console.warn(`Error checking JSON content for ${url}: ${err}`);
+        return false;
+      });
+  }
   
   // For JavaScript files, verify it's actually JavaScript
   if (url.endsWith('.js') && !contentType.includes('javascript')) {
@@ -86,14 +134,45 @@ const shouldCacheResponse = (response, url) => {
       .catch(() => true); // If we can't check, assume it's cacheable
   }
   
-  // Special handling for content.json requests which should really be content.md
-  if (url.includes('/content.json')) {
-    // We now have proper JSON files, so no need to redirect
-    return true;
-  }
-  
   // Default: cache if it's a successful response
   return true;
+};
+
+// Special handling for Mathigon content paths
+const isMathigonContentPath = (url) => {
+  return url.includes('/mathigon/content/');
+};
+
+// Fix content type headers for a response
+const fixContentTypeHeaders = (response, url) => {
+  if (!response.ok) return response;
+  
+  const contentType = response.headers.get('content-type') || '';
+  let newContentType = contentType;
+  
+  // Fix content type based on file extension
+  if (url.endsWith('.json') && !contentType.includes('application/json')) {
+    newContentType = 'application/json; charset=utf-8';
+  } else if (url.endsWith('.js') && !contentType.includes('javascript')) {
+    newContentType = 'application/javascript; charset=utf-8';
+  } else if (url.endsWith('.css') && !contentType.includes('text/css')) {
+    newContentType = 'text/css; charset=utf-8';
+  }
+  
+  // If we don't need to change anything, return original response
+  if (newContentType === contentType) {
+    return response;
+  }
+  
+  // Create a new response with the correct content type
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers({
+      ...Array.from(response.headers.entries()),
+      'Content-Type': newContentType
+    })
+  });
 };
 
 // Fetch event - serve from cache, then network with cache update
@@ -119,10 +198,13 @@ self.addEventListener('fetch', (event) => {
               .then((response) => {
                 if (!response.ok) return;
                 
-                return shouldCacheResponse(response, requestURL.pathname)
+                // Fix content type headers if needed
+                const fixedResponse = fixContentTypeHeaders(response, requestURL.pathname);
+                
+                return shouldCacheResponse(fixedResponse, requestURL.pathname)
                   .then(shouldCache => {
                     if (shouldCache) {
-                      cache.put(event.request, response.clone());
+                      cache.put(event.request, fixedResponse.clone());
                     }
                   });
               })
@@ -134,35 +216,53 @@ self.addEventListener('fetch', (event) => {
           // Otherwise fetch from network and cache
           return fetch(event.request)
             .then((response) => {
-              // Clone the response so we can check it and use it in multiple places
-              const responseToCache = response.clone();
+              // Fix content type headers if needed
+              const fixedResponse = fixContentTypeHeaders(response, requestURL.pathname);
               
               // Only cache successful responses
-              if (response.ok) {
-                shouldCacheResponse(responseToCache, requestURL.pathname)
+              if (fixedResponse.ok) {
+                shouldCacheResponse(fixedResponse, requestURL.pathname)
                   .then(shouldCache => {
                     if (shouldCache) {
-                      // Add proper content type headers for JavaScript files in deployed environments
-                      if (isDeployedEnvironment() && requestURL.pathname.endsWith('.js')) {
-                        const modifiedResponse = new Response(
-                          responseToCache.body,
-                          {
-                            status: responseToCache.status,
-                            statusText: responseToCache.statusText,
-                            headers: new Headers({
-                              ...Array.from(responseToCache.headers.entries()),
-                              'Content-Type': 'application/javascript; charset=utf-8'
-                            })
-                          }
-                        );
-                        cache.put(event.request, modifiedResponse);
+                      // Add proper content type headers for files in deployed environments
+                      if (isDeployedEnvironment()) {
+                        if (requestURL.pathname.endsWith('.js')) {
+                          const modifiedResponse = new Response(
+                            fixedResponse.clone().body,
+                            {
+                              status: fixedResponse.status,
+                              statusText: fixedResponse.statusText,
+                              headers: new Headers({
+                                ...Array.from(fixedResponse.headers.entries()),
+                                'Content-Type': 'application/javascript; charset=utf-8'
+                              })
+                            }
+                          );
+                          cache.put(event.request, modifiedResponse);
+                        } else if (requestURL.pathname.endsWith('.json')) {
+                          // Ensure JSON content is properly cached with correct content type
+                          const modifiedResponse = new Response(
+                            fixedResponse.clone().body,
+                            {
+                              status: fixedResponse.status,
+                              statusText: fixedResponse.statusText,
+                              headers: new Headers({
+                                ...Array.from(fixedResponse.headers.entries()),
+                                'Content-Type': 'application/json; charset=utf-8'
+                              })
+                            }
+                          );
+                          cache.put(event.request, modifiedResponse);
+                        } else {
+                          cache.put(event.request, fixedResponse.clone());
+                        }
                       } else {
-                        cache.put(event.request, responseToCache);
+                        cache.put(event.request, fixedResponse.clone());
                       }
                     }
                   });
               }
-              return response;
+              return fixedResponse;
             })
             .catch((error) => {
               console.error('Fetch failed:', error);

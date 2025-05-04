@@ -68,6 +68,34 @@ function parseMathigonMarkdown(markdown) {
 }
 
 /**
+ * Validate that the generated JSON is properly formatted
+ */
+function validateJsonContent(jsonContent, filePath) {
+  try {
+    // Check for required properties
+    if (!jsonContent.sections || !Array.isArray(jsonContent.sections)) {
+      console.error(`Error in ${filePath}: Missing or invalid 'sections' array`);
+      return false;
+    }
+    
+    // Check each section
+    for (const section of jsonContent.sections) {
+      if (!section.content) {
+        console.error(`Error in ${filePath}: Section missing 'content' property`);
+        return false;
+      }
+    }
+    
+    // Try parsing and stringifying to verify valid JSON structure
+    JSON.parse(JSON.stringify(jsonContent));
+    return true;
+  } catch (err) {
+    console.error(`Error validating JSON for ${filePath}:`, err);
+    return false;
+  }
+}
+
+/**
  * Recursively process all content directories
  */
 async function processDirectory(dir) {
@@ -92,11 +120,21 @@ async function processDirectory(dir) {
           // Parse to JSON structure
           const jsonContent = parseMathigonMarkdown(markdown);
           
-          // Write JSON file
+          // Validate content
           const jsonPath = path.join(dir, 'content.json');
-          await fs.writeFile(jsonPath, JSON.stringify(jsonContent, null, 2), 'utf-8');
-          
-          console.log(`Created ${jsonPath}`);
+          if (validateJsonContent(jsonContent, jsonPath)) {
+            // Write JSON file
+            await fs.writeFile(jsonPath, JSON.stringify(jsonContent, null, 2), 'utf-8');
+            
+            // Verify the file was written correctly
+            try {
+              const contents = await fs.readFile(jsonPath, 'utf-8');
+              JSON.parse(contents); // Make sure it's valid JSON
+              console.log(`Created ${jsonPath}`);
+            } catch (err) {
+              console.error(`Error verifying ${jsonPath}:`, err);
+            }
+          }
         } catch (err) {
           console.error(`Error processing ${fullPath}:`, err);
         }
@@ -107,12 +145,43 @@ async function processDirectory(dir) {
   }
 }
 
+/**
+ * Make sure the output directory exists
+ */
+async function ensureDirectoriesExist() {
+  try {
+    // Check if the main content directory exists
+    try {
+      await fs.access(CONTENT_DIR);
+    } catch (err) {
+      console.log(`Creating content directory: ${CONTENT_DIR}`);
+      await fs.mkdir(CONTENT_DIR, { recursive: true });
+    }
+    
+    // Also make sure all example directories exist
+    const exampleDirs = ['circles', 'triangles', 'probability'];
+    for (const dir of exampleDirs) {
+      const coursePath = path.join(CONTENT_DIR, dir);
+      try {
+        await fs.access(coursePath);
+      } catch (err) {
+        console.log(`Creating course directory: ${coursePath}`);
+        await fs.mkdir(coursePath, { recursive: true });
+      }
+    }
+  } catch (err) {
+    console.error('Error creating directories:', err);
+  }
+}
+
 // Start processing
 console.log(`Starting conversion from: ${CONTENT_DIR}`);
-processDirectory(CONTENT_DIR)
+ensureDirectoriesExist()
+  .then(() => processDirectory(CONTENT_DIR))
   .then(() => {
     console.log('All content.md files have been converted to content.json');
   })
   .catch(err => {
     console.error('Error processing content directories:', err);
+    process.exit(1); // Exit with error code
   }); 

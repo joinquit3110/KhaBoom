@@ -210,7 +210,8 @@ const MathigonCourse = () => {
           assetsPrefix: `${basePath}mathigon/assets/`,
           contentPrefix: `${basePath}mathigon/content/`,
           language: 'en', // Default language
-          downloadMode: false
+          downloadMode: false,
+          contentFormat: 'json' // Explicitly set to use JSON format
         };
         
         // Add Mathigon stylesheet first
