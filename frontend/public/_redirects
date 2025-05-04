@@ -9,3 +9,9 @@ https://www.khaboom.netlify.app/* https://khaboom.netlify.app/:splat 301!
 
 # API proxy to backend (uncomment and adjust if needed)
 # /api/* https://kha-boom-backend.onrender.com/api/:splat 200
+
+# Mathigon content files - prevent SPA redirect
+/mathigon/content/*/*.json 200!
+/mathigon/assets/* 200!
+/service-worker.js 200!
+/mathigon-test.js 200!

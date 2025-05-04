@@ -70,7 +70,19 @@
   Cache-Control: public, max-age=31536000
   Access-Control-Allow-Origin: *
 
-/mathigon/content/*.json
+/mathigon/content/*/*.json
   Content-Type: application/json; charset=UTF-8
   Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *
+
+# Force service worker to use the correct content type
+/service-worker.js
+  Content-Type: application/javascript; charset=UTF-8
+  Cache-Control: no-cache, no-store, must-revalidate
+  Access-Control-Allow-Origin: *
+
+# Diagnostic script
+/mathigon-test.js
+  Content-Type: application/javascript; charset=UTF-8
+  Cache-Control: no-cache, no-store, must-revalidate
   Access-Control-Allow-Origin: *
