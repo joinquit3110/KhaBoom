@@ -82,6 +82,16 @@ const MathigonCourse = () => {
           console.log('Creating Mathigon TextbookLoader for course:', courseId);
           
           const basePath = getBasePath();
+          
+          // Set additional global config values that Mathigon might need
+          window.steps = sectionId || null;
+          
+          // Important - ensure content format is correctly set
+          if (!window.mathigonConfig) {
+            window.mathigonConfig = {};
+          }
+          window.mathigonConfig.contentFormat = 'md'; // Use markdown instead of JSON
+          
           const textbook = new TextbookLoaderClass({
             courseId,
             sectionId: sectionId || undefined,
@@ -90,6 +100,7 @@ const MathigonCourse = () => {
             assetsPrefix: `${basePath}mathigon/assets/`,
             language: 'en',
             progress: true,
+            contentFormat: 'md', // Important: specify we're using markdown files
             onSectionComplete: (sectionId) => {
               console.log(`Completed section ${sectionId}`);
             },

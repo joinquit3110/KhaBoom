@@ -57,7 +57,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Helper function to determine if a response should be cached
+// Update the content type checking to handle HTML responses correctly
 const shouldCacheResponse = (response, url) => {
   // Don't cache error responses
   if (!response.ok) return false;
@@ -84,6 +84,12 @@ const shouldCacheResponse = (response, url) => {
         return true;
       })
       .catch(() => true); // If we can't check, assume it's cacheable
+  }
+  
+  // Special handling for content.json requests which should really be content.md
+  if (url.includes('/content.json')) {
+    console.warn(`Redirecting ${url} to .md version`);
+    return false;
   }
   
   // Default: cache if it's a successful response
@@ -167,6 +173,23 @@ self.addEventListener('fetch', (event) => {
             });
         });
       })
+    );
+    return;
+  }
+  
+  // Redirect content.json requests to content.md for Mathigon courses
+  if (requestURL.pathname.includes('/mathigon/content/') && requestURL.pathname.endsWith('/content.json')) {
+    const mdUrl = requestURL.pathname.replace('/content.json', '/content.md');
+    console.log(`Redirecting ${requestURL.pathname} to ${mdUrl}`);
+    
+    event.respondWith(
+      fetch(new Request(mdUrl, {
+        method: event.request.method,
+        headers: event.request.headers,
+        mode: event.request.mode,
+        credentials: event.request.credentials,
+        redirect: event.request.redirect
+      }))
     );
     return;
   }

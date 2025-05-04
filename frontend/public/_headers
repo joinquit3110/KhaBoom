@@ -65,3 +65,8 @@
 
 /*.scss
   Content-Type: text/css
+
+/mathigon/content/*.md
+  Content-Type: text/markdown; charset=UTF-8
+  Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *
