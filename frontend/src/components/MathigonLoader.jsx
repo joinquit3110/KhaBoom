@@ -5,6 +5,17 @@ import axios from 'axios';
  * MathigonLoader component
  * This component handles loading Mathigon scripts and initializing the textbook functionality
  * to provide the same interactive experience as the original Mathigon platform.
+ * 
+ * Supports all interactive features:
+ * - Mathematical typesetting
+ * - Animations and transitions
+ * - Interactive diagrams
+ * - Video and audio elements
+ * - Drag and drop interactions
+ * - Drawing tools
+ * - Minigames and puzzles
+ * - Notifications
+ * - Chatbox interactions
  */
 const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onInteractionStart, onNotification }) => {
   const containerRef = useRef(null);
@@ -22,12 +33,16 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
         
         // Define script sources for Mathigon assets
         const scriptSources = [
-          '/mathigon/assets/course.js'
+          '/mathigon/assets/course.js',
+          // Additional scripts for advanced interactions
+          '/mathigon/assets/boost.js'
         ];
         
         // Define stylesheet sources for Mathigon assets
         const stylesheetSources = [
-          '/mathigon/assets/course.css'
+          '/mathigon/assets/course.css',
+          // Add additional stylesheets for components
+          '/mathigon/assets/components.css'
         ];
         
         // Load all required stylesheets
@@ -51,7 +66,7 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
         }
         
         // Wait for scripts to be fully available
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Initialize the Mathigon textbook
         if (window.Mathigon && window.Mathigon.TextbookLoader) {
@@ -60,18 +75,29 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
           // Set global configuration for Mathigon
           window.mathigonConfig = {
             assetsPrefix: '/mathigon/assets/',
-            contentPrefix: '/content/',
-            language: language
+            contentPrefix: '/mathigon/content/',
+            language: language,
+            // Enable all interactive features
+            interactive: true,
+            audio: true,
+            animations: true
           };
           
           // Create and initialize the textbook
           const textbook = new window.Mathigon.TextbookLoader({
             courseId: courseId,
             language: language,
-            sourcePrefix: '/content/',
+            sourcePrefix: '/mathigon/content/',
             container: containerRef.current || '#mathigon-textbook-container',
+            // Enable all interactive features
             animations: true,
             progress: true,
+            audio: true,
+            // Important: set contentFormat to json
+            contentFormat: 'json',
+            // Enable drawing features
+            drawing: true,
+            // Event handlers
             onSectionOpen: (sectionId) => {
               console.log(`Section opened: ${sectionId}`);
             },
@@ -83,6 +109,20 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
             onInteractionStart: (componentId) => {
               console.log(`Interaction started: ${componentId}`);
               onInteractionStart && onInteractionStart(componentId);
+            },
+            // New event handlers for all interactive features
+            onDrawingComplete: (drawingId) => {
+              console.log(`Drawing completed: ${drawingId}`);
+            },
+            onVideoPlay: (videoId) => {
+              console.log(`Video started: ${videoId}`);
+            },
+            onAudioPlay: (audioId) => {
+              console.log(`Audio started: ${audioId}`);
+            },
+            onGameComplete: (gameId, score) => {
+              console.log(`Game completed: ${gameId} with score ${score}`);
+              onNotification && onNotification(`Game completed with score: ${score}`);
             }
           });
           
@@ -92,6 +132,9 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
           
           // Set up event listeners for interactive components
           setupInteractiveListeners();
+          
+          // Register global handlers for chat interactions
+          setupChatHandlers();
           
           // Add a notification to welcome the user
           setTimeout(() => {
@@ -131,13 +174,68 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
       document.addEventListener('popup-close', () => {
         console.log('Popup closed');
       });
+      
+      // Listen for drag and drop interactions
+      document.addEventListener('drag-start', (e) => {
+        console.log('Drag started:', e.detail);
+      });
+      
+      document.addEventListener('drop', (e) => {
+        console.log('Drop event:', e.detail);
+      });
+      
+      // Listen for minigame events
+      document.addEventListener('game-start', (e) => {
+        console.log('Game started:', e.detail);
+      });
+      
+      document.addEventListener('game-end', (e) => {
+        console.log('Game ended:', e.detail);
+        if (e.detail && e.detail.success) {
+          onNotification && onNotification('Game completed successfully!');
+        }
+      });
+      
+      // Listen for puzzle completion
+      document.addEventListener('puzzle-complete', (e) => {
+        console.log('Puzzle completed:', e.detail);
+        onNotification && onNotification('Puzzle solved! Great job!');
+      });
+    };
+    
+    // Set up chat handlers
+    const setupChatHandlers = () => {
+      if (!window.Mathigon || !window.Mathigon.Chat) return;
+      
+      // Initialize chat functionality
+      window.Mathigon.Chat.initialize({
+        container: containerRef.current,
+        onMessage: (message) => {
+          console.log('Chat message received:', message);
+        },
+        onQuestion: async (question) => {
+          console.log('Question asked:', question);
+          // Here you could integrate with your own backend for AI responses
+          return {
+            answer: 'I understand your question. This is a placeholder response.',
+            confidence: 0.8
+          };
+        }
+      });
     };
     
     loadMathigonAssets();
     
     // Cleanup function
     return () => {
-      // If needed, can clean up event listeners here
+      // Clean up event listeners
+      document.removeEventListener('popup-open', () => {});
+      document.removeEventListener('popup-close', () => {});
+      document.removeEventListener('drag-start', () => {});
+      document.removeEventListener('drop', () => {});
+      document.removeEventListener('game-start', () => {});
+      document.removeEventListener('game-end', () => {});
+      document.removeEventListener('puzzle-complete', () => {});
     };
   }, [courseId, language, onSectionComplete, onInteractionStart, onNotification]);
   

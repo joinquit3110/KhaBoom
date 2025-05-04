@@ -66,7 +66,7 @@ const CourseList = ({ userId }) => {
       thumbnailUrl = `${apiBase}${thumbnailUrl.startsWith('/') ? thumbnailUrl : `/${thumbnailUrl}`}`;
     } else if (!thumbnailUrl) {
       // Default thumbnail URL
-      thumbnailUrl = `${apiBase}/content/${course.id}/hero.jpg`;
+      thumbnailUrl = `${apiBase}/mathigon/content/${course.id}/hero.jpg`;
     }
     
     return (

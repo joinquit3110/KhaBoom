@@ -1,315 +1,189 @@
 /**
- * Service Worker for KhaBoom Learning Platform
- * 
- * Handles caching for Mathigon content and assets
+ * KHA-BOOM! Learning Platform Service Worker
+ * Optimized for Mathigon content caching and offline support
  */
 
-const CACHE_NAME = 'khaboom-cache-v4';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'kha-boom-cache-v1';
+
+// Assets to cache immediately on service worker installation
+const PRECACHE_ASSETS = [
+  '/',
   '/index.html',
+  '/manifest.json',
   '/mathigon/assets/course.js',
   '/mathigon/assets/course.css',
-  '/mathigon/assets/icons.svg'
+  '/mathigon-test.js'
 ];
 
-// Determine if running in Netlify, Render, or other deployment environments
-const isDeployedEnvironment = () => {
-  return self.location.hostname.includes('netlify.app') || 
-         self.location.hostname.includes('render.com') || 
-         self.location.hostname !== 'localhost';
-};
+// Asset types to cache when requested
+const CACHED_FILETYPES = [
+  '.html',
+  '.css',
+  '.js',
+  '.json',
+  '.woff',
+  '.woff2',
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.svg',
+  '.mp4',
+  '.mp3',
+  '.gif'
+];
 
-// Log with console and client messaging
-async function debugLog(message) {
-  console.log(`[ServiceWorker] ${message}`);
+// Install event - precache key assets
+self.addEventListener('install', event => {
+  self.skipWaiting();
   
-  // Try to send to all clients
-  try {
-    const allClients = await self.clients.matchAll();
-    for (const client of allClients) {
-      client.postMessage({
-        type: 'sw-debug',
-        message
-      });
-    }
-  } catch (e) {
-    // Silent fail
-  }
-}
-
-// Install event - cache core assets
-self.addEventListener('install', (event) => {
-  debugLog('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        debugLog('Caching core assets');
-        return cache.addAll(ASSETS_TO_CACHE);
+      .then(cache => {
+        console.log('Service worker pre-caching assets');
+        return cache.addAll(PRECACHE_ASSETS);
       })
       .catch(error => {
-        console.error('Failed to cache core assets:', error);
+        console.error('Pre-caching failed:', error);
       })
   );
-  
-  // Force the waiting service worker to become the active service worker
-  self.skipWaiting();
 });
 
-// Activate event - cleanup old caches
-self.addEventListener('activate', (event) => {
-  debugLog('Service Worker activating...');
+// Activate event - clean up old caches
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            debugLog(`Removing old cache: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
+        cacheNames.filter(cacheName => {
+          return cacheName !== CACHE_NAME;
+        }).map(cacheName => {
+          console.log('Service worker removing old cache:', cacheName);
+          return caches.delete(cacheName);
         })
       );
     }).then(() => {
-      // Take control of uncontrolled clients
+      console.log('Service worker active and controlling page');
       return self.clients.claim();
     })
   );
 });
 
-// Improved content type checking
-const shouldCacheResponse = (response, url) => {
-  // Don't cache error responses
-  if (!response.ok) return false;
-  
-  const contentType = response.headers.get('content-type') || '';
-  
-  // For JSON files, validate proper JSON content
-  if (url.endsWith('.json')) {
-    if (!contentType.includes('application/json')) {
-      console.warn(`Skipping cache for ${url}: JSON file with incorrect content type ${contentType}`);
-      return false;
-    }
-    
-    return response.clone().text()
-      .then(text => {
-        try {
-          // Try to parse as JSON to validate
-          const content = text.trim();
-          if (content.startsWith('<!DOCTYPE html>') || content.startsWith('<html')) {
-            console.warn(`Skipping cache for ${url}: JSON file with HTML content`);
-            return false;
-          }
-          
-          JSON.parse(content);
-          return true;
-        } catch (e) {
-          console.warn(`Skipping cache for ${url}: Invalid JSON content - ${e.message}`);
-          return false;
-        }
-      })
-      .catch(err => {
-        console.warn(`Error checking JSON content for ${url}: ${err}`);
-        return false;
-      });
+// Fetch event - serve from cache or network
+self.addEventListener('fetch', event => {
+  // Special handling for Mathigon assets and course content
+  if (event.request.url.includes('/mathigon/')) {
+    return handleMathigonAssets(event);
   }
   
-  // For JavaScript files, verify it's actually JavaScript
-  if (url.endsWith('.js') && !contentType.includes('javascript')) {
-    console.warn(`Skipping cache for ${url}: wrong content type ${contentType}`);
-    return false;
-  }
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
   
-  // Skip caching HTML content with incorrect content type
-  if (contentType.includes('javascript') || contentType.includes('application/')) {
-    return response.clone().text()
-      .then(text => {
-        const isHTML = text.trim().startsWith('<!DOCTYPE html>') || 
-                       text.trim().startsWith('<html') || 
-                       (text.trim().startsWith('<') && text.includes('<html'));
-        if (isHTML) {
-          console.warn(`Skipping cache for ${url}: HTML content with non-HTML content type`);
-          return false;
-        }
-        return true;
-      })
-      .catch(() => true); // If we can't check, assume it's cacheable
-  }
+  // Cache-first strategy for cacheable file types
+  const url = new URL(event.request.url);
+  const shouldCache = CACHED_FILETYPES.some(fileType => 
+    url.pathname.endsWith(fileType)
+  );
   
-  // Default: cache if it's a successful response
-  return true;
-};
-
-// Special handling for Mathigon content paths
-const isMathigonContentPath = (url) => {
-  return url.includes('/mathigon/content/');
-};
-
-// Fix content type headers for a response
-const fixContentTypeHeaders = (response, url) => {
-  if (!response.ok) return response;
-  
-  const contentType = response.headers.get('content-type') || '';
-  let newContentType = contentType;
-  
-  // Fix content type based on file extension
-  if (url.endsWith('.json') && !contentType.includes('application/json')) {
-    newContentType = 'application/json; charset=utf-8';
-  } else if (url.endsWith('.js') && !contentType.includes('javascript')) {
-    newContentType = 'application/javascript; charset=utf-8';
-  } else if (url.endsWith('.css') && !contentType.includes('text/css')) {
-    newContentType = 'text/css; charset=utf-8';
-  }
-  
-  // If we don't need to change anything, return original response
-  if (newContentType === contentType) {
-    return response;
-  }
-  
-  // Create a new response with the correct content type
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: new Headers({
-      ...Array.from(response.headers.entries()),
-      'Content-Type': newContentType
-    })
-  });
-};
-
-// Fetch event - serve from cache, then network with cache update
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests and browser extensions
-  if (event.request.method !== 'GET' || 
-      event.request.url.startsWith('chrome-extension://')) {
-    return;
-  }
-  
-  const requestURL = new URL(event.request.url);
-  
-  // Special handling for Mathigon content and assets
-  if (requestURL.pathname.includes('/mathigon/content/') || 
-      requestURL.pathname.includes('/mathigon/assets/')) {
+  if (shouldCache) {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          // Return cached response if available
+      caches.match(event.request)
+        .then(cachedResponse => {
           if (cachedResponse) {
-            // Update cache in background for non-HTML content
-            fetch(event.request)
-              .then((response) => {
-                if (!response.ok) return;
-                
-                // Fix content type headers if needed
-                const fixedResponse = fixContentTypeHeaders(response, requestURL.pathname);
-                
-                return shouldCacheResponse(fixedResponse, requestURL.pathname)
-                  .then(shouldCache => {
-                    if (shouldCache) {
-                      cache.put(event.request, fixedResponse.clone());
-                    }
-                  });
-              })
-              .catch(() => {/* Ignore network errors */});
-            
+            // Return cached response
             return cachedResponse;
           }
           
-          // Otherwise fetch from network and cache
+          // No cache hit, fetch from network and cache
           return fetch(event.request)
-            .then((response) => {
-              // Fix content type headers if needed
-              const fixedResponse = fixContentTypeHeaders(response, requestURL.pathname);
-              
-              // Only cache successful responses
-              if (fixedResponse.ok) {
-                shouldCacheResponse(fixedResponse, requestURL.pathname)
-                  .then(shouldCache => {
-                    if (shouldCache) {
-                      // Add proper content type headers for files in deployed environments
-                      if (isDeployedEnvironment()) {
-                        if (requestURL.pathname.endsWith('.js')) {
-                          const modifiedResponse = new Response(
-                            fixedResponse.clone().body,
-                            {
-                              status: fixedResponse.status,
-                              statusText: fixedResponse.statusText,
-                              headers: new Headers({
-                                ...Array.from(fixedResponse.headers.entries()),
-                                'Content-Type': 'application/javascript; charset=utf-8'
-                              })
-                            }
-                          );
-                          cache.put(event.request, modifiedResponse);
-                        } else if (requestURL.pathname.endsWith('.json')) {
-                          // Ensure JSON content is properly cached with correct content type
-                          const modifiedResponse = new Response(
-                            fixedResponse.clone().body,
-                            {
-                              status: fixedResponse.status,
-                              statusText: fixedResponse.statusText,
-                              headers: new Headers({
-                                ...Array.from(fixedResponse.headers.entries()),
-                                'Content-Type': 'application/json; charset=utf-8'
-                              })
-                            }
-                          );
-                          cache.put(event.request, modifiedResponse);
-                        } else {
-                          cache.put(event.request, fixedResponse.clone());
-                        }
-                      } else {
-                        cache.put(event.request, fixedResponse.clone());
-                      }
-                    }
-                  });
+            .then(response => {
+              // Don't cache non-successful responses
+              if (!response || response.status !== 200) {
+                return response;
               }
-              return fixedResponse;
+              
+              // Cache a copy of the response
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+                
+              return response;
             })
-            .catch((error) => {
+            .catch(error => {
               console.error('Fetch failed:', error);
-              return new Response('Network error', { 
-                status: 408, 
-                headers: { 'Content-Type': 'text/plain' } 
-              });
+              // Could return a custom offline page here
             });
-        });
-      })
+        })
     );
-    return;
   }
+});
+
+// Special handling for Mathigon assets
+function handleMathigonAssets(event) {
+  const isMathigonContent = event.request.url.includes('/mathigon/content/');
+  const isMathigonAsset = event.request.url.includes('/mathigon/assets/');
   
-  // Standard strategy for other requests - network first, fall back to cache
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful responses
-        if (response.ok && response.type === 'basic') {
-          const contentType = response.headers.get('content-type') || '';
-          // Skip caching HTML responses to avoid capturing error pages
-          if (!contentType.includes('text/html')) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
+  // Use network-first strategy for content (which might be updated)
+  if (isMathigonContent) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Clone the response to cache it
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => {
               cache.put(event.request, responseToCache);
             });
-          }
-        }
-        return response;
-      })
-      .catch(() => {
-        // Fall back to cache if network fails
-        return caches.match(event.request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // If no match in cache, return a fallback for HTML requests
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/index.html');
-            }
-            return new Response('Network error, and no cached version available', { 
-              status: 404, 
-              headers: { 'Content-Type': 'text/plain' } 
+          
+          return response;
+        })
+        .catch(error => {
+          // If network fails, try cache
+          return caches.match(event.request)
+            .then(cachedResponse => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              
+              console.error('Failed to fetch Mathigon content:', error);
+              // Return an appropriate error response
             });
-          });
-      })
-  );
+        })
+    );
+  }
+  
+  // Use cache-first for assets (which rarely change)
+  if (isMathigonAsset) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          // Fetch and cache if not in cache
+          return fetch(event.request)
+            .then(response => {
+              if (!response || response.status !== 200) {
+                return response;
+              }
+              
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+                
+              return response;
+            });
+        })
+    );
+  }
+}
+
+// Handle messages from the main thread
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

@@ -163,8 +163,8 @@ export default function Dashboard({ user }) {
   const getThumbnailUrl = useCallback((course) => {
     if (!course || !course.id) return '';
     
-    // Use local content path instead of API
-    return `/content/${course.id}/hero.jpg`;
+    // Use mathigon content path where hero images are located
+    return `/mathigon/content/${course.id}/hero.jpg`;
   }, []);
 
   // Use useMemo to prevent unnecessary re-renders of the course grid

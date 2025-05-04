@@ -189,7 +189,7 @@ const getApiUrl = (path) => {
 // Function to generate correct thumbnail URLs for cloud hosting
 const generateThumbnailUrl = (courseId) => {
   // This handles both development and production environments
-  return `/content/${courseId}/hero.jpg`;
+  return `/mathigon/content/${courseId}/hero.jpg`;
 };
 
 // Function to check if a file exists via API

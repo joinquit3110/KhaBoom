@@ -1,12 +1,45 @@
-/* CourseReader Component Styles */
+/* CourseReader Component Styles - Enhanced to match Mathigon's beautiful UI */
+
+:root {
+  --primary-color: #1c7ef6;
+  --primary-dark: #0056d6;
+  --primary-light: #e3f2fd;
+  --secondary-color: #ff941f;
+  --secondary-dark: #e67e00;
+  --secondary-light: #fff3e0;
+  --green: #31b16a;
+  --green-dark: #259655;
+  --green-light: #e8f5e9;
+  --purple: #9c27b0;
+  --purple-dark: #7b1fa2;
+  --purple-light: #f3e5f5;
+  --red: #f44336;
+  --red-dark: #d32f2f;
+  --red-light: #ffebee;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-300: #e0e0e0;
+  --gray-400: #bdbdbd;
+  --gray-500: #9e9e9e;
+  --gray-600: #757575;
+  --gray-700: #616161;
+  --gray-800: #424242;
+  --gray-900: #212121;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.1);
+  --animation-fast: 0.2s;
+}
 
 .course-reader {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
-  color: #333;
+  color: var(--gray-900);
+  background-color: var(--gray-50);
 }
 
 .course-reader-loading {
@@ -14,19 +47,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 50vh;
+  min-height: 70vh;
   text-align: center;
-  color: #666;
+  color: var(--gray-700);
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #1f7aed;
-  animation: spin 1s infinite linear;
-  margin-bottom: 1rem;
+  border-top-color: var(--primary-color);
+  animation: spin 1s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  margin-bottom: 1.5rem;
 }
 
 @keyframes spin {
@@ -36,142 +69,164 @@
 .course-reader-error {
   max-width: 700px;
   margin: 3rem auto;
-  padding: 2rem;
+  padding: 2.5rem;
   text-align: center;
-  background-color: #ffebee;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  border-top: 4px solid var(--red);
 }
 
 .course-reader-error h2 {
-  color: #c62828;
+  color: var(--red);
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .error-details {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: var(--gray-50);
   padding: 1.5rem;
   border-radius: 8px;
   text-align: left;
+  font-size: 0.95rem;
 }
 
 .error-details code {
-  background-color: #f5f5f5;
+  background-color: var(--gray-100);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
-  font-family: monospace;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .error-actions {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-top: 1rem;
 }
 
 .retry-button, .back-button {
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.3s;
+  transition: all var(--animation-fast) ease;
   text-decoration: none;
   border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 1rem;
 }
 
 .retry-button {
-  background-color: #c62828;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .retry-button:hover {
-  background-color: #b71c1c;
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .back-button {
-  background-color: #f5f5f5;
-  color: #555;
+  background-color: var(--gray-100);
+  color: var(--gray-800);
 }
 
 .back-button:hover {
-  background-color: #e0e0e0;
+  background-color: var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .course-reader-empty {
-  max-width: 600px;
-  margin: 3rem auto;
-  padding: 2rem;
+  max-width: 700px;
+  margin: 4rem auto;
+  padding: 3rem 2rem;
   text-align: center;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .content-path-note {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  color: #666;
+  background-color: var(--primary-light);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: var(--gray-800);
 }
 
 .content-path-note code {
   background-color: white;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
-  font-family: monospace;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .dev-info {
   margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #999;
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  background-color: var(--gray-100);
+  padding: 0.4rem 0.6rem;
   border-radius: 4px;
   text-align: center;
 }
 
 .course-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   text-align: center;
+  position: relative;
 }
 
 .course-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #1f7aed;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
   line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .course-description {
-  font-size: 1.1rem;
-  color: #666;
+  font-size: 1.25rem;
+  color: var(--gray-700);
   max-width: 800px;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 2rem;
+  line-height: 1.5;
 }
 
 .course-color-bar {
-  height: 4px;
-  width: 100px;
-  margin: 1rem auto;
-  border-radius: 2px;
+  height: 5px;
+  width: 120px;
+  margin: 1.5rem auto;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
 }
 
 .course-nav {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
+  box-shadow: var(--shadow-sm);
+  border-radius: 8px;
+  padding: 0.5rem;
 }
 
 .section-tabs {
@@ -179,10 +234,8 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   list-style: none;
-  padding: 0;
+  padding: 0.5rem;
   margin: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
 }
 
 .section-tabs li {
@@ -191,66 +244,74 @@
 }
 
 .section-tabs li.active .section-button {
-  background-color: #1f7aed;
+  background-color: var(--primary-color);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .section-button {
-  padding: 0.6rem 1.2rem;
-  background-color: #f5f5f5;
+  padding: 0.7rem 1.2rem;
+  background-color: var(--gray-100);
   border: none;
-  border-radius: 4px;
-  color: #555;
+  border-radius: 6px;
+  color: var(--gray-800);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--animation-fast) ease;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .section-button:hover {
-  background-color: #e0e0e0;
+  background-color: var(--gray-200);
+  transform: translateY(-1px);
 }
 
 .course-content {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 2rem;
-  margin-bottom: 2rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  padding: 3rem;
+  margin-bottom: 3rem;
   overflow-x: auto;
 }
 
 .mathigon-content {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
 }
 
 .mathigon-content h1 {
-  font-size: 1.8rem;
-  color: #1f7aed;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-top: 2.5rem;
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .mathigon-content h2 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-top: 1.5rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.6rem;
+  color: var(--gray-900);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .mathigon-content h3 {
   font-size: 1.3rem;
-  color: #444;
-  margin-top: 1.2rem;
-  margin-bottom: 0.6rem;
+  color: var(--gray-800);
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
 }
 
 .mathigon-content p {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .mathigon-content strong {
   font-weight: 600;
+  color: var(--gray-900);
 }
 
 .mathigon-content em {
@@ -258,14 +319,15 @@
 }
 
 .mathigon-content a {
-  color: #1f7aed;
+  color: var(--primary-color);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all var(--animation-fast);
+  border-bottom: 1px solid transparent;
 }
 
 .mathigon-content a:hover {
-  color: #0d47a1;
-  text-decoration: underline;
+  color: var(--primary-dark);
+  border-bottom: 1px solid var(--primary-dark);
 }
 
 .mathigon-content .math {
@@ -277,12 +339,13 @@
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 1rem auto;
-  border-radius: 4px;
+  margin: 2rem auto;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .course-footer {
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 
 .step-buttons {
@@ -291,134 +354,193 @@
 }
 
 .prev-section, .next-section {
-  padding: 0.7rem 1.5rem;
-  background-color: #f5f5f5;
+  padding: 0.8rem 1.8rem;
   border: none;
-  border-radius: 4px;
-  color: #555;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--animation-fast) ease;
   font-weight: 500;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .prev-section:hover:not(:disabled), 
 .next-section:hover:not(:disabled) {
-  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.prev-section {
+  background-color: var(--gray-100);
+  color: var(--gray-800);
+}
+
+.prev-section:hover:not(:disabled) {
+  background-color: var(--gray-200);
 }
 
 .next-section {
-  background-color: #1f7aed;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .next-section:hover:not(:disabled) {
-  background-color: #0d47a1;
+  background-color: var(--primary-dark);
 }
 
 .prev-section:disabled, 
 .next-section:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Interactive elements styling */
 .input-field {
   display: inline-block;
-  margin: 0 0.2rem;
-  min-width: 60px;
+  margin: 0 0.3rem;
+  min-width: 70px;
   position: relative;
 }
 
 .blank-input {
-  padding: 0.3rem 0.5rem;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.95rem;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 1rem;
   width: 100%;
-  transition: border-color 0.2s;
+  transition: all var(--animation-fast);
 }
 
 .blank-input:focus {
-  border-color: #1f7aed;
+  border-color: var(--primary-color);
   outline: none;
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .input-field.correct .blank-input {
-  border-color: #4caf50;
-  background-color: #e8f5e9;
+  border-color: var(--green);
+  background-color: var(--green-light);
 }
 
 .input-field.incorrect .blank-input {
-  border-color: #f44336;
-  background-color: #ffebee;
+  border-color: var(--red);
+  background-color: var(--red-light);
 }
 
 .action-button {
   display: inline-block;
-  padding: 0.3rem 0.8rem;
-  background-color: #1f7aed;
+  padding: 0.4rem 1rem;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin: 0 0.2rem;
-  transition: background-color 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0.3rem;
+  transition: all var(--animation-fast);
 }
 
 .action-button:hover {
-  background-color: #0d47a1;
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .glossary-term {
-  color: #1f7aed;
-  border-bottom: 1px dashed #1f7aed;
+  color: var(--primary-color);
+  border-bottom: 1px dashed var(--primary-color);
   cursor: help;
+  position: relative;
+}
+
+.glossary-term:hover {
+  color: var(--primary-dark);
+  border-bottom: 1px dashed var(--primary-dark);
 }
 
 .pill {
   display: inline-block;
-  padding: 0.1rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
+  padding: 0.15rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
   font-weight: 500;
-  margin: 0 0.2rem;
+  margin: 0 0.3rem;
+  transition: all var(--animation-fast);
 }
 
-.pill-red { background-color: #ffebee; color: #c62828; }
-.pill-blue { background-color: #e3f2fd; color: #1565c0; }
-.pill-green { background-color: #e8f5e9; color: #2e7d32; }
-.pill-purple { background-color: #f3e5f5; color: #7b1fa2; }
-.pill-yellow { background-color: #fff8e1; color: #f9a825; }
+.pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pill-red { background-color: var(--red-light); color: var(--red-dark); }
+.pill-blue { background-color: var(--primary-light); color: var(--primary-dark); }
+.pill-green { background-color: var(--green-light); color: var(--green-dark); }
+.pill-purple { background-color: var(--purple-light); color: var(--purple-dark); }
+.pill-yellow { background-color: var(--secondary-light); color: var(--secondary-dark); }
 .pill-orange { background-color: #fff3e0; color: #ef6c00; }
 
 .variable-slider {
   display: inline-flex;
   align-items: center;
-  margin: 0 0.2rem;
-  min-width: 120px;
+  margin: 0 0.3rem;
+  min-width: 140px;
+  background-color: var(--gray-100);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
 }
 
 .variable-range {
   flex: 1;
-  margin-right: 8px;
+  margin-right: 10px;
+  -webkit-appearance: none;
+  height: 6px;
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.variable-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  transition: all var(--animation-fast);
+}
+
+.variable-range::-webkit-slider-thumb:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
 }
 
 .slider-value {
-  font-weight: 500;
-  min-width: 30px;
+  font-weight: 600;
+  min-width: 35px;
   text-align: center;
+  color: var(--gray-800);
 }
 
 .variable-expression {
-  color: #1f7aed;
-  font-weight: 500;
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 .mathigon-section {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--gray-200);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive adjustments */
@@ -428,20 +550,21 @@
   }
   
   .course-header h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
   
   .course-content {
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
   }
   
   .section-tabs {
     overflow-x: auto;
     white-space: nowrap;
-    display: block;
+    display: flex;
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    padding: 0.5rem;
   }
   
   .section-tabs::-webkit-scrollbar {
@@ -449,15 +572,25 @@
   }
   
   .section-tabs li {
-    display: inline-block;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
+    flex: 0 0 auto;
+  }
+  
+  .mathigon-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .mathigon-content h2 {
+    font-size: 1.4rem;
   }
 }
 
 @media (max-width: 480px) {
   .course-header h1 {
     font-size: 1.8rem;
+  }
+  
+  .course-content {
+    padding: 1.5rem 1rem;
   }
   
   .step-buttons {
@@ -467,5 +600,516 @@
   
   .prev-section, .next-section {
     width: 100%;
+    justify-content: center;
   }
+}
+
+/* Mathigon-specific styling for interactive elements */
+.interactives-wrapper {
+  margin: 2rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.interactives-header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.interactives-body {
+  padding: 1.5rem;
+  background-color: white;
+}
+
+/* Styling for steps */
+.step {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--gray-50);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--primary-color);
+}
+
+.step-title {
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.step-content {
+  color: var(--gray-800);
+}
+
+/* Styling for the code blocks */
+pre, code {
+  font-family: 'Roboto Mono', monospace;
+  background-color: var(--gray-100);
+  border-radius: 6px;
+}
+
+pre {
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+code {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9em;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  box-shadow: var(--shadow-sm);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: var(--primary-light);
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--primary-dark);
+  padding: 1rem;
+}
+
+td {
+  padding: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+tr:nth-child(even) {
+  background-color: var(--gray-50);
+}
+
+/* Blockquotes */
+blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  background-color: var(--primary-light);
+  color: var(--gray-800);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* 
+  Mathigon Course Reader Styles
+  Optimized for displaying Mathigon interactive courses with proper styling
+*/
+
+/* Core container styles */
+.mathigon-course-view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #333;
+  --primary-color: #5050ff;
+  --accent-color: #ff5050;
+  --success-color: #00c853;
+  --warning-color: #ffab00;
+  --error-color: #ff1744;
+}
+
+/* Course header */
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Progress bar */
+.progress-container {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+}
+
+.progress-bar {
+  flex-grow: 1;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: white;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Main course content area */
+.course-content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  margin: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mathigon container styles */
+.mathigon-container {
+  width: 100%;
+  min-height: 500px;
+  position: relative;
+}
+
+/* Notifications */
+.notifications-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification {
+  background-color: white;
+  color: #333;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+  border-left: 4px solid var(--primary-color);
+}
+
+.notification.success {
+  border-left-color: var(--success-color);
+}
+
+.notification.warning {
+  border-left-color: var(--warning-color);
+}
+
+.notification.error {
+  border-left-color: var(--error-color);
+}
+
+.close-notification {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #888;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.close-notification:hover {
+  color: #333;
+}
+
+/* Support panel */
+.support-panel {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 900;
+}
+
+.support-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.support-button:hover {
+  transform: scale(1.05);
+  background-color: #4040ee;
+}
+
+/* Loading state */
+.mathigon-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(80, 80, 255, 0.2);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.mathigon-error {
+  padding: 2rem;
+  background-color: #fff5f5;
+  border-left: 4px solid var(--error-color);
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.mathigon-error h3 {
+  color: var(--error-color);
+  margin-top: 0;
+}
+
+.mathigon-error .btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Make sure mathigon-specific styles are properly applied */
+.mathigon-container {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  --step-width: 720px;
+}
+
+/* Style proper step interactions */
+.course-reader .step {
+  position: relative;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+  max-width: var(--step-width);
+}
+
+/* For the X-Step component Mathigon uses */
+x-step {
+  display: block;
+  margin: 0 auto;
+  max-width: var(--step-width);
+  padding: 1.5rem 0;
+  position: relative;
+}
+
+/* Interactive elements must be visible */
+.interactive-element {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  background-color: #f9f9f9;
+}
+
+/* Mathigon's glossary tooltips */
+.hover-tooltip {
+  position: absolute;
+  z-index: 400;
+  width: 260px;
+  background: white;
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 3px 12px 2px rgba(0,0,0,0.2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .2s, transform .2s;
+}
+
+.hover-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Basic responsive design */
+@media (max-width: 768px) {
+  .course-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 1rem;
+  }
+  
+  .progress-container {
+    width: 100%;
+  }
+  
+  .course-content {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .mathigon-container {
+    --step-width: 100%;
+  }
+}
+
+/* Mathigon-specific component overrides to ensure proper display */
+.mathigon-step {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2rem;
+}
+
+.mathigon-step:last-child {
+  border-bottom: none;
+}
+
+/* Drag and drop elements */
+.drag-element {
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-element:active {
+  cursor: grabbing;
+}
+
+.drop-target {
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.drop-target.can-drop {
+  border-color: var(--primary-color);
+  background-color: rgba(80, 80, 255, 0.05);
+}
+
+.drop-target.drop-success {
+  border-color: var(--success-color);
+  background-color: rgba(0, 200, 83, 0.05);
+}
+
+/* Drawing elements */
+.drawing-canvas {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 1rem 0;
+  background-color: white;
+}
+
+/* Variables and sliders */
+.variable-slider {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Math equations */
+.math-equation {
+  font-family: 'KaTeX_Main', serif;
+  margin: 1rem 0;
+}
+
+/* Make sure buttons are visible */
+.mathigon-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+
+.mathigon-button:hover {
+  background-color: #4040ee;
+}
+
+/* Success and error messages */
+.mathigon-success {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.mathigon-error {
+  color: var(--error-color);
+  font-weight: 500;
 } 

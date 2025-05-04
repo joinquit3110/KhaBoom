@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getCourseById, 
@@ -15,13 +15,15 @@ import ChatBot from '../components/ChatBot';
 import LazyImage from './LazyImage';
 import axios from 'axios';
 import './courseReader.css';
+import MathigonLoader from './MathigonLoader';
 
 // Lazy load the Mathigon components to reduce initial bundle size
-const MathigonLoader = lazy(() => import('./MathigonLoader'));
 const InteractiveComponent = lazy(() => import('../interactive/InteractiveComponent'));
 
-const CourseView = () => {
+const CourseView = ({ courses }) => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [course, setCourse] = useState({
@@ -63,6 +65,32 @@ const CourseView = () => {
   const [mathigonError, setMathigonError] = useState(null);
   const [isExactMathigonCourse, setIsExactMathigonCourse] = useState(false);
   
+  // Animation variants for smooth transitions
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+        duration: 0.5 
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: 'spring',
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
   // Function to load external Mathigon scripts
   const loadMathigonAssets = useCallback(async () => {
     try {
@@ -987,7 +1015,7 @@ const CourseView = () => {
           </AnimatePresence>
         </div>
       </motion.main>
-    );
-  };
+  );
+};
 
 export default CourseView;

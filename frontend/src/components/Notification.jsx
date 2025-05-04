@@ -1,33 +1,36 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * Notification Component
+ * 
+ * Displays notifications as toast-style messages in the corner of the screen
+ * Supports different types: info (default), success, warning, error
+ */
 const Notification = ({ notifications, removeNotification }) => {
+  if (!notifications || notifications.length === 0) return null;
+  
   return (
-    <div className="notification-container">
+    <div className="notifications-container">
       <AnimatePresence>
         {notifications.map(notification => (
           <motion.div 
             key={notification.id}
-            className={`notification ${notification.type}`}
-            initial={{ opacity: 0, y: -50, scale: 0.8 }}
+            className={`notification ${notification.type || 'info'}`}
+            initial={{ opacity: 0, y: 50, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            transition={{ duration: 0.3 }}
           >
             <div className="notification-content">
-              {notification.type === 'success' && <span className="notification-icon">✓</span>}
-              {notification.type === 'error' && <span className="notification-icon">✗</span>}
-              {notification.type === 'info' && <span className="notification-icon">ℹ</span>}
-              {notification.type === 'warning' && <span className="notification-icon">⚠</span>}
-              
-              <p>{notification.message}</p>
+              {notification.message}
             </div>
-            
             <button 
-              className="notification-close"
+              className="close-notification"
               onClick={() => removeNotification(notification.id)}
+              aria-label="Close notification"
             >
-              ×
+              &times;
             </button>
           </motion.div>
         ))}

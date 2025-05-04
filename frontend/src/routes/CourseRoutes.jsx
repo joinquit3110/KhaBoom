@@ -3,9 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from '../components/Dashboard';
 import NotFound from '../components/NotFound';
 import CourseView from '../components/CourseView';
-
-// Lazy load the MathigonCourse component to improve performance
-const MathigonCourse = lazy(() => import('../mathigon/MathigonCourse'));
+import MathigonCourseView from '../components/MathigonCourseView';
 
 /**
  * CourseRoutes Component
@@ -13,7 +11,7 @@ const MathigonCourse = lazy(() => import('../mathigon/MathigonCourse'));
  * Defines the routes for course-related pages, including course list, 
  * course content, and section navigation.
  * 
- * Includes fallback to CourseView if MathigonCourse fails
+ * Uses MathigonCourseView for Mathigon content rendering with full interactivity
  */
 const CourseRoutes = ({ userId, user }) => {
   const LoadingIndicator = () => (
@@ -29,20 +27,20 @@ const CourseRoutes = ({ userId, user }) => {
       {/* Course listing page - using Dashboard component */}
       <Route path="/" element={<Dashboard user={user} />} />
       
-      {/* Main Mathigon course pages */}
+      {/* Main Mathigon course pages - using the dedicated MathigonCourseView component */}
       <Route path="/:courseId" element={
         <Suspense fallback={<LoadingIndicator />}>
-          <MathigonCourse />
+          <MathigonCourseView />
         </Suspense>
       } />
       
       <Route path="/:courseId/:sectionId" element={
         <Suspense fallback={<LoadingIndicator />}>
-          <MathigonCourse />
+          <MathigonCourseView />
         </Suspense>
       } />
       
-      {/* Fallback routes that use CourseView as an alternative */}
+      {/* Fallback routes that use the original CourseView as an alternative */}
       <Route path="/fallback/:courseId" element={<CourseView alternateView={true} />} />
       <Route path="/fallback/:courseId/:sectionId" element={<CourseView alternateView={true} />} />
       

@@ -3,9 +3,22 @@
   to = "/index.html"
   status = 200
 
+# Important: Exclude Mathigon content files from SPA redirect
+[[redirects]]
+  from = "/mathigon/content/*/*.json"
+  to = "/mathigon/content/:splat.json"
+  status = 200
+  force = true
+  
+[[redirects]]
+  from = "/mathigon/assets/*"
+  to = "/mathigon/assets/:splat"
+  status = 200
+  force = true
+
 [build]
   publish = "dist"
-  command = "npm run build && node build-content-json.js"
+  command = "npm run build"
 
 # NOTE: The following plugins were removed as they were causing build failures
 # These plugins don't appear to be available in the npm registry:
@@ -63,12 +76,14 @@
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
 
 [[headers]]
   for = "/mathigon/assets/*.css"
   [headers.values]
     Content-Type = "text/css; charset=utf-8"
     Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
 
 # More specific content type rule for JSON files - most important fix
 [[headers]]
@@ -76,7 +91,15 @@
   [headers.values]
     Content-Type = "application/json; charset=utf-8"
     Cache-Control = "public, max-age=86400"
-    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Origin = "*"
+
+# Content type for mathigon markdown files
+[[headers]]
+  for = "/mathigon/content/*/*.md"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+    Access-Control-Allow-Origin = "*"
 
 # More general content rule
 [[headers]]
@@ -84,6 +107,7 @@
   [headers.values]
     Content-Type = "application/json; charset=utf-8"
     Cache-Control = "public, max-age=86400"
+    Access-Control-Allow-Origin = "*"
 
 # Add special handling for fonts
 [[headers]]
@@ -111,10 +135,37 @@
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin = "*"
     
 # For diagnostic script
 [[headers]]
   for = "/mathigon-test.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
-    Cache-Control = "no-cache, no-store, must-revalidate" 
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin = "*"
+
+# Handle other static assets for Mathigon
+[[headers]]
+  for = "/mathigon/content/*/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/mathigon/content/*/svg/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/mathigon/content/*/audio/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/mathigon/content/*/components/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*" 
