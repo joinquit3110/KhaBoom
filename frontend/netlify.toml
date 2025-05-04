@@ -7,12 +7,11 @@
   publish = "dist"
   command = "npm run build && node build-content-json.js"
 
-[[plugins]]
-  package = "@netlify/plugin-functions-core"
-
-# Make sure we force the MIME type to be correctly set for all files
-[[plugins]]
-  package = "@netlify/plugin-local-install-core"
+# NOTE: The following plugins were removed as they were causing build failures
+# These plugins don't appear to be available in the npm registry:
+# - @netlify/plugin-functions-core
+# - @netlify/plugin-local-install-core
+# If you need these plugins, they must be properly installed or configured in the Netlify UI
 
 [[headers]]
   for = "/*"
@@ -36,6 +35,7 @@
       frame-ancestors 'none';
     """
 
+# Content-Type headers for different file types
 [[headers]]
   for = "/*.js"
   [headers.values]
