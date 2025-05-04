@@ -65,8 +65,37 @@ export default function Dashboard({ user }) {
       if (loading) {
         console.warn("Loading timeout reached - forcing loading state to complete");
         setLoading(false);
+        // Try to use cached data if we have it
+        try {
+          const cachedCoursesData = localStorage.getItem('courses-data');
+          if (cachedCoursesData) {
+            const parsedData = JSON.parse(cachedCoursesData);
+            if (Array.isArray(parsedData) && parsedData.length > 0) {
+              console.log(`Using ${parsedData.length} cached courses from localStorage`);
+              setCourses(parsedData);
+              setError(null);
+            }
+          }
+        } catch (cacheError) {
+          console.error('Error reading cached courses:', cacheError);
+        }
       }
     }, 5000); // 5 second timeout
+
+    // Try to avoid the timeout by using cached data immediately
+    try {
+      const cachedCoursesData = localStorage.getItem('courses-data');
+      if (cachedCoursesData) {
+        const parsedData = JSON.parse(cachedCoursesData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          console.log(`Quick-loading ${parsedData.length} cached courses from localStorage`);
+          setCourses(parsedData);
+          setLoading(false);
+        }
+      }
+    } catch (cacheError) {
+      console.error('Error reading cached courses:', cacheError);
+    }
 
     fetchCourses();
 

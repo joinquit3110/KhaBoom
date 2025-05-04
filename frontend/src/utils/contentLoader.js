@@ -665,14 +665,14 @@ const scanAvailableCourses = async () => {
   console.log('Scanning for available courses...');
   
   try {
-    // First try the API endpoint for cloud courses
+    // First try to load from cloud-courses.json - this is our primary source
     try {
-      // First, try to load from cloud-courses.json
+      console.log('Attempting to load courses from cloud-courses.json');
       const response = await fetch('/cloud-courses.json');
       
       if (response.ok) {
         const data = await response.json();
-        console.log(`Loaded ${data.courses.length} courses from cloud data`);
+        console.log(`Loaded ${data.courses?.length || 0} courses from cloud data`);
         
         if (Array.isArray(data.courses) && data.courses.length > 0) {
           // Clear existing courses
@@ -688,7 +688,11 @@ const scanAvailableCourses = async () => {
           availableCourses.push(...apiCourses);
           console.log(`Added ${apiCourses.length} courses from cloud data`);
           return;
+        } else {
+          console.warn('No courses found in cloud-courses.json or invalid format');
         }
+      } else {
+        console.warn(`Failed to load cloud-courses.json: ${response.status} ${response.statusText}`);
       }
     } catch (localError) {
       console.warn('Error loading from local cloud-courses.json:', localError);
@@ -700,11 +704,14 @@ const scanAvailableCourses = async () => {
     
     try {
       console.log(`Fetching courses from API: ${endpoint}`);
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, { 
+        headers: { 'Accept': 'application/json' },
+        timeout: 5000 // Add timeout to prevent hanging
+      });
       
       if (response.ok) {
         const data = await response.json();
-        console.log(`Loaded ${data.length} courses from API`);
+        console.log(`Loaded ${data.length || 0} courses from API`);
         
         if (Array.isArray(data) && data.length > 0) {
           // Clear existing courses
@@ -720,18 +727,44 @@ const scanAvailableCourses = async () => {
           availableCourses.push(...apiCourses);
           console.log(`Added ${apiCourses.length} courses from API`);
           return;
+        } else {
+          console.warn('No courses found in API response or invalid format');
         }
+      } else {
+        console.warn(`Failed to fetch courses from API: ${response.status} ${response.statusText}`);
       }
     } catch (apiError) {
       console.warn('Error fetching courses from API:', apiError);
     }
     
     // If all else fails, use the fallback courses
+    console.log('Using fallback course discovery method');
     await addFallbackCourses();
   } catch (error) {
     console.error('Error scanning courses:', error);
     // Ensure we have courses even if API scan fails
-    await addFallbackCourses();
+    if (availableCourses.length === 0) {
+      console.log('No courses found, using hardcoded fallbacks');
+      // Add some hardcoded courses as absolute last resort
+      availableCourses.push(
+        {
+          id: 'triangles',
+          title: 'Triangles and Trigonometry',
+          description: 'Explore the properties of triangles',
+          color: '#1f77b4',
+          category: 'Geometry',
+          thumbnail: generateThumbnailUrl('triangles')
+        },
+        {
+          id: 'circles',
+          title: 'Circles and Pi',
+          description: 'Learn about circles and the significance of Pi',
+          color: '#7f7f7f',
+          category: 'Geometry',
+          thumbnail: generateThumbnailUrl('circles')
+        }
+      );
+    }
   }
 };
 
@@ -742,10 +775,15 @@ function getRandomColor() {
 }
 
 // Initialize with fallback courses first, then try to fetch from API
-addFallbackCourses().then(() => {
-  // After we have fallback courses loaded, try to get courses from API
-  scanAvailableCourses();
-});
+(async function initializeCourses() {
+  try {
+    await addFallbackCourses();
+    // After we have fallback courses loaded, try to get courses from API
+    await scanAvailableCourses();
+  } catch (error) {
+    console.error('Failed to initialize courses:', error);
+  }
+})();
 
 // Export utility functions
 export const getCourseList = () => {

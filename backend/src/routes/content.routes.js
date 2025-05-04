@@ -321,14 +321,41 @@ router.head("/exists", (req, res) => {
 // ROUTE: Get list of available courses
 router.get("/courses", (req, res) => {
   try {
-    const courseDirs = fs.readdirSync(contentRoot).filter(dir => 
-      fs.statSync(path.join(contentRoot, dir)).isDirectory()
-    );
+    // Check if content root exists
+    if (!fs.existsSync(contentRoot)) {
+      console.error(`Content root directory not found: ${contentRoot}`);
+      return res.status(404).json({ error: "Content directory not found" });
+    }
+    
+    const courseDirs = fs.readdirSync(contentRoot).filter(dir => {
+      // Skip directories starting with _ or named 'shared'
+      if (dir.startsWith('_') || dir === 'shared') return false;
+      
+      // Make sure it's a directory
+      const dirPath = path.join(contentRoot, dir);
+      return fs.statSync(dirPath).isDirectory();
+    });
+    
+    if (courseDirs.length === 0) {
+      console.warn("No course directories found");
+      return res.status(404).json({ error: "No courses found" });
+    }
     
     const courses = courseDirs.map(courseId => {
-      return readCourseMetadata(courseId);
+      try {
+        return readCourseMetadata(courseId);
+      } catch (err) {
+        console.error(`Error reading metadata for course ${courseId}:`, err);
+        return null;
+      }
     }).filter(Boolean);
     
+    if (courses.length === 0) {
+      console.warn("No valid courses with metadata found");
+      return res.status(404).json({ error: "No valid courses found" });
+    }
+    
+    console.log(`Successfully fetched ${courses.length} courses`);
     res.json(courses);
   } catch (error) {
     console.error("Error getting courses:", error);
