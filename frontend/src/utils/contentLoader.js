@@ -15,179 +15,280 @@
  * - Analytics tracking for learning progress
  */
 
+import { parseMathigonMd } from './mathigonParser.js';
+
 // Initialize content cache for improved performance
 const contentCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-// Utility functions for parsing Mathigon markdown format
+// Enhanced function to parse Mathigon markdown format
 const parseMathigonMd = (content) => {
   // Safely handle different types of content
-  if (!content) return { metadata: {}, html: '' };
+  if (!content) return { metadata: {}, html: '', sections: [] };
   
-  // If content is already a structured object, return it as is
-  if (typeof content === 'object' && !Array.isArray(content)) {
-    return content;
-  }
-  
-  // Ensure content is a string to avoid 'includes is not a function' error
+  // Ensure content is a string
   if (typeof content !== 'string') {
-    console.warn('Content is not a string or object:', typeof content);
+    console.warn('Content is not a string:', typeof content);
     return {
       metadata: {},
-      html: `<p>Error: Received invalid content type (${typeof content})</p>`
+      html: `<p>Error: Invalid content type (${typeof content})</p>`,
+      sections: []
     };
   }
   
-  // Extract metadata from content
-  const metadata = {};
-  const lines = content.split('\n');
-  let contentStart = 0;
-  
-  // Look for metadata at the beginning of the file (Mathigon format)
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.startsWith('> ')) {
-      const parts = line.substring(2).split(':');
-      if (parts.length >= 2) {
-        const key = parts[0].trim();
-        const value = parts.slice(1).join(':').trim();
-        metadata[key] = value;
-      }
-      contentStart = i + 1;
-    } else if (line !== '') {
-      break;
-    }
-  }
-  
-  // Process the actual content, skipping metadata
-  const contentLines = lines.slice(contentStart);
-  const contentWithoutMetadata = contentLines.join('\n');
-  
-  // If content is already HTML, just return it with minimal processing
-  if (contentWithoutMetadata.includes('<h1>') || contentWithoutMetadata.includes('<div class="section">')) {
-    return { metadata, html: contentWithoutMetadata };
-  }
-  
-  // Parse sections and subsections
-  let html = '';
-  const sections = [];
-  
-  // Split content by sections (## heading followed by > section: id)
-  const sectionMatches = contentWithoutMetadata.matchAll(/## ([^\n]+)\s*\n+> section: ([^\n]+)/g);
-  const sectionIndices = [];
-  
-  for (const match of sectionMatches) {
-    sectionIndices.push({
-      index: match.index,
-      title: match[1].trim(),
-      id: match[2].trim()
-    });
-  }
-  
-  // Process each section
-  if (sectionIndices.length > 0) {
-    for (let i = 0; i < sectionIndices.length; i++) {
-      const section = sectionIndices[i];
-      const nextSection = i < sectionIndices.length - 1 ? sectionIndices[i + 1] : null;
-      const startIndex = section.index;
-      const endIndex = nextSection ? nextSection.index : contentWithoutMetadata.length;
-      
-      // Extract section content
-      const sectionContent = contentWithoutMetadata.substring(startIndex, endIndex);
-      
-      // Process section content
-      const processedContent = processSectionContent(sectionContent);
-      
-      // Add to HTML
-      html += `<div class="section" id="${section.id}" data-section="${section.id}">
-        <h2>${section.title}</h2>
-        <div class="section-content">
-          ${processedContent}
-        </div>
-      </div>`;
-      
-      // Add to sections array
-      sections.push({
-        id: section.id,
-        title: section.title,
-        content: processedContent
-      });
-    }
-  } else {
-    // If no sections found, treat the whole content as one section
-    html = `<div class="section" id="content" data-section="content">
-      <div class="section-content">
-        ${processSectionContent(contentWithoutMetadata)}
-      </div>
-    </div>`;
+  try {
+    // Extract metadata from content using the Mathigon format
+    const metadata = {};
+    const lines = content.split('\n');
+    let contentStartIndex = 0;
     
-    sections.push({
-      id: 'content',
-      title: metadata.title || 'Content',
-      content: processSectionContent(contentWithoutMetadata)
+    // Extract global metadata at the beginning of the file
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.startsWith('> ')) {
+        // Parse metadata line (> key: value)
+        const metaContent = line.substring(2).trim();
+        const colonIndex = metaContent.indexOf(':');
+        
+        if (colonIndex > 0) {
+          const key = metaContent.substring(0, colonIndex).trim();
+          const value = metaContent.substring(colonIndex + 1).trim();
+          metadata[key] = value;
+        }
+        
+        contentStartIndex = i + 1;
+      } else if (line.startsWith('#') || line !== '') {
+        // Stop when we hit a non-metadata line
+        break;
+      }
+    }
+    
+    // Extract sections based on Mathigon format (separated by ---)
+    const sections = [];
+    let currentSection = { content: '', metadata: {} };
+    let inMetadata = false;
+    let sectionContent = [];
+    
+    for (let i = contentStartIndex; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Section separator
+      if (line.trim() === '---') {
+        // Save the current section if it has content
+        if (sectionContent.length > 0) {
+          currentSection.content = sectionContent.join('\n');
+          sections.push(currentSection);
+          
+          // Reset for the next section
+          currentSection = { content: '', metadata: {} };
+          sectionContent = [];
+          inMetadata = true;
+        } else {
+          inMetadata = true;
+        }
+        continue;
+      }
+      
+      // Parse section metadata
+      if (inMetadata && line.trim().startsWith('> ')) {
+        const metaContent = line.substring(2).trim();
+        const colonIndex = metaContent.indexOf(':');
+        
+        if (colonIndex > 0) {
+          const key = metaContent.substring(0, colonIndex).trim();
+          const value = metaContent.substring(colonIndex + 1).trim();
+          currentSection.metadata[key] = value;
+        }
+      } else {
+        // Once we hit non-metadata content, all future lines are content
+        if (inMetadata) {
+          inMetadata = false;
+        }
+        sectionContent.push(line);
+      }
+    }
+    
+    // Add the last section if it has content
+    if (sectionContent.length > 0) {
+      currentSection.content = sectionContent.join('\n');
+      sections.push(currentSection);
+    }
+    
+    // Process sections to generate HTML
+    let fullHtml = '';
+    const processedSections = sections.map((section, index) => {
+      const sectionId = section.metadata.id || `section-${index}`;
+      const sectionTitle = section.metadata.title || `Section ${index + 1}`;
+      
+      // Process content according to Mathigon's Markdown syntax
+      const processedContent = processMathigonContent(section.content);
+      
+      // Create HTML for this section
+      const sectionHtml = `
+        <div class="mathigon-section" id="${sectionId}" data-section-id="${sectionId}">
+          <div class="mathigon-content">
+            ${processedContent}
+          </div>
+        </div>
+      `;
+      
+      fullHtml += sectionHtml;
+      
+      return {
+        id: sectionId,
+        title: sectionTitle,
+        content: processedContent,
+        metadata: section.metadata
+      };
     });
+    
+    return {
+      metadata,
+      html: fullHtml,
+      sections: processedSections
+    };
+  } catch (error) {
+    console.error('Error parsing Mathigon markdown:', error);
+    return {
+      metadata: {},
+      html: `<p>Error parsing content: ${error.message}</p>`,
+      sections: []
+    };
   }
-  
-  return { 
-    metadata, 
-    html, 
-    sections 
-  };
 };
 
-// Helper function to process section content
-const processSectionContent = (sectionContent) => {
-  return sectionContent
-    // Process subsection markers
-    .replace(/> id: ([^\n]+)/g, '<div class="subsection" id="$1">')
-    .replace(/> end-id/g, '</div>')
+// Process Mathigon markdown content according to their custom format
+const processMathigonContent = (content) => {
+  if (!content) return '';
+  
+  try {
+    // Process headings
+    let processed = content
+      // Process H1 and H2 headings
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      
+      // Process bold and italic
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      .replace(/_([^_]+)_/g, '<em>$1</em>')
+      
+      // Process links and special link types
+      .replace(/\[([^\]]+)\]\(gloss:([^)]+)\)/g, '<span class="glossary-term" data-term="$2">$1</span>')
+      .replace(/\[([^\]]+)\]\(bio:([^)]+)\)/g, '<span class="biography" data-person="$2">$1</span>')
+      .replace(/\[([^\]]+)\]\(pill:([^)]+)\)/g, '<span class="pill pill-$2">$1</span>')
+      .replace(/\[([^\]]+)\]\(action:([^)]+)\)/g, '<button class="action-button" data-action="$2">$1</button>')
+      .replace(/\[([^\]]+)\]\((->[^)]+)\)/g, '<a class="target-pointer" href="$2">$1</a>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      
+      // Process code and equations
+      .replace(/`([^`]+)`/g, (match, p1) => {
+        // Check if this is a code block with language specification
+        if (p1.startsWith('{py}') || p1.startsWith('{js}') || p1.startsWith('{latex}')) {
+          const langMatch = p1.match(/^\{([a-z]+)\}/);
+          if (langMatch) {
+            const language = langMatch[1];
+            const code = p1.substring(langMatch[0].length);
+            return `<code class="language-${language}">${code}</code>`;
+          }
+        }
+        // Otherwise treat as AsciiMath (will be converted to MathML)
+        return `<span class="math">${p1}</span>`;
+      })
+      
+      // Process input fields and multiple choice (double brackets)
+      .replace(/\[\[([^\]]+)\]\]/g, (match, p1) => {
+        // Check if it's a multiple choice (contains pipe characters)
+        if (p1.includes('|')) {
+          const choices = p1.split('|').map(c => c.trim());
+          return `<span class="multiple-choice" data-choices="${choices.join(',')}">${choices[0]}</span>`;
+        }
+        
+        // Check if it has a range (contains ±)
+        if (p1.includes('±')) {
+          const parts = p1.split('±').map(p => p.trim());
+          const value = parts[0];
+          const range = parts[1] || '0';
+          return `<span class="input-field" data-value="${value}" data-range="${range}">${value}</span>`;
+        }
+        
+        // Check if it has hints (contains parentheses)
+        const hintMatch = p1.match(/^([^(]+)(\(.*\))$/);
+        if (hintMatch) {
+          const value = hintMatch[1].trim();
+          const hint = hintMatch[2];
+          return `<span class="input-field" data-value="${value}" data-hint="${hint}">${value}</span>`;
+        }
+        
+        // Simple input field
+        return `<span class="input-field" data-value="${p1.trim()}">${p1.trim()}</span>`;
+      })
+      
+      // Process variable expressions with sliders ${var}{var|2|-8,8,2}
+      .replace(/\${([^}]+)}\{([^}]+)\}/g, (match, variable, sliderData) => {
+        const parts = sliderData.split('|');
+        if (parts.length >= 2) {
+          const varName = parts[0];
+          const initialValue = parts[1];
+          const rangeData = parts[2] || '0,10,1';
+          
+          return `<span class="variable-slider" 
+                    data-var="${varName}" 
+                    data-value="${initialValue}" 
+                    data-range="${rangeData}">${initialValue}</span>`;
+        }
+        return match;
+      })
+      
+      // Process variable expressions ${expr}
+      .replace(/\${([^}]+)}/g, '<span class="variable-expression" data-expr="$1">$1</span>')
+      
+      // Process block elements (:::)
+      .replace(/:::\s+([^\n]+)([\s\S]*?):::/g, (match, blockHeader, blockContent) => {
+        const classMatch = blockHeader.match(/\.([a-zA-Z0-9-_]+)/g);
+        const idMatch = blockHeader.match(/#([a-zA-Z0-9-_]+)/g);
+        const classes = classMatch ? classMatch.map(c => c.substring(1)).join(' ') : '';
+        const id = idMatch ? idMatch[0].substring(1) : '';
+        
+        return `<div class="${classes}" id="${id}">${blockContent}</div>`;
+      })
+      
+      // Process custom attributes {.class#id(attr="value")} for paragraphs
+      .replace(/\{([^}]+)\}\s+([^\n]+)/g, (match, attributes, content) => {
+        const classMatch = attributes.match(/\.([a-zA-Z0-9-_]+)/g);
+        const idMatch = attributes.match(/#([a-zA-Z0-9-_]+)/g);
+        const attrMatch = attributes.match(/\(([^)]+)\)/g);
+        
+        const classes = classMatch ? classMatch.map(c => c.substring(1)).join(' ') : '';
+        const id = idMatch ? idMatch[0].substring(1) : '';
+        
+        let attrStr = '';
+        if (attrMatch) {
+          attrMatch.forEach(attr => {
+            const attrContent = attr.substring(1, attr.length - 1);
+            const parts = attrContent.split('=');
+            if (parts.length === 2) {
+              attrStr += ` ${parts[0]}=${parts[1]}`;
+            }
+          });
+        }
+        
+        return `<p class="${classes}" id="${id}"${attrStr}>${content}</p>`;
+      })
+      
+      // Process paragraphs (skip lines that start with HTML tags)
+      .replace(/^(?!<[a-z][^>]*>)([^\n]+)$/gm, '<p>$1</p>')
+      
+      // Process emojis :emoji:
+      .replace(/:([a-z_-]+):/g, '<span class="emoji">$1</span>');
     
-    // Process column layouts
-    .replace(/::: column\(width=(\d+)\)/g, '<div class="column" style="width: $1px;">')
-    .replace(/::: column\.grow/g, '<div class="column grow">')
-    .replace(/:::/g, '</div>')
-    
-    // Process images with proper path resolution
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
-      // Handle relative paths
-      if (src.startsWith('./') || !src.startsWith('http') && !src.startsWith('/')) {
-        src = `/content/${src.replace('./', '')}`;
-      }
-      return `<img src="${src}" alt="${alt}" class="mathigon-image" />`;
-    })
-    
-    // Process special x-tag elements - Match Mathigon format
-    .replace(/x-geopad\(([^)]*)\)/g, '<div class="interactive-element geopad" data-params=\'$1\'></div>')
-    .replace(/x-coordinate-system\(([^)]*)\)/g, '<div class="interactive-element graph" data-params=\'$1\'></div>')
-    .replace(/x-slider\(([^)]*)\)/g, '<div class="interactive-element slider" data-params=\'$1\'></div>')
-    .replace(/x-equation\(([^)]*)\)/g, '<div class="interactive-element equation" data-params=\'$1\'></div>')
-    .replace(/x-sortable\(([^)]*)\)/g, '<div class="interactive-element sortable" data-params=\'$1\'></div>')
-    .replace(/x-gesture\(([^)]*)\)/g, '<div class="interactive-element gesture" data-params=\'$1\'></div>')
-    .replace(/x-picker\(([^)]*)\)/g, '<div class="interactive-element picker" data-params=\'$1\'></div>')
-    .replace(/x-quizzes\(([^)]*)\)/g, '<div class="interactive-element quiz" data-params=\'$1\'></div>')
-    .replace(/x-code\(([^)]*)\)/g, '<div class="interactive-element code" data-params=\'$1\'></div>')
-    .replace(/x-simulation\(([^)]*)\)/g, '<div class="interactive-element simulation" data-params=\'$1\'></div>')
-    
-    // Process glossary terms
-    .replace(/\[([^\]]+)\]\(gloss:([^)]+)\)/g, '<span class="term" data-gloss="$2">$1</span>')
-    
-    // Process step blocks and tabs
-    .replace(/{step.*?}/g, '<div class="step-block">')
-    .replace(/{:\/step}/g, '</div>')
-    .replace(/{tab.*?}/g, '<div class="tab-content">')
-    .replace(/{:\/tab}/g, '</div>')
-    
-    // Process math expressions
-    .replace(/\${2}([^$]+)\${2}/g, '<span class="math-block">$1</span>')
-    .replace(/\$([^$\n]+)\$/g, '<span class="math-inline">$1</span>')
-    
-    // Process basic markdown
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/__([^_]+)__/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    
-    // Process paragraphs (avoid wrapping existing HTML elements)
-    .replace(/^(?!<[a-z]).+/gm, '<p>$&</p>');
+    return processed;
+  } catch (error) {
+    console.error('Error processing Mathigon content:', error);
+    return `<p>Error processing content: ${error.message}</p>`;
+  }
 };
 
 // Function to generate glossary tooltip content
@@ -301,100 +402,37 @@ const loadUserProgress = async (userId, courseId) => {
 const loadContentFile = async (courseId, userId = null) => {
   try {
     // Check if content directory exists
-    const courseExists = await fileExists(`${courseId}`);
-    
-    if (!courseExists) {
-      console.error(`Course directory not found: ${courseId}`);
-      return null;
-    }
-    
-    // Load course markdown content
-    const contentPath = `${courseId}/content.md`;
-    const contentExists = await fileExists(contentPath);
+    const courseExists = true; // Always assume the course exists in the content directory
+
+    // Load course markdown content - directly from content directory
+    const contentPath = `/content/${courseId}/content.md`;
     
     let contentData = null;
     
-    if (contentExists) {
-      const response = await fetch(getApiUrl(`/api/content/${contentPath}`));
-      if (!response.ok) {
-        console.error(`Error fetching content: ${response.status} ${response.statusText}`);
-        throw new Error(`Failed to fetch ${contentPath}`);
-      }
-      const content = await response.text();
-      contentData = parseMathigonMd(content);
-    } else {
-      // Fallback to index.md if content.md doesn't exist
-      const indexPath = `${courseId}/index.md`;
-      const indexExists = await fileExists(indexPath);
+    try {
+      const response = await fetch(contentPath);
       
-      if (indexExists) {
-        const response = await fetch(getApiUrl(`/api/content/${indexPath}`));
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${indexPath}`);
-        }
+      if (response.ok) {
         const content = await response.text();
+        // Use the new Mathigon markdown parser
         contentData = parseMathigonMd(content);
       } else {
-        // Try direct API endpoint as a final fallback
-        try {
-          const apiResponse = await fetch(getApiUrl(`/api/courses/${courseId}`));
-          if (apiResponse.ok) {
-            const apiData = await apiResponse.json();
-            contentData = {
-              metadata: apiData.metadata || {},
-              html: apiData.html || `<h1>${apiData.title || courseId}</h1><p>${apiData.description || ''}</p>`,
-              sections: apiData.sections || []
-            };
-          } else {
-            console.error(`API fallback failed: ${apiResponse.status}`);
-            throw new Error('All content loading methods failed');
-          }
-        } catch (apiError) {
-          console.error('API fallback error:', apiError);
-          throw new Error('All content loading methods failed');
-        }
+        console.error(`Error fetching content from ${contentPath}: ${response.status}`);
+        throw new Error(`Failed to fetch ${contentPath}`);
       }
-    }
-    
-    // Load user progress if userId is provided
-    if (userId && contentData) {
-      try {
-        const progressData = await loadUserProgress(userId, courseId);
-        if (progressData) {
-          contentData.progress = progressData;
-        }
-      } catch (progressError) {
-        console.warn('Failed to load user progress:', progressError);
-        // Continue without progress data
-      }
-    }
-    
-    // Load functions.ts file for interactive content
-    const functionsPath = `${courseId}/functions.ts`;
-    const functionsExists = await fileExists(functionsPath);
-    
-    if (functionsExists) {
-      try {
-        const response = await fetch(getApiUrl(`/api/content/${functionsPath}`));
-        const functionsCode = await response.text();
-        contentData.functions = functionsCode;
-      } catch (e) {
-        console.warn(`Could not load functions for ${courseId}:`, e);
-      }
-    }
-    
-    // Load styles.scss file for styling
-    const stylesPath = `${courseId}/styles.scss`;
-    const stylesExists = await fileExists(stylesPath);
-    
-    if (stylesExists) {
-      try {
-        const response = await fetch(getApiUrl(`/api/content/${stylesPath}`));
-        const stylesCode = await response.text();
-        contentData.styles = stylesCode;
-      } catch (e) {
-        console.warn(`Could not load styles for ${courseId}:`, e);
-      }
+    } catch (err) {
+      console.error(`Error loading content from ${contentPath}:`, err);
+      
+      // Create minimal content structure if content.md doesn't exist
+      const course = getCourseById(courseId);
+      contentData = {
+        metadata: { 
+          title: course?.title || courseId,
+          id: courseId
+        },
+        html: `<h1>${course?.title || courseId}</h1><p>Content for this course is not available yet.</p>`,
+        sections: []
+      };
     }
     
     return contentData;
@@ -423,180 +461,17 @@ const addFallbackCourses = async () => {
   availableCourses.length = 0;
   
   try {
-    // Scan the content directory to find all available courses
-    const contentDir = '/content';
-    
-    // Dynamic course discovery
-    try {
-      // Try to get a directory listing from the server
-      const response = await fetch(getApiUrl('/api/content/list'));
-      
-      if (response.ok) {
-        const directories = await response.json();
-        console.log('Discovered course directories:', directories);
-        
-        // Create course objects for each directory that is not _shared
-        const discoveredCourses = directories.filter(dir => 
-          dir !== 'shared' && !dir.startsWith('_')
-        ).map(dir => {
-          // Attempt to load course metadata from content.md
-          // This is a simplified version - in a full implementation we would parse the metadata
-          // from the content.md file using the same approach as in the backend
-          
-          // Use common color mapping from textbooks-master for consistency
-          const colorMap = {
-            'probability': '#CD0E66',
-            'circles': '#5A49C9',
-            'vectors': '#1F7AED',
-            'triangles': '#5A49C9',
-            'transformations': '#1F7AED',
-            'statistics': '#CD0E66',
-            'solids': '#5A49C9',
-            'sequences': '#22AB24',
-            'quadratics': '#AD1D84',
-            'polyhedra': '#5A49C9',
-            'matrices': '#1F7AED',
-            'graph-theory': '#0F82F2',
-            'game-theory': '#CA0E66',
-            'fractals': '#4AB72A',
-            'euclidean-geometry': '#CD0E66',
-            'divisibility': '#0F82F2',
-            'complex': '#22AB24',
-            'combinatorics': '#AD1D84',
-            'codes': '#1F7AED',
-            'chaos': '#009EA6',
-            'basic-probability': '#CD0E66',
-            'non-euclidean-geometry': '#5A49C9',
-            'logic': '#1F7AED',
-            'linear-functions': '#22AB24',
-            'functions': '#AD1D84',
-            'exponentials': '#0F82F2',
-            'exploding-dots': '#CA0E66',
-            'data': '#4AB72A',
-            'shapes': '#CD0E66',
-            'polygons': '#5A49C9'
-          };
-          
-          // Convert directory name to display title with appropriate formatting
-          const title = dir
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          
-          return {
-            id: dir,
-            title: title,
-            description: `Learn about ${title.toLowerCase()}`,
-            color: colorMap[dir] || getRandomColor(),
-            level: 'Intermediate',
-            category: 'Mathematics'
-          };
-        });
-        
-        // Add the discovered courses
-        discoveredCourses.forEach(course => {
-          availableCourses.push({
-            ...course,
-            thumbnail: generateThumbnailUrl(course.id)
-          });
-        });
-        
-        console.log(`Added ${discoveredCourses.length} courses from content directory scanning`);
-        return;
-      }
-    } catch (error) {
-      console.warn('Error dynamically discovering courses:', error);
-    }
-    
-    // If API fails, try direct access to content folder
-    try {
-      // Try to fetch a list of directories directly from the content folder
-      const response = await fetch('/content/');
-      
-      if (response.ok) {
-        const html = await response.text();
-        
-        // Extract directory names from the HTML response (this is a simple approach that might need adjustment)
-        const dirRegex = /<a[^>]*href="([^"\/]+)\/"[^>]*>/g;
-        const directories = [];
-        let match;
-        
-        while ((match = dirRegex.exec(html)) !== null) {
-          const dir = match[1];
-          if (dir !== 'shared' && !dir.startsWith('_') && !dir.startsWith('.')) {
-            directories.push(dir);
-          }
-        }
-        
-        console.log('Discovered directories from content folder:', directories);
-        
-        // Create course objects for each directory using the same approach as above
-        const colorMap = {
-          'probability': '#CD0E66',
-          'circles': '#5A49C9',
-          'vectors': '#1F7AED',
-          'triangles': '#5A49C9',
-          'transformations': '#1F7AED',
-          'statistics': '#CD0E66',
-          'solids': '#5A49C9',
-          'sequences': '#22AB24',
-          'quadratics': '#AD1D84',
-          'polyhedra': '#5A49C9',
-          'matrices': '#1F7AED',
-          'graph-theory': '#0F82F2',
-          'game-theory': '#CA0E66',
-          'fractals': '#4AB72A',
-          'euclidean-geometry': '#CD0E66',
-          'divisibility': '#0F82F2',
-          'complex': '#22AB24',
-          'combinatorics': '#AD1D84',
-          'codes': '#1F7AED',
-          'chaos': '#009EA6',
-          'basic-probability': '#CD0E66',
-          'non-euclidean-geometry': '#5A49C9',
-          'logic': '#1F7AED',
-          'linear-functions': '#22AB24',
-          'functions': '#AD1D84',
-          'exponentials': '#0F82F2',
-          'exploding-dots': '#CA0E66',
-          'data': '#4AB72A',
-          'shapes': '#CD0E66',
-          'polygons': '#5A49C9'
-        };
-        
-        directories.forEach(dir => {
-          const title = dir
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          
-          availableCourses.push({
-            id: dir,
-            title: title,
-            description: `Learn about ${title.toLowerCase()}`,
-            color: colorMap[dir] || getRandomColor(),
-            level: 'Intermediate',
-            category: 'Mathematics',
-            thumbnail: generateThumbnailUrl(dir)
-          });
-        });
-        
-        console.log(`Added ${directories.length} courses from direct content directory access`);
-        return;
-      }
-    } catch (directError) {
-      console.warn('Error directly accessing content directory:', directError);
-    }
-    
-    // If all else fails, use manual list based on content directory structure
-    const contentDirectories = [
-      'triangles', 'transformations', 'statistics', 
-      'solids', 'shapes', 'sequences', 'quadratics', 'polyhedra', 'polygons', 'matrices', 
-      'logic', 'linear-functions', 'graph-theory', 'game-theory', 'functions', 'fractals', 
-      'exponentials', 'exploding-dots', 'euclidean-geometry', 'divisibility', 'data', 
-      'complex', 'combinatorics', 'codes', 'chaos', 'basic-probability', 'non-euclidean-geometry'
+    // Get content directories directly from the content folder
+    const contentDirs = [
+      'triangles', 'vectors', 'transformations', 'statistics', 'solids', 
+      'shapes', 'sequences', 'quadratics', 'probability', 'polyhedra', 
+      'polygons', 'matrices', 'logic', 'linear-functions', 'graph-theory', 
+      'game-theory', 'functions', 'fractals', 'exponentials', 'exploding-dots', 
+      'euclidean-geometry', 'divisibility', 'data', 'complex', 'combinatorics', 
+      'codes', 'circles', 'chaos', 'basic-probability', 'non-euclidean-geometry'
     ];
     
+    // Define colors based on Mathigon's color scheme
     const colorMap = {
       'probability': '#CD0E66',
       'circles': '#5A49C9',
@@ -630,24 +505,65 @@ const addFallbackCourses = async () => {
       'polygons': '#5A49C9'
     };
     
-    contentDirectories.forEach(dir => {
-      const title = dir
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      
-      availableCourses.push({
-        id: dir,
-        title: title,
-        description: `Learn about ${title.toLowerCase()}`,
-        color: colorMap[dir] || getRandomColor(),
-        level: 'Intermediate',
-        category: 'Mathematics',
-        thumbnail: generateThumbnailUrl(dir)
-      });
-    });
+    // Assign courses to categories based on Mathigon's structure
+    const categoryMap = {
+      'triangles': 'Geometry',
+      'vectors': 'Linear Algebra',
+      'transformations': 'Geometry',
+      'statistics': 'Data Analysis',
+      'sequences': 'Algebra',
+      'probability': 'Statistics',
+      'quadratics': 'Algebra',
+      'polyhedra': 'Geometry',
+      'polygons': 'Geometry',
+      'matrices': 'Linear Algebra',
+      'logic': 'Foundations',
+      'linear-functions': 'Algebra',
+      'graph-theory': 'Discrete Mathematics',
+      'game-theory': 'Discrete Mathematics',
+      'functions': 'Algebra',
+      'fractals': 'Advanced Topics',
+      'exponentials': 'Algebra',
+      'exploding-dots': 'Number Theory',
+      'euclidean-geometry': 'Geometry',
+      'divisibility': 'Number Theory',
+      'data': 'Data Analysis',
+      'complex': 'Advanced Topics',
+      'combinatorics': 'Discrete Mathematics',
+      'codes': 'Discrete Mathematics',
+      'circles': 'Geometry',
+      'chaos': 'Advanced Topics',
+      'basic-probability': 'Statistics',
+      'non-euclidean-geometry': 'Geometry'
+    };
     
-    console.log(`Added ${contentDirectories.length} courses from predefined content list`);
+    // Read content directory and extract metadata from content.md files
+    for (const dir of contentDirs) {
+      try {
+        // Generate a properly formatted title from the directory name
+        const title = dir
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        // Create a course object with metadata following Mathigon format
+        const course = {
+          id: dir,
+          title: title,
+          description: `Learn about ${title.toLowerCase()}`,
+          color: colorMap[dir] || getRandomColor(),
+          level: 'Intermediate',
+          category: categoryMap[dir] || 'Mathematics',
+          thumbnail: generateThumbnailUrl(dir)
+        };
+        
+        availableCourses.push(course);
+      } catch (err) {
+        console.warn(`Error processing directory ${dir}:`, err);
+      }
+    }
+    
+    console.log(`Added ${availableCourses.length} courses from content directory`);
   } catch (error) {
     console.error('Error loading courses from content directory:', error);
   }
@@ -665,93 +581,19 @@ const scanAvailableCourses = async () => {
   console.log('Scanning for available courses...');
   
   try {
-    // First try to load from cloud-courses.json - this is our primary source
-    try {
-      console.log('Attempting to load courses from cloud-courses.json');
-      const response = await fetch('/cloud-courses.json');
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`Loaded ${data.courses?.length || 0} courses from cloud data`);
-        
-        if (Array.isArray(data.courses) && data.courses.length > 0) {
-          // Clear existing courses
-          availableCourses.length = 0;
-          
-          // Process the courses
-          const apiCourses = data.courses.map(course => ({
-            ...course,
-            color: course.color || getRandomColor(),
-            thumbnail: generateThumbnailUrl(course.id)
-          }));
-          
-          availableCourses.push(...apiCourses);
-          console.log(`Added ${apiCourses.length} courses from cloud data`);
-          return;
-        } else {
-          console.warn('No courses found in cloud-courses.json or invalid format');
-        }
-      } else {
-        console.warn(`Failed to load cloud-courses.json: ${response.status} ${response.statusText}`);
-      }
-    } catch (localError) {
-      console.warn('Error loading from local cloud-courses.json:', localError);
-    }
-    
-    // Then try the backend API
-    const apiBase = import.meta.env.VITE_API_BASE || '';
-    const endpoint = `${apiBase}/api/content/courses`;
-    
-    try {
-      console.log(`Fetching courses from API: ${endpoint}`);
-      const response = await fetch(endpoint, { 
-        headers: { 'Accept': 'application/json' },
-        timeout: 5000 // Add timeout to prevent hanging
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`Loaded ${data.length || 0} courses from API`);
-        
-        if (Array.isArray(data) && data.length > 0) {
-          // Clear existing courses
-          availableCourses.length = 0;
-          
-          // Add courses from API
-          const apiCourses = data.map(course => ({
-            ...course,
-            color: course.color || getRandomColor(),
-            thumbnail: generateThumbnailUrl(course.id)
-          }));
-          
-          availableCourses.push(...apiCourses);
-          console.log(`Added ${apiCourses.length} courses from API`);
-          return;
-        } else {
-          console.warn('No courses found in API response or invalid format');
-        }
-      } else {
-        console.warn(`Failed to fetch courses from API: ${response.status} ${response.statusText}`);
-      }
-    } catch (apiError) {
-      console.warn('Error fetching courses from API:', apiError);
-    }
-    
-    // If all else fails, use the fallback courses
-    console.log('Using fallback course discovery method');
+    // Only load courses directly from content directory
     await addFallbackCourses();
   } catch (error) {
     console.error('Error scanning courses:', error);
-    // Ensure we have courses even if API scan fails
+    // Add minimal fallback courses if needed
     if (availableCourses.length === 0) {
-      console.log('No courses found, using hardcoded fallbacks');
-      // Add some hardcoded courses as absolute last resort
+      console.log('No courses found, using basic fallbacks');
       availableCourses.push(
         {
           id: 'triangles',
           title: 'Triangles and Trigonometry',
           description: 'Explore the properties of triangles',
-          color: '#1f77b4',
+          color: '#5A49C9',
           category: 'Geometry',
           thumbnail: generateThumbnailUrl('triangles')
         },
@@ -759,7 +601,7 @@ const scanAvailableCourses = async () => {
           id: 'circles',
           title: 'Circles and Pi',
           description: 'Learn about circles and the significance of Pi',
-          color: '#7f7f7f',
+          color: '#5A49C9',
           category: 'Geometry',
           thumbnail: generateThumbnailUrl('circles')
         }
@@ -774,12 +616,10 @@ function getRandomColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// Initialize with fallback courses first, then try to fetch from API
+// Initialize courses - only using content directory
 (async function initializeCourses() {
   try {
     await addFallbackCourses();
-    // After we have fallback courses loaded, try to get courses from API
-    await scanAvailableCourses();
   } catch (error) {
     console.error('Failed to initialize courses:', error);
   }
@@ -817,183 +657,25 @@ export const getCourseContent = async (courseId) => {
   if (!course) return null;
   
   try {
-    console.log(`Creating fallback content for course: ${courseId}`);
+    // Try to load content directly from content directory
+    const contentData = await loadContentFile(courseId);
     
-    // Create fallback content using the course info we already have
+    return {
+      course,
+      content: contentData
+    };
+  } catch (error) {
+    console.error(`Error getting course content for ${courseId}:`, error);
+    
+    // Provide fallback content if loading fails
     return {
       course,
       content: {
-        metadata: { id: courseId },
-        html: `<div class="section" data-section="intro">
-          <h1>${course.title}</h1>
-          <h2 id="intro">Introduction</h2>
-          <div class="section-content">
-            <p>${course.description}</p>
-            <p>This is a preview of the course content. Interactive elements will be available in future versions.</p>
-          </div>
-        </div>`,
-        sections: [{
-          id: 'intro',
-          title: 'Introduction',
-          content: `<p>${course.description}</p>`,
-          steps: ['intro-1']
-        }]
+        metadata: { title: course.title || courseId },
+        html: `<h1>${course.title || courseId}</h1><p>Content temporarily unavailable.</p>`,
+        sections: []
       }
     };
-      
-      if (response.ok) {
-        const jsonData = await response.json();
-        console.log(`Successfully loaded JSON data for ${courseId}`, jsonData.title);
-        
-        if (jsonData && jsonData.sections) {
-          // Create HTML structure from the steps in JSON
-          let processedSections = [];
-          let fullHtml = '';
-          
-          // Process each section from the JSON data
-          for (const section of jsonData.sections) {
-            let sectionHtml = `<div class="section" data-section="${section.id}">
-              <h2 id="${section.id}">${section.title}</h2>
-              <div class="section-content">`;
-              
-            // If the section has steps, process them
-            if (section.steps && Array.isArray(section.steps)) {
-              // For each step ID, get the step content from the jsonData.steps object
-              for (const stepId of section.steps) {
-                if (jsonData.steps && jsonData.steps[stepId]) {
-                  const step = jsonData.steps[stepId];
-                  sectionHtml += `<div class="step" id="${stepId}">${step.html || ''}</div>\n`;
-                }
-              }
-            }
-            
-            sectionHtml += '</div></div>\n';
-            fullHtml += sectionHtml;
-            
-            processedSections.push({
-              id: section.id,
-              title: section.title,
-              content: sectionHtml,
-              steps: section.steps || []
-            });
-          }
-          
-          // Create the properly structured content object
-          return {
-            course: {
-              ...course,
-              ...jsonData,  // Include all the data from the JSON file
-              sections: jsonData.sections
-            },
-            content: {
-              metadata: jsonData || {},
-              sections: processedSections,
-              html: fullHtml,
-              steps: jsonData.steps || {}
-            }
-          };
-        }
-      }
-      
-      // Try loading from markdown as a fallback
-      const contentPath = `/content/${courseId}/content.md`;
-      console.log(`Trying markdown fallback: ${contentPath}`);
-      try {
-        const mdResponse = await fetch(contentPath);
-        
-        if (mdResponse.ok) {
-        const markdownContent = await mdResponse.text();
-        if (markdownContent && markdownContent.length > 0) {
-          console.log(`Successfully loaded content from markdown for ${courseId}`);
-          
-          // Process the markdown content
-          const parsedContent = parseMathigonMd(markdownContent);
-          
-          // Create default sections if none exist
-          const sections = parsedContent.sections || [
-            { 
-              id: 'introduction', 
-              title: 'Introduction', 
-              content: parsedContent.html || markdownContent 
-            }
-          ];
-          
-          // Create the properly structured content object
-          return {
-            course,
-            content: {
-              metadata: parsedContent.metadata || {},
-              sections,
-              html: parsedContent.html || ''
-            }
-          };
-        }
-      }
-      
-      // If local files don't work, create a minimal course structure with fallback content
-      console.log(`Creating fallback content for ${courseId}`);
-      return {
-        course,
-        content: {
-          metadata: { title: course.title },
-          sections: [{
-            id: 'introduction',
-            title: 'Introduction',
-            content: `<div class="section" data-section="introduction">
-              <h2 id="introduction">Introduction</h2>
-              <div class="section-content">
-                <p>${course.description || 'No course content available yet.'}</p>
-                <p>Please check back later for full course content.</p>
-              </div>
-            </div>`
-          }],
-          html: `<h1>${course.title}</h1>
-            <div class="section" data-section="introduction">
-              <h2 id="introduction">Introduction</h2>
-              <div class="section-content">
-                <p>${course.description || 'No course content available yet.'}</p>
-                <p>Please check back later for full course content.</p>
-              </div>
-            </div>`
-        }
-      };
-    } catch (err) {
-      console.error(`Error fetching course content from ${apiPath}:`, err);
-      
-      // Provide a properly structured fallback content that matches the expected format
-      console.log(`Using simple fallback content for ${courseId}`);
-      
-      // Create a properly structured content object with HTML field that matches what renderCourseContent expects
-      const fallbackContent = {
-        metadata: {
-          id: courseId,
-          title: course.title || courseId
-        },
-        sections: [
-          {
-            id: 'introduction',
-            title: 'Introduction',
-            content: '<p>Error loading course content. Please try again later.</p>'
-          }
-        ],
-        html: `<h1>${course.title || courseId}</h1>
-               <p>We're having trouble loading this course content right now. Please try again later.</p>
-               <div class="section" data-section="introduction">
-                 <h2 id="introduction">Introduction</h2>
-                 <div class="section-content">
-                   <p>This course is currently unavailable. Please check back soon.</p>
-                 </div>
-               </div>`
-      };
-      
-      return {
-        course,
-        content: fallbackContent
-      };
-    }
-  } catch (error) {
-    console.error(`Error getting course content for ${courseId}:`, error);
-    return null;
   }
 };
 

@@ -4,29 +4,54 @@ import App from './App.jsx'
 import './index.css'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-// Add this script cleaner function at the top
+// Clean up any browser extension errors and filter error messages
 (() => {
-  // Clean up any content scripts causing errors
-  const invalidScripts = document.querySelectorAll('script[src^="chrome-extension://invalid"]');
+  // Remove any invalid scripts
+  const invalidScripts = document.querySelectorAll('script[src^="chrome-extension://"]');
   invalidScripts.forEach(script => script.remove());
   
-  // Block certain console errors to reduce noise
+  // Filter console messages to remove noise
   const originalConsoleError = console.error;
   console.error = function(...args) {
-    const errorMsg = args[0]?.toString() || '';
+    const errorMsg = args.length > 0 ? String(args[0] || '') : '';
     
-    // Filter out known errors we can't fix
+    // Ignore specific errors that we can't fix
     if (errorMsg.includes('content-script-dev:') || 
+        errorMsg.includes('screenshot-gv-chrome') ||
         errorMsg.includes('Failed to load module script') || 
+        errorMsg.includes('text/jsx') ||
         errorMsg.includes('Refused to connect') ||
-        errorMsg.includes('CORS policy') ||
-        errorMsg.includes('Fetch API cannot load')) {
-      // Silently ignore content script errors
+        errorMsg.includes('Content Security Policy') ||
+        errorMsg.includes('MIME type') ||
+        errorMsg.includes('chrome-extension://invalid') ||
+        errorMsg.includes('google-analytics') ||
+        errorMsg.includes('overbridgenet.com') ||
+        errorMsg.includes('CORS') ||
+        errorMsg.includes('ERR_BLOCKED_BY_CLIENT') ||
+        errorMsg.includes('ERR_FAILED')) {
+      // Skip logging these errors
       return;
     }
     
     // Pass through all other errors
     return originalConsoleError.apply(console, args);
+  };
+  
+  // Also filter warning messages
+  const originalConsoleWarn = console.warn;
+  console.warn = function(...args) {
+    const warnMsg = args.length > 0 ? String(args[0] || '') : '';
+    
+    // Ignore specific warnings that we can't fix
+    if (warnMsg.includes('content-script') || 
+        warnMsg.includes('extension') ||
+        warnMsg.includes('404')) {
+      // Skip logging these warnings
+      return;
+    }
+    
+    // Pass through all other warnings
+    return originalConsoleWarn.apply(console, args);
   };
 })();
 
