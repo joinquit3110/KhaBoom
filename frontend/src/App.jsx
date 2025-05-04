@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import CourseRoutes from "./routes/CourseRoutes";
 import Navbar from "./components/Navbar";
@@ -56,39 +56,37 @@ export default function App() {
   );
 
   return (
-    <Router>
-      <ErrorBoundary>
-        <div className="app">
-          <Navbar user={user} onLogout={handleLogout} />
-          
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/login" element={<Login setUser={setUser} />} />
-              <Route path="/register" element={<Register setUser={setUser} />} />
-              
-              {/* Redirect /dashboard to /courses */}
-              <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
-              
-              {/* Course routes with dedicated error boundary */}
-              <Route path="/courses/*" element={
-                <ErrorBoundary courseId="true">
-                  <CourseRoutes userId={user?.id} user={user} />
-                </ErrorBoundary>
-              } />
-              
-              <Route path="/" element={
-                <HomePage message={message} user={user} />
-              } />
-              
-              {/* 404 Route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-          
-          <Footer />
-        </div>
-      </ErrorBoundary>
-    </Router>
+    <ErrorBoundary>
+      <div className="app">
+        <Navbar user={user} onLogout={handleLogout} />
+        
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/login" element={<Login setUser={setUser} />} />
+            <Route path="/register" element={<Register setUser={setUser} />} />
+            
+            {/* Redirect /dashboard to /courses */}
+            <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
+            
+            {/* Course routes with dedicated error boundary */}
+            <Route path="/courses/*" element={
+              <ErrorBoundary courseId="true">
+                <CourseRoutes userId={user?.id} user={user} />
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/" element={
+              <HomePage message={message} user={user} />
+            } />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        
+        <Footer />
+      </div>
+    </ErrorBoundary>
   );
 }
 
