@@ -58,6 +58,8 @@
       font-src 'self' https://fonts.gstatic.com;
       object-src 'none';
       frame-src https://player.vimeo.com https://www.youtube.com https://*.mathigon.org;
+      worker-src 'self' blob:;
+      manifest-src 'self';
     """
 
 # Content types for JavaScript files
@@ -103,3 +105,8 @@
   from = "/course/:id/*"
   to = "/courses/:id/:splat"
   status = 301
+
+[[headers]]
+  for = "/data:text/jsx;base64*"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"

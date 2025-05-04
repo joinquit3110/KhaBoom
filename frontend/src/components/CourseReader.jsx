@@ -141,17 +141,45 @@ const CourseReader = () => {
         }
       });
       
-      // Process action buttons
-      const actionButtons = contentRef.current.querySelectorAll('.action-button');
+      // Process action buttons (including btn:next)
+      const actionButtons = contentRef.current.querySelectorAll('.action-button, .btn-action');
       actionButtons.forEach(button => {
         if (!button.hasAttribute('data-processed')) {
           button.addEventListener('click', () => {
             const action = button.getAttribute('data-action');
             console.log(`Action triggered: ${action}`);
-            // In a real implementation, you would evaluate this action
-            // or trigger a corresponding function
+            
+            // Handle navigation actions
+            if (action === 'next' && content.sections && activeSectionId) {
+              const currentIndex = content.sections.findIndex(s => s.id === activeSectionId);
+              if (currentIndex < content.sections.length - 1) {
+                setActiveSectionId(content.sections[currentIndex + 1].id);
+              }
+            } else if (action === 'prev' && content.sections && activeSectionId) {
+              const currentIndex = content.sections.findIndex(s => s.id === activeSectionId);
+              if (currentIndex > 0) {
+                setActiveSectionId(content.sections[currentIndex - 1].id);
+              }
+            }
+            
+            // For other actions, you'd implement custom behavior
           });
           button.setAttribute('data-processed', 'true');
+        }
+      });
+      
+      // Process x-interactive elements
+      const interactiveElements = contentRef.current.querySelectorAll('[class^="x-"]');
+      interactiveElements.forEach(element => {
+        if (!element.hasAttribute('data-processed')) {
+          // Mark as processed to avoid double-processing
+          element.setAttribute('data-processed', 'true');
+          
+          // Add appropriate class for styling
+          element.classList.add('mathigon-interactive');
+          
+          // You might need to add specific handlers for different types of interactive elements
+          // This would depend on the specific x- components in the original implementation
         }
       });
       
@@ -219,7 +247,7 @@ const CourseReader = () => {
         }
       });
     }
-  }, [loading, content]);
+  }, [loading, content, activeSectionId]);
   
   // Render loading state
   if (loading) {

@@ -152,7 +152,7 @@ export const processMathigonContent = (content) => {
     let processed = content
       // Process H1 and H2 headings
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^## (.+)$/gm, '<h2>$2</h2>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       
       // Process bold and italic
@@ -160,7 +160,7 @@ export const processMathigonContent = (content) => {
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
       .replace(/_([^_]+)_/g, '<em>$1</em>')
       
-      // Process video embeds
+      // Process video embeds with proper frame-src allowed in CSP
       .replace(/\[vimeo:([^\]]+)\]/g, '<div class="video-container"><iframe src="https://player.vimeo.com/video/$1" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>')
       .replace(/\[youtube:([^\]]+)\]/g, '<div class="video-container"><iframe src="https://www.youtube.com/embed/$1" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>')
       
@@ -168,6 +168,7 @@ export const processMathigonContent = (content) => {
       .replace(/\[([^\]]+)\]\(gloss:([^)]+)\)/g, '<span class="glossary-term" data-term="$2">$1</span>')
       .replace(/\[([^\]]+)\]\(bio:([^)]+)\)/g, '<span class="biography" data-person="$2">$1</span>')
       .replace(/\[([^\]]+)\]\(pill:([^)]+)\)/g, '<span class="pill pill-$2">$1</span>')
+      .replace(/\[([^\]]+)\]\(btn:([^)]+)\)/g, '<button class="btn-action" data-action="$2">$1</button>')
       .replace(/\[([^\]]+)\]\(action:([^)]+)\)/g, '<button class="action-button" data-action="$2">$1</button>')
       .replace(/\[([^\]]+)\]\((->[^)]+)\)/g, '<a class="target-pointer" href="$2">$1</a>')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
@@ -233,6 +234,12 @@ export const processMathigonContent = (content) => {
       
       // Process variable expressions ${expr}
       .replace(/\${([^}]+)}/g, '<span class="variable-expression" data-expr="$1">$1</span>')
+      
+      // Process special interactive elements from Mathigon (x-step, x-geogebra, etc.)
+      .replace(/:::(\s+x-[a-z-]+)([\s\S]*?):::/g, (match, elementType, content) => {
+        const elementName = elementType.trim();
+        return `<div class="${elementName}">${content}</div>`;
+      })
       
       // Process block elements (:::)
       .replace(/:::\s+([^\n]+)([\s\S]*?):::/g, (match, blockHeader, blockContent) => {
