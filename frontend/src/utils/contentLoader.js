@@ -21,143 +21,6 @@ import { parseMathigonMd } from './mathigonParser.js';
 const contentCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-// Enhanced function to parse Mathigon markdown format
-const parseMathigonMd = (content) => {
-  // Safely handle different types of content
-  if (!content) return { metadata: {}, html: '', sections: [] };
-  
-  // Ensure content is a string
-  if (typeof content !== 'string') {
-    console.warn('Content is not a string:', typeof content);
-    return {
-      metadata: {},
-      html: `<p>Error: Invalid content type (${typeof content})</p>`,
-      sections: []
-    };
-  }
-  
-  try {
-    // Extract metadata from content using the Mathigon format
-    const metadata = {};
-    const lines = content.split('\n');
-    let contentStartIndex = 0;
-    
-    // Extract global metadata at the beginning of the file
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      
-      if (line.startsWith('> ')) {
-        // Parse metadata line (> key: value)
-        const metaContent = line.substring(2).trim();
-        const colonIndex = metaContent.indexOf(':');
-        
-        if (colonIndex > 0) {
-          const key = metaContent.substring(0, colonIndex).trim();
-          const value = metaContent.substring(colonIndex + 1).trim();
-          metadata[key] = value;
-        }
-        
-        contentStartIndex = i + 1;
-      } else if (line.startsWith('#') || line !== '') {
-        // Stop when we hit a non-metadata line
-        break;
-      }
-    }
-    
-    // Extract sections based on Mathigon format (separated by ---)
-    const sections = [];
-    let currentSection = { content: '', metadata: {} };
-    let inMetadata = false;
-    let sectionContent = [];
-    
-    for (let i = contentStartIndex; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Section separator
-      if (line.trim() === '---') {
-        // Save the current section if it has content
-        if (sectionContent.length > 0) {
-          currentSection.content = sectionContent.join('\n');
-          sections.push(currentSection);
-          
-          // Reset for the next section
-          currentSection = { content: '', metadata: {} };
-          sectionContent = [];
-          inMetadata = true;
-        } else {
-          inMetadata = true;
-        }
-        continue;
-      }
-      
-      // Parse section metadata
-      if (inMetadata && line.trim().startsWith('> ')) {
-        const metaContent = line.substring(2).trim();
-        const colonIndex = metaContent.indexOf(':');
-        
-        if (colonIndex > 0) {
-          const key = metaContent.substring(0, colonIndex).trim();
-          const value = metaContent.substring(colonIndex + 1).trim();
-          currentSection.metadata[key] = value;
-        }
-      } else {
-        // Once we hit non-metadata content, all future lines are content
-        if (inMetadata) {
-          inMetadata = false;
-        }
-        sectionContent.push(line);
-      }
-    }
-    
-    // Add the last section if it has content
-    if (sectionContent.length > 0) {
-      currentSection.content = sectionContent.join('\n');
-      sections.push(currentSection);
-    }
-    
-    // Process sections to generate HTML
-    let fullHtml = '';
-    const processedSections = sections.map((section, index) => {
-      const sectionId = section.metadata.id || `section-${index}`;
-      const sectionTitle = section.metadata.title || `Section ${index + 1}`;
-      
-      // Process content according to Mathigon's Markdown syntax
-      const processedContent = processMathigonContent(section.content);
-      
-      // Create HTML for this section
-      const sectionHtml = `
-        <div class="mathigon-section" id="${sectionId}" data-section-id="${sectionId}">
-          <div class="mathigon-content">
-            ${processedContent}
-          </div>
-        </div>
-      `;
-      
-      fullHtml += sectionHtml;
-      
-      return {
-        id: sectionId,
-        title: sectionTitle,
-        content: processedContent,
-        metadata: section.metadata
-      };
-    });
-    
-    return {
-      metadata,
-      html: fullHtml,
-      sections: processedSections
-    };
-  } catch (error) {
-    console.error('Error parsing Mathigon markdown:', error);
-    return {
-      metadata: {},
-      html: `<p>Error parsing content: ${error.message}</p>`,
-      sections: []
-    };
-  }
-};
-
 // Process Mathigon markdown content according to their custom format
 const processMathigonContent = (content) => {
   if (!content) return '';
@@ -425,7 +288,7 @@ const loadContentFile = async (courseId, userId = null) => {
       
       // Create minimal content structure if content.md doesn't exist
       const course = getCourseById(courseId);
-      contentData = {
+            contentData = {
         metadata: { 
           title: course?.title || courseId,
           id: courseId
@@ -472,39 +335,39 @@ const addFallbackCourses = async () => {
     ];
     
     // Define colors based on Mathigon's color scheme
-    const colorMap = {
-      'probability': '#CD0E66',
-      'circles': '#5A49C9',
-      'vectors': '#1F7AED',
-      'triangles': '#5A49C9',
-      'transformations': '#1F7AED',
-      'statistics': '#CD0E66',
-      'solids': '#5A49C9',
-      'sequences': '#22AB24',
-      'quadratics': '#AD1D84',
-      'polyhedra': '#5A49C9',
-      'matrices': '#1F7AED',
-      'graph-theory': '#0F82F2',
-      'game-theory': '#CA0E66',
-      'fractals': '#4AB72A',
-      'euclidean-geometry': '#CD0E66',
-      'divisibility': '#0F82F2',
-      'complex': '#22AB24',
-      'combinatorics': '#AD1D84',
-      'codes': '#1F7AED',
-      'chaos': '#009EA6',
-      'basic-probability': '#CD0E66',
-      'non-euclidean-geometry': '#5A49C9',
-      'logic': '#1F7AED',
-      'linear-functions': '#22AB24',
-      'functions': '#AD1D84',
-      'exponentials': '#0F82F2',
-      'exploding-dots': '#CA0E66',
-      'data': '#4AB72A',
-      'shapes': '#CD0E66',
-      'polygons': '#5A49C9'
-    };
-    
+          const colorMap = {
+            'probability': '#CD0E66',
+            'circles': '#5A49C9',
+            'vectors': '#1F7AED',
+            'triangles': '#5A49C9',
+            'transformations': '#1F7AED',
+            'statistics': '#CD0E66',
+            'solids': '#5A49C9',
+            'sequences': '#22AB24',
+            'quadratics': '#AD1D84',
+            'polyhedra': '#5A49C9',
+            'matrices': '#1F7AED',
+            'graph-theory': '#0F82F2',
+            'game-theory': '#CA0E66',
+            'fractals': '#4AB72A',
+            'euclidean-geometry': '#CD0E66',
+            'divisibility': '#0F82F2',
+            'complex': '#22AB24',
+            'combinatorics': '#AD1D84',
+            'codes': '#1F7AED',
+            'chaos': '#009EA6',
+            'basic-probability': '#CD0E66',
+            'non-euclidean-geometry': '#5A49C9',
+            'logic': '#1F7AED',
+            'linear-functions': '#22AB24',
+            'functions': '#AD1D84',
+            'exponentials': '#0F82F2',
+            'exploding-dots': '#CA0E66',
+            'data': '#4AB72A',
+            'shapes': '#CD0E66',
+            'polygons': '#5A49C9'
+          };
+          
     // Assign courses to categories based on Mathigon's structure
     const categoryMap = {
       'triangles': 'Geometry',
@@ -541,20 +404,20 @@ const addFallbackCourses = async () => {
     for (const dir of contentDirs) {
       try {
         // Generate a properly formatted title from the directory name
-        const title = dir
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-        
+          const title = dir
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          
         // Create a course object with metadata following Mathigon format
         const course = {
-          id: dir,
-          title: title,
-          description: `Learn about ${title.toLowerCase()}`,
-          color: colorMap[dir] || getRandomColor(),
-          level: 'Intermediate',
+            id: dir,
+            title: title,
+            description: `Learn about ${title.toLowerCase()}`,
+            color: colorMap[dir] || getRandomColor(),
+            level: 'Intermediate',
           category: categoryMap[dir] || 'Mathematics',
-          thumbnail: generateThumbnailUrl(dir)
+            thumbnail: generateThumbnailUrl(dir)
         };
         
         availableCourses.push(course);
@@ -668,9 +531,9 @@ export const getCourseContent = async (courseId) => {
     console.error(`Error getting course content for ${courseId}:`, error);
     
     // Provide fallback content if loading fails
-    return {
-      course,
-      content: {
+          return {
+            course,
+            content: {
         metadata: { title: course.title || courseId },
         html: `<h1>${course.title || courseId}</h1><p>Content temporarily unavailable.</p>`,
         sections: []
