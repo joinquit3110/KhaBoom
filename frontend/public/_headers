@@ -4,7 +4,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer-when-downgrade
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://*.netlify.app https://*.mathigon.org https://*.render.com; style-src 'self' 'unsafe-inline' https://*.netlify.app https://*.mathigon.org https://fonts.googleapis.com; img-src 'self' data: https://*.netlify.app https://*.mathigon.org https://*.render.com https://api.dicebear.com; font-src 'self' data: https://*.netlify.app https://*.mathigon.org https://fonts.gstatic.com; connect-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com https://kha-boom-backend.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com;
+  Content-Security-Policy: default-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://*.netlify.app https://*.mathigon.org https://*.render.com https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com; style-src 'self' 'unsafe-inline' https://*.netlify.app https://*.mathigon.org https://fonts.googleapis.com; img-src 'self' data: https://*.netlify.app https://*.mathigon.org https://*.render.com https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' data: https://*.netlify.app https://*.mathigon.org https://fonts.gstatic.com; connect-src 'self' https://*.netlify.app https://*.mathigon.org https://*.render.com https://kha-boom-backend.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.dicebear.com https://*.google-analytics.com https://www.googletagmanager.com https://overbridgenet.com;
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 /*.css
@@ -31,21 +31,6 @@
 
 /fonts/*
   Cache-Control: public, max-age=31536000
-
-/*.js
-  Content-Type: application/javascript; charset=utf-8
-
-/*.jsx
-  Content-Type: application/javascript; charset=utf-8
-
-/*.mjs
-  Content-Type: application/javascript; charset=utf-8
-
-/*.ts
-  Content-Type: application/javascript; charset=utf-8
-
-/*.tsx
-  Content-Type: application/javascript; charset=utf-8
 
 /*.json
   Content-Type: application/json
