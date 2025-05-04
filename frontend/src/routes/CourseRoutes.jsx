@@ -4,6 +4,7 @@ import CourseRenderer from '../components/CourseRenderer';
 import CourseReader from '../components/CourseReader';
 import Dashboard from '../components/Dashboard';
 import NotFound from '../components/NotFound';
+import MathigonCourse from '../mathigon/MathigonCourse';
 
 /**
  * CourseRoutes Component
@@ -17,13 +18,13 @@ const CourseRoutes = ({ userId, user }) => {
       {/* Course listing page - using Dashboard component */}
       <Route path="/" element={<Dashboard user={user} />} />
       
-      {/* Course home page - Using CourseReader for Mathigon format */}
-      <Route path="/:courseId" element={<CourseReader />} />
+      {/* Course pages - Using MathigonCourse for exact Mathigon format */}
+      <Route path="/:courseId" element={<MathigonCourse />} />
+      <Route path="/:courseId/:sectionId" element={<MathigonCourse />} />
       
-      {/* Course section page - Using CourseReader for Mathigon format */}
-      <Route path="/:courseId/:sectionId" element={<CourseReader />} />
-      
-      {/* Legacy renderer - keeping as fallback */}
+      {/* Legacy routes - keeping as fallbacks */}
+      <Route path="/reader/:courseId" element={<CourseReader />} />
+      <Route path="/reader/:courseId/:sectionId" element={<CourseReader />} />
       <Route path="/legacy/:courseId" element={<CourseRenderer userId={userId} />} />
       <Route path="/legacy/:courseId/:sectionId" element={<CourseRenderer userId={userId} />} />
       

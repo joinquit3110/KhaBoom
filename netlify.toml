@@ -110,3 +110,14 @@
   for = "/data:text/jsx;base64*"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+
+# Mathigon content redirects
+[[redirects]]
+  from = "/content/*"
+  to = "/mathigon/content/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/mathigon/*"
+  to = "/mathigon/:splat"
+  status = 200
