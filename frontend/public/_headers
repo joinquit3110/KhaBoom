@@ -33,19 +33,19 @@
   Cache-Control: public, max-age=31536000
 
 /*.js
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 /*.jsx
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 /*.mjs
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 /*.ts
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 /*.tsx
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=utf-8
 
 /*.json
   Content-Type: application/json

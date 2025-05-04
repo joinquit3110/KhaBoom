@@ -7,6 +7,17 @@
     <meta name="description" content="Kha-Boom! - An interactive learning platform with engaging courses" />
     <title>Kha-Boom!</title>
     
+    <!-- Fix for JSX MIME type issues -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "/node_modules/react/index.js",
+        "react-dom": "/node_modules/react-dom/index.js",
+        "react-router-dom": "/node_modules/react-router-dom/dist/index.js"
+      }
+    }
+    </script>
+    
     <!-- Preload critical resources -->
     <link rel="preload" href="/logo.png" as="image" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,6 +67,6 @@
         }
       }
     </script>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="application/javascript" src="/src/main.jsx"></script>
   </body>
 </html>

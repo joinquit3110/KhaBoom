@@ -86,7 +86,7 @@ export default defineConfig({
       writeBundle() {
         // Create a .htaccess file to ensure JSX files are served with correct MIME type
         const htaccessContent = `
-# Proper MIME type for all files
+# Proper MIME types for all files
 <IfModule mod_mime.c>
   # JavaScript
   AddType application/javascript js
@@ -116,33 +116,6 @@ export default defineConfig({
         fs.writeFileSync(path.join('dist', '.htaccess'), htaccessContent);
         
         console.log('✅ Added .htaccess file for proper MIME types');
-        
-        // Create a custom server routing file for Netlify
-        const redirectsContent = `
-# Proper MIME types for JavaScript modules
-/*.js
-  Content-Type: application/javascript; charset=utf-8
-
-/*.jsx
-  Content-Type: application/javascript; charset=utf-8
-
-/*.mjs
-  Content-Type: application/javascript; charset=utf-8
-
-/*.ts
-  Content-Type: application/javascript; charset=utf-8
-
-/*.tsx
-  Content-Type: application/javascript; charset=utf-8
-
-# Handle SPA routing
-/*
-  Rewrite /index.html
-  Status: 200
-`;
-
-        fs.writeFileSync(path.join('dist', '_redirects'), redirectsContent);
-        console.log('✅ Added _redirects file for Netlify MIME type handling');
       }
     }
   ],

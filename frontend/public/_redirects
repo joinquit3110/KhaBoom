@@ -1,13 +1,6 @@
 # Redirect domain aliases to primary domain
 https://www.khaboom.netlify.app/* https://khaboom.netlify.app/:splat 301!
 
-# Content-Type headers
-/*.js /index.html 200
-/*.jsx /index.html 200
-/*.mjs /index.html 200
-/*.ts /index.html 200
-/*.tsx /index.html 200
-
 # Handle SPA routing - All routes go to index.html
 /* /index.html 200
 
