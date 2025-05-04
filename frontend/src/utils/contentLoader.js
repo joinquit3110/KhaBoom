@@ -590,7 +590,7 @@ const addFallbackCourses = async () => {
     
     // If all else fails, use manual list based on content directory structure
     const contentDirectories = [
-      'probability', 'circles', 'vectors', 'triangles', 'transformations', 'statistics', 
+      'triangles', 'transformations', 'statistics', 
       'solids', 'shapes', 'sequences', 'quadratics', 'polyhedra', 'polygons', 'matrices', 
       'logic', 'linear-functions', 'graph-theory', 'game-theory', 'functions', 'fractals', 
       'exponentials', 'exploding-dots', 'euclidean-geometry', 'divisibility', 'data', 
