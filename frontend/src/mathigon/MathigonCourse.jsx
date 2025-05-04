@@ -37,63 +37,124 @@ const MathigonCourse = () => {
       existingCSP.remove();
     }
     
-    // Add a new CSP meta tag that allows Google Analytics
+    // Add a new CSP meta tag that allows Google Analytics and backend access
     const meta = document.createElement('meta');
     meta.httpEquiv = 'Content-Security-Policy';
-    meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com";
+    meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://kha-boom-backend.onrender.com";
     document.head.appendChild(meta);
   };
   
   // Function to initialize the Mathigon textbook
   const initializeTextbook = () => {
     // Create a global textbook context for Mathigon
-    if (window.Mathigon && window.Mathigon.TextbookLoader) {
-      try {
-        console.log('Creating Mathigon TextbookLoader for course:', courseId);
+    if (window.Mathigon) {
+      // Check directly for TextbookLoader
+      let TextbookLoaderClass = window.Mathigon.TextbookLoader;
+      
+      // If not found, try to locate it in other properties
+      if (!TextbookLoaderClass) {
+        console.warn('TextbookLoader not directly available, searching for it');
         
-        const basePath = getBasePath();
-        const textbook = new window.Mathigon.TextbookLoader({
-          courseId,
-          sectionId: sectionId || undefined,
-          container: '#mathigon-textbook',
-          sourcePrefix: `${basePath}mathigon/content/`,
-          assetsPrefix: `${basePath}mathigon/assets/`,
-          language: 'en',
-          progress: true,
-          onSectionComplete: (sectionId) => {
-            console.log(`Completed section ${sectionId}`);
-          },
-          onInteraction: (step, action) => {
-            console.log(`Interaction: ${step} - ${action}`);
+        // Look through all Mathigon properties
+        for (const prop in window.Mathigon) {
+          if (typeof window.Mathigon[prop] === 'function') {
+            try {
+              // Check if this function is likely the TextbookLoader
+              const fnString = window.Mathigon[prop].toString();
+              if (fnString.includes('TextbookLoader') || 
+                  fnString.includes('initialize') && fnString.includes('load')) {
+                console.log(`Potential TextbookLoader found in Mathigon.${prop}`);
+                TextbookLoaderClass = window.Mathigon[prop];
+                // Add it to the TextbookLoader property for future use
+                window.Mathigon.TextbookLoader = TextbookLoaderClass;
+                break;
+              }
+            } catch (e) {
+              // Ignore errors when stringifying functions
+            }
           }
-        });
-        
-        // Initialize the textbook
-        console.log('Initializing textbook...');
-        textbook.initialize().then(() => {
-          console.log('Textbook initialized successfully');
+        }
+      }
+      
+      // If we found a potential TextbookLoader, try to use it
+      if (TextbookLoaderClass) {
+        try {
+          console.log('Creating Mathigon TextbookLoader for course:', courseId);
+          
+          const basePath = getBasePath();
+          const textbook = new TextbookLoaderClass({
+            courseId,
+            sectionId: sectionId || undefined,
+            container: '#mathigon-textbook',
+            sourcePrefix: `${basePath}mathigon/content/`,
+            assetsPrefix: `${basePath}mathigon/assets/`,
+            language: 'en',
+            progress: true,
+            onSectionComplete: (sectionId) => {
+              console.log(`Completed section ${sectionId}`);
+            },
+            onInteraction: (step, action) => {
+              console.log(`Interaction: ${step} - ${action}`);
+            }
+          });
+          
+          // Initialize the textbook
+          console.log('Initializing textbook...');
+          textbook.initialize().then(() => {
+            console.log('Textbook initialized successfully');
+            setLoading(false);
+          }).catch(err => {
+            console.error('Error initializing textbook:', err);
+            setError('Failed to initialize textbook: ' + (err.message || 'Unknown error'));
+            setLoading(false);
+          });
+          
+          return textbook;
+        } catch (err) {
+          console.error('Error creating textbook:', err);
+          setError('Error creating textbook: ' + (err.message || 'Unknown error'));
           setLoading(false);
-        }).catch(err => {
-          console.error('Error initializing textbook:', err);
-          setError('Failed to initialize textbook: ' + (err.message || 'Unknown error'));
+          return null;
+        }
+      } else {
+        // If we still don't have TextbookLoader, try to use the Mathigon.load method
+        if (typeof window.Mathigon.load === 'function') {
+          console.log('TextbookLoader not found, trying Mathigon.load method');
+          
+          try {
+            window.Mathigon.load()
+              .then(() => {
+                console.log('Mathigon loaded using load() method');
+                setLoading(false);
+              })
+              .catch(err => {
+                console.error('Error in Mathigon.load method:', err);
+                setError('Error loading Mathigon: ' + (err.message || 'Unknown error'));
+                setLoading(false);
+              });
+            
+            return true; // Return something truthy to indicate we're handling it
+          } catch (err) {
+            console.error('Error using Mathigon.load:', err);
+            setError('Error using Mathigon.load: ' + (err.message || 'Unknown error'));
+            setLoading(false);
+            return null;
+          }
+        } else {
+          console.error('Mathigon TextbookLoader not available and no load method found');
+          if (window.Mathigon) {
+            console.log('Available Mathigon objects:', Object.keys(window.Mathigon));
+          } else {
+            console.log('Mathigon global object not found');
+          }
+          setError('Mathigon TextbookLoader not available. Try refreshing the page.');
           setLoading(false);
-        });
-        
-        return textbook;
-      } catch (err) {
-        console.error('Error creating textbook:', err);
-        setError('Error creating textbook: ' + (err.message || 'Unknown error'));
-        setLoading(false);
-        return null;
+          return null;
+        }
       }
     } else {
-      console.error('Mathigon TextbookLoader not available');
-      if (window.Mathigon) {
-        console.log('Available Mathigon objects:', Object.keys(window.Mathigon));
-      } else {
-        console.log('Mathigon global object not found');
-      }
-      setError('Mathigon TextbookLoader not available. Try refreshing the page.');
+      console.error('Mathigon global object not available');
+      setError('Mathigon global object not available. Try refreshing the page.');
       setLoading(false);
       return null;
     }
@@ -173,12 +234,39 @@ const MathigonCourse = () => {
               return;
             }
             
+            // First load diagnostic script to help with debugging
+            const diagnosticScript = document.createElement('script');
+            diagnosticScript.src = `/mathigon-test.js`;
+            
+            // Then load the main Mathigon script
             const script = document.createElement('script');
             script.src = `${basePath}mathigon/assets/course.js`;
             script.async = false; // Important! Load in order
             script.onload = () => {
               console.log('Mathigon course.js loaded successfully');
-              resolve();
+              
+              // Small delay to ensure script initialization
+              setTimeout(() => {
+                // Inject a helper script to force initialization if needed
+                const helperScript = document.createElement('script');
+                helperScript.textContent = `
+                  console.log("Helper initialization script running");
+                  if (window.Mathigon && !window.Mathigon.TextbookLoader) {
+                    console.warn("TextbookLoader not found, attempting to find or create it");
+                    // Check if it's available in another property
+                    for (const prop in window.Mathigon) {
+                      if (typeof window.Mathigon[prop] === 'function' && 
+                          window.Mathigon[prop].toString().includes('TextbookLoader')) {
+                        console.log("Found potential TextbookLoader in", prop);
+                        window.Mathigon.TextbookLoader = window.Mathigon[prop];
+                        break;
+                      }
+                    }
+                  }
+                `;
+                document.body.appendChild(helperScript);
+                resolve();
+              }, 300);
             };
             script.onerror = (e) => {
               console.error('Failed to load Mathigon course.js', e);
@@ -192,6 +280,11 @@ const MathigonCourse = () => {
                 reject(new Error('Failed to load required scripts'));
               };
             };
+            
+            // Add diagnostic script first
+            document.body.appendChild(diagnosticScript);
+            
+            // Then add main script
             document.body.appendChild(script);
           });
         };
