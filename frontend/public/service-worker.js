@@ -69,13 +69,17 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', event => {
+  // Skip non-GET requests and chrome-extension:// URLs
+  if (event.request.method !== 'GET' || 
+      event.request.url.startsWith('chrome-extension:') ||
+      event.request.url.startsWith('data:')) {
+    return;
+  }
+  
   // Special handling for Mathigon assets and course content
   if (event.request.url.includes('/mathigon/')) {
     return handleMathigonAssets(event);
   }
-  
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
   
   // Cache-first strategy for cacheable file types
   const url = new URL(event.request.url);
@@ -97,6 +101,12 @@ self.addEventListener('fetch', event => {
             .then(response => {
               // Don't cache non-successful responses
               if (!response || response.status !== 200) {
+                return response;
+              }
+              
+              // Only cache same-origin responses
+              const isSameOrigin = url.origin === self.location.origin;
+              if (!isSameOrigin) {
                 return response;
               }
               
@@ -123,11 +133,23 @@ function handleMathigonAssets(event) {
   const isMathigonContent = event.request.url.includes('/mathigon/content/');
   const isMathigonAsset = event.request.url.includes('/mathigon/assets/');
   
+  // Skip if not a GET request or is a chrome-extension URL
+  if (event.request.method !== 'GET' || 
+      event.request.url.startsWith('chrome-extension:') ||
+      event.request.url.startsWith('data:')) {
+    return;
+  }
+  
   // Use network-first strategy for content (which might be updated)
   if (isMathigonContent) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
+          // Only cache successful responses
+          if (!response || response.status !== 200) {
+            return response;
+          }
+          
           // Clone the response to cache it
           const responseToCache = response.clone();
           caches.open(CACHE_NAME)

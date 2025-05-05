@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathigon Debug Tool</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      line-height: 1.5;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #5050FF;
+      border-bottom: 2px solid #5050FF;
+      padding-bottom: 10px;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #444;
+    }
+    .test-section {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #5050FF;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #4040dd;
+    }
+    .results {
+      margin-top: 15px;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+    .log {
+      font-family: monospace;
+      white-space: pre-wrap;
+      padding: 5px;
+      margin: 5px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 3px;
+    }
+    .success {
+      background: #e6ffed;
+      border-left: 3px solid #2cbe4e;
+    }
+    .error {
+      background: #ffeef0;
+      border-left: 3px solid #d73a49;
+    }
+    .warning {
+      background: #fff5b1;
+      border-left: 3px solid #f9c513;
+    }
+    .info {
+      background: #f1f8ff;
+      border-left: 3px solid #2188ff;
+    }
+    #content-display {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 15px;
+      min-height: 100px;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f5f5f5;
+    }
+    .response-viewer {
+      max-height: 300px;
+      overflow: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mathigon Debug Tool</h1>
+  <p>This tool helps diagnose issues with Mathigon content loading in your application.</p>
+
+  <div class="test-section">
+    <h2>1. Environment Check</h2>
+    <button id="check-env">Check Environment</button>
+    <div id="env-results" class="results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. Content Availability Test</h2>
+    <button id="test-content">Test Content</button>
+    <div id="content-results" class="results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. TextbookLoader Test</h2>
+    <button id="test-textbookloader">Test TextbookLoader</button>
+    <div id="textbookloader-results" class="results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Service Worker Test</h2>
+    <button id="test-service-worker">Test Service Worker</button>
+    <div id="service-worker-results" class="results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>5. Content Rendering Test</h2>
+    <button id="test-rendering">Test Rendering</button>
+    <div id="rendering-results" class="results"></div>
+    <div id="content-display"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. Content Repair Tools</h2>
+    <p>If JSON files are not loading correctly, you can create and download placeholder files:</p>
+    <select id="course-select">
+      <option value="circles">circles</option>
+      <option value="triangles">triangles</option>
+      <option value="probability">probability</option>
+      <option value="algebra">algebra</option>
+      <option value="functions">functions</option>
+    </select>
+    <button id="create-placeholder">Create Placeholder JSON</button>
+    <div id="placeholder-results" class="results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>7. Technical Information</h2>
+    <div id="tech-info"></div>
+  </div>
+
+  <!-- Load Debug Scripts -->
+  <script src="/mathigon-json-validator.js"></script>
+  <script src="/mathigon-test.js"></script>
+  
+  <script>
+    // Utility for logging
+    function log(container, message, type = 'info') {
+      const logEl = document.createElement('div');
+      logEl.className = `log ${type}`;
+      logEl.textContent = message;
+      container.appendChild(logEl);
+      return logEl;
+    }
+    
+    // Format current time for logs
+    function timestamp() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      return `[${hours}:${minutes}:${seconds}]`;
+    }
+    
+    // Environment check
+    document.getElementById('check-env').addEventListener('click', async () => {
+      const results = document.getElementById('env-results');
+      results.innerHTML = '';
+      
+      log(results, `${timestamp()} Running environment check...`, 'info');
+      
+      // Check browser
+      const browser = navigator.userAgent;
+      log(results, `${timestamp()} Browser: ${browser}`, 'info');
+      
+      // Check if JavaScript is enabled (obviously it is)
+      log(results, `${timestamp()} JavaScript: Enabled`, 'success');
+      
+      // Check if we're running on HTTPS
+      const isHttps = location.protocol === 'https:';
+      log(results, `${timestamp()} HTTPS: ${isHttps ? 'Yes' : 'No'}`, isHttps ? 'success' : 'warning');
+      
+      // Check Service Worker API
+      const swAvailable = 'serviceWorker' in navigator;
+      log(results, `${timestamp()} Service Worker API: ${swAvailable ? 'Available' : 'Not available'}`, swAvailable ? 'success' : 'error');
+      
+      // Check Cache API
+      const cacheAvailable = 'caches' in window;
+      log(results, `${timestamp()} Cache API: ${cacheAvailable ? 'Available' : 'Not available'}`, cacheAvailable ? 'success' : 'error');
+      
+      // Check window.mathigonConfig
+      const mathigonConfigAvailable = typeof window.mathigonConfig !== 'undefined';
+      log(results, `${timestamp()} mathigonConfig: ${mathigonConfigAvailable ? 'Available' : 'Not available'}`, mathigonConfigAvailable ? 'success' : 'warning');
+      
+      if (mathigonConfigAvailable) {
+        log(results, `${timestamp()} mathigonConfig settings:`, 'info');
+        log(results, JSON.stringify(window.mathigonConfig, null, 2), 'info');
+      } else {
+        window.mathigonConfig = {
+          assetsPrefix: '/mathigon/assets/',
+          contentPrefix: '/mathigon/content/',
+          language: 'en'
+        };
+        log(results, `${timestamp()} Created default mathigonConfig for testing`, 'warning');
+      }
+    });
+    
+    // Content availability test
+    document.getElementById('test-content').addEventListener('click', async () => {
+      const results = document.getElementById('content-results');
+      results.innerHTML = '';
+      
+      log(results, `${timestamp()} Testing content availability...`, 'info');
+      
+      const courses = ['circles', 'triangles', 'probability'];
+      
+      // Test each course's content.json
+      for (const course of courses) {
+        try {
+          const response = await fetch(`/mathigon/content/${course}/content.json`);
+          const contentType = response.headers.get('content-type');
+          
+          if (!response.ok) {
+            log(results, `${timestamp()} ✖ ${course}/content.json - Error: ${response.status} ${response.statusText}`, 'error');
+            continue;
+          }
+          
+          if (!contentType || !contentType.includes('json')) {
+            log(results, `${timestamp()} ✖ ${course}/content.json - Error: Incorrect Content-Type: ${contentType}`, 'error');
+            
+            // Try to read and display the response to debug
+            const text = await response.text();
+            if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+              log(results, `${timestamp()} ✖ ${course}/content.json - Error: Unexpected token '<', "<!DOCTYPE "... is not valid JSON`, 'error');
+            }
+            continue;
+          }
+          
+          try {
+            const json = await response.json();
+            log(results, `${timestamp()} ✓ ${course}/content.json - Successfully loaded (${json.sections ? json.sections.length : 0} sections)`, 'success');
+          } catch (jsonError) {
+            log(results, `${timestamp()} ✖ ${course}/content.json - Error: ${jsonError.message}`, 'error');
+          }
+        } catch (error) {
+          log(results, `${timestamp()} ✖ ${course}/content.json - Error: ${error.message}`, 'error');
+        }
+      }
+    });
+    
+    // TextbookLoader test
+    document.getElementById('test-textbookloader').addEventListener('click', async () => {
+      const results = document.getElementById('textbookloader-results');
+      results.innerHTML = '';
+      
+      log(results, `${timestamp()} Loading Mathigon course.js...`, 'info');
+      
+      // First, try to load the Mathigon script
+      try {
+        // Create and append script
+        const script = document.createElement('script');
+        script.src = '/mathigon/assets/course.js';
+        script.async = true;
+        
+        const scriptPromise = new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+        });
+        
+        document.head.appendChild(script);
+        
+        await scriptPromise;
+        log(results, `${timestamp()} ✓ course.js loaded successfully`, 'success');
+        
+        // Check for Mathigon global object
+        if (typeof window.Mathigon === 'undefined') {
+          log(results, `${timestamp()} ✖ Mathigon global object not available`, 'error');
+        } else {
+          log(results, `${timestamp()} ✓ Mathigon global object available`, 'success');
+          
+          // Check for TextbookLoader
+          if (typeof window.Mathigon.TextbookLoader === 'undefined') {
+            log(results, `${timestamp()} ✖ TextbookLoader not available`, 'error');
+          } else {
+            log(results, `${timestamp()} ✓ TextbookLoader available`, 'success');
+            
+            // Try to initialize a TextbookLoader (without actually loading content)
+            try {
+              const textbook = new window.Mathigon.TextbookLoader({
+                courseId: 'circles',
+                container: document.createElement('div'),
+                sourcePrefix: '/mathigon/content/',
+                contentFormat: 'json'
+              });
+              
+              log(results, `${timestamp()} ✓ TextbookLoader successfully instantiated`, 'success');
+            } catch (textbookError) {
+              log(results, `${timestamp()} ✖ TextbookLoader error: ${textbookError.message}`, 'error');
+            }
+          }
+        }
+      } catch (error) {
+        log(results, `${timestamp()} ✖ Failed to load course.js: ${error.message}`, 'error');
+      }
+    });
+    
+    // Service Worker test
+    document.getElementById('test-service-worker').addEventListener('click', async () => {
+      const results = document.getElementById('service-worker-results');
+      results.innerHTML = '';
+      
+      log(results, `${timestamp()} Testing Service Worker...`, 'info');
+      
+      // Check if Service Worker API is available
+      if (!('serviceWorker' in navigator)) {
+        log(results, `${timestamp()} ✖ Service Worker API is not available in this browser`, 'error');
+        return;
+      }
+      
+      log(results, `${timestamp()} Service Worker API is available`, 'success');
+      
+      // Check for registered service workers
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        log(results, `${timestamp()} Found ${registrations.length} registered service workers`, 'info');
+        
+        for (const registration of registrations) {
+          log(results, `${timestamp()} Service Worker: ${registration.scope}`, 'info');
+        }
+      } catch (error) {
+        log(results, `${timestamp()} ✖ Error checking service workers: ${error.message}`, 'error');
+      }
+      
+      // Check Cache API
+      if (!('caches' in window)) {
+        log(results, `${timestamp()} ✖ Cache API is not available`, 'error');
+        return;
+      }
+      
+      log(results, `${timestamp()} Cache API is available`, 'success');
+      
+      // Check for caches
+      try {
+        const cacheNames = await caches.keys();
+        log(results, `${timestamp()} Found ${cacheNames.length} caches: ${cacheNames.join(', ')}`, 'info');
+        
+        // Check for Kha-Boom cache specifically
+        const khaBoomCache = cacheNames.find(name => name.includes('kha-boom'));
+        if (khaBoomCache) {
+          log(results, `${timestamp()} Found KhaBoom cache: ${khaBoomCache}`, 'success');
+          
+          // Check cache contents
+          const cache = await caches.open(khaBoomCache);
+          const keys = await cache.keys();
+          log(results, `${timestamp()} Cache contains ${keys.length} items`, 'info');
+          
+          // Sample some items from cache
+          const sampleSize = Math.min(5, keys.length);
+          if (sampleSize > 0) {
+            log(results, `${timestamp()} Sample of cached items:`, 'info');
+            for (let i = 0; i < sampleSize; i++) {
+              log(results, `${timestamp()} - ${keys[i].url}`, 'info');
+            }
+          }
+        } else {
+          log(results, `${timestamp()} ✖ KhaBoom cache not found`, 'error');
+        }
+      } catch (error) {
+        log(results, `${timestamp()} ✖ Error checking caches: ${error.message}`, 'error');
+      }
+    });
+    
+    // Content rendering test
+    document.getElementById('test-rendering').addEventListener('click', async () => {
+      const results = document.getElementById('rendering-results');
+      const display = document.getElementById('content-display');
+      results.innerHTML = '';
+      display.innerHTML = '';
+      
+      log(results, `${timestamp()} Testing content rendering...`, 'info');
+      
+      // Check if Mathigon TextbookLoader is available
+      if (!window.Mathigon || !window.Mathigon.TextbookLoader) {
+        log(results, `${timestamp()} Mathigon TextbookLoader not available`, 'error');
+        display.textContent = 'Cannot render content: Mathigon TextbookLoader not available';
+        return;
+      }
+      
+      // Try to render a simple piece of content
+      try {
+        const textbook = new window.Mathigon.TextbookLoader({
+          courseId: 'circles',
+          container: display,
+          sourcePrefix: '/mathigon/content/',
+          contentFormat: 'json'
+        });
+        
+        await textbook.initialize();
+        log(results, `${timestamp()} ✓ TextbookLoader initialized`, 'success');
+        log(results, `${timestamp()} ✓ Content rendered in display area`, 'success');
+      } catch (error) {
+        log(results, `${timestamp()} ✖ Rendering error: ${error.message}`, 'error');
+        display.textContent = `Error rendering content: ${error.message}`;
+      }
+    });
+    
+    // Content repair tools
+    document.getElementById('create-placeholder').addEventListener('click', () => {
+      const courseId = document.getElementById('course-select').value;
+      const results = document.getElementById('placeholder-results');
+      results.innerHTML = '';
+      
+      log(results, `${timestamp()} Creating placeholder JSON for ${courseId}...`, 'info');
+      
+      try {
+        const link = window.mathigonJsonValidator.createPlaceholder(courseId);
+        results.appendChild(link);
+        log(results, `${timestamp()} ✓ Created placeholder file. Click the link to download, then upload to your server.`, 'success');
+      } catch (error) {
+        log(results, `${timestamp()} ✖ Error creating placeholder: ${error.message}`, 'error');
+      }
+    });
+    
+    // Technical information display
+    function populateTechInfo() {
+      const container = document.getElementById('tech-info');
+      
+      const table = document.createElement('table');
+      
+      // Add rows
+      const rows = [
+        ['Browser', navigator.userAgent],
+        ['Protocol', location.protocol],
+        ['Hostname', location.hostname],
+        ['Service Workers', 'serviceWorker' in navigator ? 'Supported' : 'Not supported'],
+        ['Cache API', 'caches' in window ? 'Supported' : 'Not supported']
+      ];
+      
+      // Header row
+      const headerRow = document.createElement('tr');
+      const th1 = document.createElement('th');
+      th1.textContent = 'Property';
+      const th2 = document.createElement('th');
+      th2.textContent = 'Value';
+      headerRow.appendChild(th1);
+      headerRow.appendChild(th2);
+      table.appendChild(headerRow);
+      
+      // Data rows
+      rows.forEach(([property, value]) => {
+        const row = document.createElement('tr');
+        const cell1 = document.createElement('td');
+        cell1.textContent = property;
+        const cell2 = document.createElement('td');
+        cell2.textContent = value;
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        table.appendChild(row);
+      });
+      
+      container.appendChild(table);
+      
+      // Path information
+      const paths = document.createElement('div');
+      paths.innerHTML = `
+        <h3>Important Paths</h3>
+        <ul>
+          <li>Mathigon Assets: <code>/mathigon/assets/course.js</code></li>
+          <li>Mathigon Content: <code>/mathigon/content/[course]/content.json</code></li>
+          <li>Service Worker: <code>/service-worker.js</code></li>
+        </ul>
+      `;
+      container.appendChild(paths);
+    }
+    
+    // Initialize
+    populateTechInfo();
+  </script>
+</body>
+</html> 

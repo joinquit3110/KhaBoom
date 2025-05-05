@@ -3,7 +3,7 @@
   to = "/index.html"
   status = 200
 
-# Important: Exclude Mathigon content files from SPA redirect
+# Important: Exclude Mathigon content files from SPA redirect - more specific redirects first
 [[redirects]]
   from = "/mathigon/content/*/*.json"
   to = "/mathigon/content/:splat.json"
@@ -13,6 +13,13 @@
 [[redirects]]
   from = "/mathigon/assets/*"
   to = "/mathigon/assets/:splat"
+  status = 200
+  force = true
+
+# Fix for boost.js
+[[redirects]]
+  from = "/mathigon/assets/boost.js"
+  to = "/mathigon/assets/boost.js"
   status = 200
   force = true
 
@@ -55,20 +62,21 @@
     Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "public, max-age=31536000"
 
+# Ensure boost.js is properly served as JavaScript
 [[headers]]
-  for = "/*.jsx"
+  for = "/mathigon/assets/boost.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000"
+    Access-Control-Allow-Origin = "*"
 
+# More specific content type rule for JSON files with higher priority
 [[headers]]
-  for = "/*.jsx?*"
+  for = "/mathigon/content/*/*.json"
   [headers.values]
-    Content-Type = "application/javascript; charset=utf-8"
-
-[[headers]]
-  for = "/data:text/jsx;base64*"
-  [headers.values]
-    Content-Type = "application/javascript; charset=utf-8"
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+    Access-Control-Allow-Origin = "*"
 
 # Add additional rules for Mathigon assets
 [[headers]]
@@ -85,22 +93,6 @@
     Cache-Control = "public, max-age=31536000"
     Access-Control-Allow-Origin = "*"
 
-# More specific content type rule for JSON files - most important fix
-[[headers]]
-  for = "/mathigon/content/*/*.json"
-  [headers.values]
-    Content-Type = "application/json; charset=utf-8"
-    Cache-Control = "public, max-age=86400"
-    Access-Control-Allow-Origin = "*"
-
-# Content type for mathigon markdown files
-[[headers]]
-  for = "/mathigon/content/*/*.md"
-  [headers.values]
-    Content-Type = "text/markdown; charset=utf-8"
-    Cache-Control = "public, max-age=86400"
-    Access-Control-Allow-Origin = "*"
-
 # More general content rule
 [[headers]]
   for = "/*.json"
@@ -108,26 +100,6 @@
     Content-Type = "application/json; charset=utf-8"
     Cache-Control = "public, max-age=86400"
     Access-Control-Allow-Origin = "*"
-
-# Add special handling for fonts
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    Content-Type = "font/woff2"
-    Cache-Control = "public, max-age=31536000"
-
-[[headers]]
-  for = "/*.woff"
-  [headers.values]
-    Content-Type = "font/woff"
-    Cache-Control = "public, max-age=31536000"
-
-# Add HTML content type
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Content-Type = "text/html; charset=utf-8"
-    Cache-Control = "public, no-cache"
 
 # Force service worker to be served as JavaScript
 [[headers]]
@@ -140,6 +112,14 @@
 # For diagnostic script
 [[headers]]
   for = "/mathigon-test.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin = "*"
+
+# For JSON validator script
+[[headers]]
+  for = "/mathigon-json-validator.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "no-cache, no-store, must-revalidate"
