@@ -6,14 +6,17 @@
  * that contain the properly formatted content for Mathigon's interactive components.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
-const matter = require('gray-matter');
-const glob = promisify(require('glob'));
-const mkdirp = require('mkdirp');
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import matter from 'gray-matter';
+import { glob } from 'glob';
+import { mkdirp } from 'mkdirp';
+import { fileURLToPath } from 'url';
 
-// Configuration
+// Configuration - proper __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const CONTENT_SRC_DIR = path.join(__dirname, '../src/courses');
 const CONTENT_DEST_DIR = path.join(__dirname, '../public/mathigon/content');
 const ASSETS_DEST_DIR = path.join(__dirname, '../public/mathigon/assets');
