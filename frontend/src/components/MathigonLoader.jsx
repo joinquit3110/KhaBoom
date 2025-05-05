@@ -22,6 +22,57 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
   const initialized = useRef(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [swRegistration, setSwRegistration] = useState(null);
+
+  // Register/handle service worker
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) {
+      console.warn('Service Worker API not available in this browser');
+      return;
+    }
+
+    // Register service worker
+    const registerSW = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        setSwRegistration(registration);
+        console.log('Service Worker registered with scope:', registration.scope);
+        
+        // Wait for the service worker to be ready
+        if (registration.installing) {
+          registration.installing.addEventListener('statechange', e => {
+            if (e.target.state === 'activated') {
+              console.log('Service worker activated and ready');
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Unable to register Service Worker.', err);
+      }
+    };
+
+    registerSW();
+
+    // Clean up on unmount
+    return () => {
+      if (swRegistration) {
+        // We don't unregister to maintain offline capability, but we can remove event listeners
+      }
+    };
+  }, []);
+
+  // Helper function to clear cache if needed
+  const clearMathigonCache = (recache = true) => {
+    if (swRegistration) {
+      swRegistration.active.postMessage({
+        type: 'CLEAR_MATHIGON_CACHE',
+        reCache: recache
+      });
+      return true;
+    }
+    return false;
+  };
 
   // Load Mathigon scripts and initialize the textbook
   useEffect(() => {
@@ -33,40 +84,36 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
         
         // Define script sources for Mathigon assets
         const scriptSources = [
-          '/mathigon/assets/course.js',
-          // Additional scripts for advanced interactions
-          '/mathigon/assets/boost.js'
+          '/mathigon/assets/course.js'
+          // boost.js is optional and will be loaded only if needed
         ];
         
         // Define stylesheet sources for Mathigon assets
         const stylesheetSources = [
-          '/mathigon/assets/course.css',
-          // Add additional stylesheets for components
-          '/mathigon/assets/components.css'
+          '/mathigon/assets/course.css'
+          // Additional stylesheets are optional
         ];
         
         // Load all required stylesheets
         stylesheetSources.forEach(src => {
           const link = document.createElement('link');
           link.rel = 'stylesheet';
-          link.href = src;
+          link.href = src + '?v=' + (new Date().getTime());  // Cache busting
           document.head.appendChild(link);
         });
         
-        // Load all required scripts
-        for (const src of scriptSources) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = true;
-            script.onload = resolve;
-            script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-            document.head.appendChild(script);
-          });
+        // First check if scripts are already available
+        if (window.Mathigon && window.Mathigon.TextbookLoader) {
+          console.log('Mathigon already loaded, skipping script loading');
+        } else {
+          // Load all required scripts
+          for (const src of scriptSources) {
+            await loadScriptWithRetry(src, 2);
+          }
+          
+          // Wait for scripts to be fully available
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
-        
-        // Wait for scripts to be fully available
-        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Initialize the Mathigon textbook
         if (window.Mathigon && window.Mathigon.TextbookLoader) {
@@ -123,23 +170,56 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
             onGameComplete: (gameId, score) => {
               console.log(`Game completed: ${gameId} with score ${score}`);
               onNotification && onNotification(`Game completed with score: ${score}`);
+            },
+            onError: (error) => {
+              console.error('TextbookLoader error:', error);
+              // Try to recover by clearing cache if it's a content error
+              if (error.message && error.message.includes('content') && !window.cacheCleared) {
+                window.cacheCleared = true;
+                if (clearMathigonCache()) {
+                  console.log('Cleared mathigon cache due to content error');
+                }
+              }
             }
           });
           
           // Initialize the textbook
-          await textbook.initialize();
-          initialized.current = true;
-          
-          // Set up event listeners for interactive components
-          setupInteractiveListeners();
-          
-          // Register global handlers for chat interactions
-          setupChatHandlers();
-          
-          // Add a notification to welcome the user
-          setTimeout(() => {
-            onNotification && onNotification('Welcome to this interactive course! Explore by clicking on the various elements.');
-          }, 2000);
+          try {
+            await textbook.initialize();
+            initialized.current = true;
+            
+            // Set up event listeners for interactive components
+            setupInteractiveListeners();
+            
+            // Register global handlers for chat interactions
+            setupChatHandlers();
+            
+            // Add a notification to welcome the user
+            setTimeout(() => {
+              onNotification && onNotification('Welcome to this interactive course! Explore by clicking on the various elements.');
+            }, 2000);
+          } catch (initError) {
+            console.error("Error initializing textbook:", initError);
+            // Try to load boost.js which might be needed
+            try {
+              await loadScriptWithRetry('/mathigon/assets/boost.js', 2);
+              // Try to initialize again
+              await textbook.initialize();
+              initialized.current = true;
+              
+              setupInteractiveListeners();
+              setupChatHandlers();
+            } catch (retryError) {
+              // If still failing, try clearing the cache and reloading
+              if (clearMathigonCache() && !window.reloadingAfterCacheClear) {
+                window.reloadingAfterCacheClear = true;
+                console.log('Cleared cache and reloading page');
+                setTimeout(() => window.location.reload(), 1000);
+                return;
+              }
+              throw new Error(`Failed to initialize textbook: ${retryError.message}`);
+            }
+          }
         } else {
           throw new Error('Mathigon scripts did not load correctly');
         }
@@ -149,6 +229,45 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
         console.error('Error loading Mathigon assets:', err);
         setError(err.message || 'Failed to load Mathigon assets');
         setLoading(false);
+        
+        // Increment retry count and try again if not too many attempts
+        if (retryCount < 2) {
+          setRetryCount(prev => prev + 1);
+          console.log(`Retrying (${retryCount + 1}/3)...`);
+          setTimeout(() => {
+            setError(null);
+            loadMathigonAssets();
+          }, 2000);
+        }
+      }
+    };
+    
+    // Helper function to load a script with retry
+    const loadScriptWithRetry = async (src, maxRetries = 1) => {
+      let retries = 0;
+      
+      while (retries <= maxRetries) {
+        try {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src + '?v=' + (new Date().getTime()); // Cache busting
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+            document.head.appendChild(script);
+          });
+          
+          // If we reach here, the script loaded successfully
+          console.log(`Successfully loaded ${src}`);
+          return;
+        } catch (err) {
+          retries++;
+          if (retries > maxRetries) {
+            throw err; // Give up after max retries
+          }
+          console.warn(`Failed to load ${src}, retrying (${retries}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retrying
+        }
       }
     };
     
@@ -237,7 +356,7 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
       document.removeEventListener('game-end', () => {});
       document.removeEventListener('puzzle-complete', () => {});
     };
-  }, [courseId, language, onSectionComplete, onInteractionStart, onNotification]);
+  }, [courseId, language, onSectionComplete, onInteractionStart, onNotification, retryCount]);
   
   // Handle custom event listening for canvas drawing
   useEffect(() => {
@@ -251,6 +370,22 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
       window.removeEventListener('mathigon-draw', handleDrawEvent);
     };
   }, []);
+
+  // Retry function for the user to manually retry
+  const handleRetry = () => {
+    // Clear cache and try again
+    clearMathigonCache();
+    setError(null);
+    setRetryCount(prev => prev + 1);
+  };
+
+  // Handle course switching to clear any cached data
+  useEffect(() => {
+    return () => {
+      // Cleanup when course changes
+      initialized.current = false;
+    };
+  }, [courseId]);
   
   if (loading) {
     return (
@@ -266,9 +401,13 @@ const MathigonLoader = ({ courseId, language = 'en', onSectionComplete, onIntera
       <div className="mathigon-error">
         <h3>Error loading interactive content</h3>
         <p>{error}</p>
+        <p className="mathigon-error-details">
+          This may be due to network issues or missing resources.
+          Try refreshing the page or clicking the button below.
+        </p>
         <button 
           className="btn btn-primary"
-          onClick={() => window.location.reload()}
+          onClick={handleRetry}
         >
           Try Again
         </button>

@@ -3,7 +3,8 @@
  * Optimized for Mathigon content caching and offline support
  */
 
-const CACHE_NAME = 'kha-boom-cache-v1';
+const CACHE_NAME = 'kha-boom-cache-v2';
+const MATHIGON_CACHE = 'mathigon-content-cache-v1';
 
 // Assets to cache immediately on service worker installation
 const PRECACHE_ASSETS = [
@@ -11,7 +12,9 @@ const PRECACHE_ASSETS = [
   '/index.html',
   '/manifest.json',
   '/mathigon/assets/course.js',
+  '/mathigon/assets/boost.js',
   '/mathigon/assets/course.css',
+  '/mathigon/assets/icons.svg',
   '/mathigon-test.js'
 ];
 
@@ -54,7 +57,8 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.filter(cacheName => {
-          return cacheName !== CACHE_NAME;
+          // Keep current caches and content cache
+          return cacheName !== CACHE_NAME && cacheName !== MATHIGON_CACHE;
         }).map(cacheName => {
           console.log('Service worker removing old cache:', cacheName);
           return caches.delete(cacheName);
@@ -69,7 +73,7 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests and chrome-extension:// URLs
+  // Skip non-GET requests and problematic URLs
   if (event.request.method !== 'GET' || 
       event.request.url.startsWith('chrome-extension:') ||
       event.request.url.startsWith('data:')) {
@@ -78,7 +82,7 @@ self.addEventListener('fetch', event => {
   
   // Special handling for Mathigon assets and course content
   if (event.request.url.includes('/mathigon/')) {
-    return handleMathigonAssets(event);
+    return handleMathigonResources(event);
   }
   
   // Cache-first strategy for cacheable file types
@@ -128,84 +132,118 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// Special handling for Mathigon assets
-function handleMathigonAssets(event) {
-  const isMathigonContent = event.request.url.includes('/mathigon/content/');
-  const isMathigonAsset = event.request.url.includes('/mathigon/assets/');
+// Special handling for Mathigon resources
+function handleMathigonResources(event) {
+  const url = new URL(event.request.url);
+  const pathname = url.pathname;
   
-  // Skip if not a GET request or is a chrome-extension URL
+  // Skip if not a GET request or is a problematic URL
   if (event.request.method !== 'GET' || 
       event.request.url.startsWith('chrome-extension:') ||
       event.request.url.startsWith('data:')) {
     return;
   }
   
-  // Use network-first strategy for content (which might be updated)
-  if (isMathigonContent) {
+  // Check whether this is core assets or course content
+  const isContent = pathname.includes('/mathigon/content/');
+  const isAsset = pathname.includes('/mathigon/assets/');
+  
+  // Core assets use a cache-first strategy
+  if (isAsset) {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Only cache successful responses
-          if (!response || response.status !== 200) {
+      caches.open(MATHIGON_CACHE).then(cache => 
+        cache.match(event.request).then(response => {
+          if (response) {
+            // Return from cache for assets
             return response;
           }
           
-          // Clone the response to cache it
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
+          // Cache miss, fetch from network and add to cache
+          return fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(error => {
+            console.error('Failed to fetch Mathigon asset:', error);
+            // Could return a fallback asset here
+          });
+        })
+      )
+    );
+    return;
+  }
+  
+  // For course content, use a network-first strategy
+  if (isContent) {
+    // Special handling for JSON files - network first with fallback to cache
+    const isJSON = pathname.endsWith('.json');
+    
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Cache a copy of successful responses
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(MATHIGON_CACHE).then(cache => {
+              cache.put(event.request, clone);
             });
-          
+          }
           return response;
         })
         .catch(error => {
-          // If network fails, try cache
-          return caches.match(event.request)
-            .then(cachedResponse => {
-              if (cachedResponse) {
-                return cachedResponse;
-              }
-              
-              console.error('Failed to fetch Mathigon content:', error);
-              // Return an appropriate error response
-            });
-        })
-    );
-  }
-  
-  // Use cache-first for assets (which rarely change)
-  if (isMathigonAsset) {
-    event.respondWith(
-      caches.match(event.request)
-        .then(cachedResponse => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          
-          // Fetch and cache if not in cache
-          return fetch(event.request)
+          console.log('Network request failed, trying cache for:', pathname);
+          return caches.open(MATHIGON_CACHE)
+            .then(cache => cache.match(event.request))
             .then(response => {
-              if (!response || response.status !== 200) {
+              if (response) {
                 return response;
               }
+              console.error('No cached version available for:', pathname);
               
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME)
-                .then(cache => {
-                  cache.put(event.request, responseToCache);
+              // For JSON content, try to return a minimal placeholder
+              if (isJSON) {
+                return new Response(JSON.stringify({
+                  sections: [{
+                    id: "offline",
+                    title: "Offline Content",
+                    content: "<p>This content is not available offline. Please reconnect to the internet.</p>"
+                  }]
+                }), {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store'
+                  }
                 });
-                
-              return response;
+              }
+              
+              throw error;
             });
         })
     );
+    return;
   }
 }
 
 // Handle messages from the main thread
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return;
+  
+  // Handle skip waiting request
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  
+  // Handle cache invalidation request
+  if (event.data.type === 'CLEAR_MATHIGON_CACHE') {
+    caches.delete(MATHIGON_CACHE).then(() => {
+      console.log('Mathigon content cache cleared');
+      if (event.data.reCache) {
+        // Re-cache core assets
+        caches.open(MATHIGON_CACHE).then(cache => {
+          cache.addAll(PRECACHE_ASSETS.filter(a => a.includes('/mathigon/')));
+        });
+      }
+    });
   }
 });

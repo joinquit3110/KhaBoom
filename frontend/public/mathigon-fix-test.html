@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathigon Fix Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #5050FF;
+    }
+    .test-box {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .result {
+      font-family: monospace;
+      min-height: 20px;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    button {
+      background: #5050FF;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mathigon Fix Test</h1>
+  <p>This page tests if the critical Mathigon components are working properly.</p>
+  
+  <div class="test-box">
+    <h2>1. Service Worker Test</h2>
+    <button onclick="testServiceWorker()">Test Service Worker</button>
+    <div id="service-worker-result" class="result"></div>
+  </div>
+  
+  <div class="test-box">
+    <h2>2. Boost.js Test</h2>
+    <button onclick="testBoostJs()">Test Boost.js</button>
+    <div id="boost-result" class="result"></div>
+  </div>
+  
+  <div class="test-box">
+    <h2>3. Course.js Test</h2>
+    <button onclick="testCourseJs()">Test Course.js</button>
+    <div id="course-result" class="result"></div>
+  </div>
+  
+  <div class="test-box">
+    <h2>4. Content JSON Test</h2>
+    <button onclick="testContentJson()">Test Content JSON</button>
+    <select id="course-select">
+      <option value="circles">circles</option>
+      <option value="triangles">triangles</option>
+      <option value="probability">probability</option>
+    </select>
+    <div id="content-result" class="result"></div>
+  </div>
+  
+  <div class="test-box">
+    <h2>5. All Tests</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+  </div>
+  
+  <script>
+    // Service Worker test
+    async function testServiceWorker() {
+      const resultElement = document.getElementById('service-worker-result');
+      resultElement.innerHTML = 'Testing service worker...';
+      
+      try {
+        if (!('serviceWorker' in navigator)) {
+          throw new Error('Service Worker API not supported in this browser');
+        }
+        
+        // Try to register the service worker
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        resultElement.innerHTML = `<span class="success">✓ Service Worker registered successfully! Scope: ${registration.scope}</span>`;
+      } catch (error) {
+        resultElement.innerHTML = `<span class="error">✗ Service Worker error: ${error.message}</span>`;
+      }
+    }
+    
+    // Boost.js test
+    async function testBoostJs() {
+      const resultElement = document.getElementById('boost-result');
+      resultElement.innerHTML = 'Loading boost.js...';
+      
+      try {
+        // Create a script element to load boost.js
+        const script = document.createElement('script');
+        script.src = '/mathigon/assets/boost.js';
+        
+        const loadPromise = new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+          setTimeout(() => reject(new Error('Timeout loading boost.js')), 5000);
+        });
+        
+        document.head.appendChild(script);
+        await loadPromise;
+        
+        // Check if Mathigon namespace exists
+        if (window.Mathigon && window.Mathigon.Boost) {
+          resultElement.innerHTML = `<span class="success">✓ Boost.js loaded successfully! Version: ${window.Mathigon.Boost.version}</span>`;
+        } else {
+          resultElement.innerHTML = '<span class="error">✗ Boost.js loaded but Mathigon.Boost object not found</span>';
+        }
+      } catch (error) {
+        resultElement.innerHTML = `<span class="error">✗ Failed to load boost.js: ${error.message}</span>`;
+      }
+    }
+    
+    // Course.js test
+    async function testCourseJs() {
+      const resultElement = document.getElementById('course-result');
+      resultElement.innerHTML = 'Loading course.js...';
+      
+      try {
+        // Create a script element to load course.js
+        const script = document.createElement('script');
+        script.src = '/mathigon/assets/course.js';
+        
+        const loadPromise = new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+          setTimeout(() => reject(new Error('Timeout loading course.js')), 5000);
+        });
+        
+        document.head.appendChild(script);
+        await loadPromise;
+        
+        // Check if Mathigon namespace exists
+        if (window.Mathigon && window.Mathigon.TextbookLoader) {
+          resultElement.innerHTML = '<span class="success">✓ Course.js loaded successfully! TextbookLoader is available.</span>';
+        } else {
+          resultElement.innerHTML = '<span class="error">✗ Course.js loaded but TextbookLoader not found</span>';
+        }
+      } catch (error) {
+        resultElement.innerHTML = `<span class="error">✗ Failed to load course.js: ${error.message}</span>`;
+      }
+    }
+    
+    // Content JSON test
+    async function testContentJson() {
+      const resultElement = document.getElementById('content-result');
+      const courseId = document.getElementById('course-select').value;
+      resultElement.innerHTML = `Testing ${courseId}/content.json...`;
+      
+      try {
+        // Fetch the content JSON
+        const response = await fetch(`/mathigon/content/${courseId}/content.json`);
+        
+        // Check if the response is OK
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+        
+        // Check if the content type is correct
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('json')) {
+          throw new Error(`Incorrect Content-Type: ${contentType}`);
+        }
+        
+        // Try to parse the JSON
+        const json = await response.json();
+        
+        // Check if it has the expected structure
+        if (!json.sections || !Array.isArray(json.sections)) {
+          throw new Error('Invalid JSON structure: missing sections array');
+        }
+        
+        resultElement.innerHTML = `<span class="success">✓ ${courseId}/content.json loaded successfully! Found ${json.sections.length} sections.</span>`;
+      } catch (error) {
+        resultElement.innerHTML = `<span class="error">✗ Failed to load ${courseId}/content.json: ${error.message}</span>`;
+      }
+    }
+    
+    // Run all tests
+    async function runAllTests() {
+      await testServiceWorker();
+      await testBoostJs();
+      await testCourseJs();
+      await testContentJson();
+    }
+  </script>
+</body>
+</html> 

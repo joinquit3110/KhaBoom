@@ -4,13 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:content && vite build && node postbuild.cjs",
+    "build": "npm run build:mathigon && vite build && node postbuild.cjs",
     "build:assets": "echo 'Skipping assets build in CI environment'",
     "build:vite": "vite build",
+    "build:mathigon": "node scripts/build-mathigon.js",
     "build:content": "node scripts/build-content-json.js",
     "postbuild": "node postbuild.cjs",
     "start": "vite preview",
-    "setup-mathigon": "node ../scripts/setup-mathigon.js"
+    "setup-mathigon": "node ../scripts/setup-mathigon.js",
+    "clean": "rimraf dist public/mathigon/content public/mathigon/assets",
+    "test:mathigon": "npm run build:mathigon && vite preview --port 3001 --open /mathigon-fix-test.html"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",
@@ -35,6 +38,7 @@
     "gray-matter": "^4.0.3",
     "mkdirp": "^3.0.1",
     "npm-run-all": "4.1.5",
+    "rimraf": "^5.0.5",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
     "ts-node": "10.9.2",
