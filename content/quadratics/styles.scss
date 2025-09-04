@@ -1,0 +1,202 @@
+// =============================================================================
+// Quadratic Equations
+// (c) Kha-Boom!
+// =============================================================================
+
+
+@import "../../frontend/styles/variables";
+@import "./components/projectile";
+
+/* Enhanced Interactive Elements for Quadratics */
+
+// Equation input styling
+x-equation {
+  background: #0f82f2 !important;
+  border: 2px solid rgba(15, 130, 242, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(15, 130, 242, 0.2) !important;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(15, 130, 242, 0.3) !important;
+    transform: translateY(-1px);
+  }
+  
+  &.active {
+    box-shadow: 0 0 0 3px rgba(15, 130, 242, 0.3) !important;
+  }
+  
+  .keys {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+  }
+  
+  .key {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    color: white;
+    margin: 2px;
+    padding: 4px 8px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// Coordinate system enhancements
+x-picker x-coordinate-system { 
+  margin: 16px auto;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+x-coordinate-system {
+  .region { 
+    position: absolute; 
+    pointer-events: none; 
+  }
+  
+  // Enhanced grid styling
+  .grid line {
+    stroke: #f1f3f4;
+    stroke-width: 1px;
+  }
+  
+  .axes line {
+    stroke: #5f6368;
+    stroke-width: 2px;
+  }
+  
+  // Function curve styling
+  path.fn {
+    stroke: #f6700f;
+    stroke-width: 3px;
+    fill: none;
+    filter: drop-shadow(0 2px 4px rgba(246, 112, 15, 0.3));
+  }
+  
+  // Interactive points
+  circle.move {
+    fill: #0f82f2;
+    stroke: white;
+    stroke-width: 3px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      fill: #0056b3;
+      transform: scale(1.2);
+      filter: drop-shadow(0 2px 8px rgba(15, 130, 242, 0.5));
+    }
+    
+    &:active {
+      cursor: grabbing;
+      transform: scale(0.9);
+    }
+  }
+  
+  // Labels and text
+  text {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    fill: #5f6368;
+    
+    &.label {
+      font-weight: 600;
+      font-size: 14px;
+      fill: #202124;
+    }
+  }
+}
+
+.text-wrap {
+  display: block;
+  float: right;
+  shape-margin: 24px;
+  margin: 0 0 24px 24px;
+  shape-outside: circle();
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 560px) { 
+    float: none !important; 
+    margin: 0 auto 1em; 
+  }
+}
+
+#intro-table table { 
+  white-space: nowrap;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.q-grid {
+  td {
+    padding: 0.6em 1.2em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    background: mix($blue, $grey-background, 15%);
+    color: rgba(black, 70%);
+    transition: background 0.2s ease;
+    
+    &:hover {
+      background: mix($blue, $grey-background, 25%);
+    }
+  }
+  
+  tr:first-child td, td:first-child {
+    background: mix($blue, $grey-background, 35%);
+    color: rgba(black, 80%);
+    font-weight: 700;
+  }
+  
+  td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+
+  tr:first-child td:first-child { border-top-left-radius: 8px; }
+  tr:first-child td:last-child { border-top-right-radius: 8px; }
+  tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+  tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+}
+
+// Enhanced button styling for this module
+.btn {
+  background: linear-gradient(135deg, #f6700f 0%, #e55a00 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(246, 112, 15, 0.3) !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #e55a00 0%, #cc4f00 100%) !important;
+    box-shadow: 0 4px 16px rgba(246, 112, 15, 0.4) !important;
+    transform: translateY(-2px) scale(1.05) !important;
+  }
+  
+  &:active {
+    transform: translateY(0) scale(0.98) !important;
+  }
+}
+
+// Profit chart styling
+.chart-container {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+// -----------------------------------------------------------------------------
+// Projectiles
+
+article.projectiles {
+  .page-background {
+    background: linear-gradient(to bottom, #7ddedd, #48b6de);
+  }
+  x-step { color: rgba(black, 75%); }
+}

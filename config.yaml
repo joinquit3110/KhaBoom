@@ -1,0 +1,52 @@
+# ==============================================================================
+# Mathigon Studio Default Settings
+# (c) Mathigon
+# ==============================================================================
+
+
+siteName: Mathigon Studio
+privacyURL: https://amplify.com/customer-privacy
+banner: (c) Mathigon
+locales: [en]
+
+contentDir: content
+
+search:
+  enabled: true
+  popular: [circles, probability, quadratics]
+
+sitemap: []
+
+header:
+  logo: images/logo.svg
+  title: images/title.svg
+  links: []
+
+social:
+  facebook:
+    page: "khaboom.edu.vn"
+  twitter:
+    handle: "khaboom"
+
+footer:
+  rows: []
+  copyright: © Mathigon, 2022
+
+courses:
+  revealAll: false
+  audio: false
+
+accounts:
+  enabled: true
+  mongodb: mongodb+srv://riptid3110:01667849897@khaboomdb.q0mfgdv.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB
+  minAge: 13
+  privacyPolicy: https://amplify.com/customer-privacy
+  termsOfUse: https://amplify.com/acceptable-use-policy
+  address: 1 Main Street, London, United Kingdom
+  supportEmail: support@khaboom.edu.vn
+  # sendgridKey: YOUR_SENDGRID_API_KEY_HERE
+
+tutor:
+  enabled: true
+  name: Archie
+  icon: images/archie.svg
