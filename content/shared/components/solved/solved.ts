@@ -6,7 +6,7 @@
 
 import {loop} from '@mathigon/core';
 import {AnimationResponse, CustomElementView, ElementView, enter, exit, register, replaceSvgImports, ResolvedAnimation} from '@mathigon/boost';
-import {Step} from '@mathigon/studio';
+import {Step} from '../../../../frontend/components/step/step';
 import template from './solved.pug';
 
 

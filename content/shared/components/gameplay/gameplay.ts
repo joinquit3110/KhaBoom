@@ -5,7 +5,7 @@
 
 
 import {$N, CustomElementView, ElementView, register} from '@mathigon/boost';
-import {Step, StepComponent} from '@mathigon/studio';
+import {Step, StepComponent} from '../../../../frontend/components/step/step';
 import template from './gameplay.pug';
 
 type SlideGenerator = (el: ElementView, success: () => void, error: () => void) => void;

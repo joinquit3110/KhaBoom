@@ -6,8 +6,8 @@
 
 import {flatten, list, Obj, repeat, tabulate2D} from '@mathigon/core';
 import {lerp, Random} from '@mathigon/fermat';
-import {$, $N, animate, ElementView} from '@mathigon/boost';
-import {confetti, Step} from '@mathigon/studio';
+import {$, $N, animate, ElementView, confetti} from '@mathigon/boost';
+import {Step} from '../../frontend/components/step/step';
 import '../shared/components/buckets/buckets';
 
 

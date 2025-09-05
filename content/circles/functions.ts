@@ -8,7 +8,11 @@ import {Color, isOneOf, list, Obj, tabulate, wait} from '@mathigon/core';
 import {clamp, numberFormat, Random, round, roundTo, toWord} from '@mathigon/fermat';
 import {Angle, Point, Polygon, Rectangle, Sector} from '@mathigon/euclid';
 import {$N, animate, CanvasView, Draggable, ElementView, hover, InputView, slide, SVGParentView, SVGView} from '@mathigon/boost';
-import {Gesture, PlayBtn, Select, Slider, Step} from '@mathigon/studio';
+import {Gesture} from '../../frontend/components/gesture/gesture';
+import {PlayBtn} from '../../frontend/components/video/play-btn';
+import {Select} from '@mathigon/boost';
+import {Slider} from '../../frontend/components/slider/slider';
+import {Step} from '../../frontend/components/step/step';
 
 import {Burst} from '../shared/components/burst';
 import {ConicSection} from '../shared/components/webgl/conic-section';

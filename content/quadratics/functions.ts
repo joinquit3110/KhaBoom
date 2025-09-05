@@ -7,7 +7,7 @@
 import {list} from '@mathigon/core';
 import {nearlyEquals} from '@mathigon/fermat';
 import {Point} from '@mathigon/euclid';
-import {Step} from '@mathigon/studio';
+import {Step} from '../../frontend/components/step/step';
 import {CoordinateSystem, EquationSystem} from '../shared/types';
 
 import './components/projectile';

@@ -2,7 +2,8 @@ import {Color, EventTarget, Obj} from '@mathigon/core';
 import {Angle, Arc, Bounds, Circle, GeoElement, GeoShape, intersections, Line, Point, Polygon, Polyline, Ray, Rectangle, Sector, Segment, SimplePoint, TransformMatrix, Triangle} from '@mathigon/euclid';
 import {AnimationResponse, CustomElementView, ElementView, InputView, Observable, SVGParentView, SVGView} from '@mathigon/boost';
 import {ExprElement} from '@mathigon/hilbert';
-import {Select, Step, StepComponent, UserData} from '@mathigon/studio';
+import {Select} from '@mathigon/boost';
+import {Step, StepComponent, UserData} from '../../frontend/components/step/step';
 
 type Callback = (p: number) => void;
 export class Ticker {

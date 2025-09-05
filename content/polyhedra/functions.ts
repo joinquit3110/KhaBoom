@@ -8,7 +8,8 @@ import {total} from '@mathigon/core';
 import {clamp, lerp, toWord} from '@mathigon/fermat';
 import {Angle, intersections, isLineLike, Point, Polygon, Rectangle, Segment} from '@mathigon/euclid';
 import {$body, Browser, slide} from '@mathigon/boost';
-import {Slider, Step} from '@mathigon/studio';
+import {Slider} from '../../frontend/components/slider/slider';
+import {Step} from '../../frontend/components/step/step';
 
 import {Geopad, GeoPath, Path, PolygonTile} from '../shared/types';
 import {Solid} from '../shared/components/webgl/solid';
