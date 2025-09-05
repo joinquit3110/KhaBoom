@@ -2,73 +2,176 @@ extends ../_layout
 
 block vars
   - var title = __('Account Profile')
-  - var styles = ['/accounts.css']
+  - var styles = ['/main.css', '/accounts.css']
   - var scripts = ['/accounts.js']
 
 block main
-  .container.narrow
-    h1
-      img.avatar(src=user.avatar(120) width=60 height=60)
-      | #{__('Account Settings')}
-
+  .container(style="min-height: 100vh; padding: 2rem; max-width: 1200px; margin: 0 auto;")
+    // Decorative blobs
+    .liquid-blob(style="width: 300px; height: 300px; top: 10%; right: 5%; opacity: 0.3; position: fixed;")
+    .liquid-blob(style="width: 250px; height: 250px; bottom: 10%; left: 5%; opacity: 0.3; position: fixed;")
+    
+    // Profile Header
+    .glass-panel(style="text-align: center; margin-bottom: 3rem; padding: 2rem;")
+      .profile-header(style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;")
+        img.avatar(src=user.avatar(120) width=120 height=120 style="border-radius: 50%; border: 4px solid; border-image: linear-gradient(135deg, #667eea, #764ba2) 1;")
+        div
+          h1.gradient-text(style="font-size: 2.5rem; margin: 0;") #{user.firstName} #{user.lastName}
+          p(style="color: rgba(255, 255, 255, 0.7); margin: 0.5rem 0;") #{__('Account Settings')}
+    
     +flash(messages)
 
-    h2.text-center= __('Personal Details')
-    form.form-large(action="/profile/details" method="POST")
-      input(type="hidden" name="_csrf" value=_csrf)
-      .form-row
-        label.form-field
-          input(type='text' name='first' required autocomplete="fname" placeholder=__("First Name") value=user.firstName)
-          span.placeholder= __('First Name')
-        label.form-field
-          input(type='text' name='last' required autocomplete="lname" placeholder=__("Last Name") value=user.lastName)
-          span.placeholder= __('Last Name')
-      label.form-field
-        input(type='email' name='email' required disabled=(!user.password) autocomplete="email" placeholder=__("Email") value=user.email)
-        span.placeholder= __('Email')
-        if user.emailVerificationToken
-          p.form-hint
-            strong.m-red= __('Email not verified!')
-            | #{" – "}
-            a(href="/profile/resend")= __('Resend verification email')
-      if user.birthday
-        label.form-field
-          input(type='text' name='birthday' disabled value=user.birthdayString placeholder=__("Date of Birth"))
-          span.placeholder= __('Date of Birth')
-      label.form-field
-        select(name='country')
-          for c in countries
-            option(value=c.id selected=(c.id === user.country))= c.name
-      button.btn.btn-red(type='submit')= __('Update Profile')
-
-    if user.password && !user.emailVerificationToken
-      hr(style="margin: 2em 0")
-      h2.text-center #[x-icon(name="lock" size=28)] #{__('Change Password')}
-      form.form-large.password-form(action='/profile/password' method='POST')
+    // Personal Details Section
+    .glass-panel(style="margin-bottom: 2rem; padding: 2.5rem;")
+      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")= __('Personal Details')
+      
+      form(action="/profile/details" method="POST" style="display: flex; flex-direction: column; gap: 1.5rem;")
         input(type="hidden" name="_csrf" value=_csrf)
-        label.form-field
-          input(type="password" name="oldpassword" required pattern=".{4,}" autocomplete="password" placeholder=__("Current Password"))
-          span.placeholder= __('Current Password')
-        x-password
-        button.btn.btn-red(type='submit')= __('Change Password')
+        
+        .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;")
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('First Name')
+            input.input-modern(
+              type='text' 
+              name='first' 
+              required 
+              autocomplete="fname" 
+              placeholder=__("First Name") 
+              value=user.firstName
+              style="width: 100%;"
+            )
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Last Name')
+            input.input-modern(
+              type='text' 
+              name='last' 
+              required 
+              autocomplete="lname" 
+              placeholder=__("Last Name") 
+              value=user.lastName
+              style="width: 100%;"
+            )
+        
+        .form-group
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Email')
+          input.input-modern(
+            type='email' 
+            name='email' 
+            required 
+            disabled=(!user.password) 
+            autocomplete="email" 
+            placeholder=__("Email") 
+            value=user.email
+            style="width: 100%; opacity: " + (user.password ? '1' : '0.6')
+          )
+          if user.emailVerificationToken
+            .alert(style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); padding: 0.75rem; border-radius: 10px; margin-top: 0.5rem;")
+              strong(style="color: #ef4444;")= __('Email not verified!')
+              | 
+              a(href="/profile/resend" style="color: #667eea; text-decoration: none;")= __('Resend verification email')
+        
+        if user.birthday
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Date of Birth')
+            input.input-modern(
+              type='text' 
+              name='birthday' 
+              disabled 
+              value=user.birthdayString 
+              placeholder=__("Date of Birth")
+              style="width: 100%; opacity: 0.6;"
+            )
+        
+        .form-group
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Country')
+          select.input-modern(name='country' style="width: 100%; padding: 12px 20px;")
+            for c in countries
+              option(value=c.id selected=(c.id === user.country))= c.name
+        
+        button.btn-gradient(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Update Profile')
 
-    hr(style="margin: 2em 0")
-    h2.text-center= __('Privacy Settings')
-    p!= __('Please review our <a href="$0" target="_blank">Privacy Policy</a> and our <a href="$1" target="_blank">Terms of Service</a>. Make sure you understand what personal data we collect, and how we use that data to personalise and improve our content.', config.accounts.privacyPolicy, config.accounts.termsOfUse)
-    if user.deletionRequested
-      p.m-red.b Your account is currently marked for deletion and will be removed in #{Math.floor(7 - (Date.now() - user.deletionRequested) / (1000 * 60 * 60 * 24))} days.
-    .btn-row
-      a.btn.btn-blue(href="/profile/data.json" download)= __('Download all my data')
+    // Change Password Section
+    if user.password && !user.emailVerificationToken
+      .glass-panel(style="margin-bottom: 2rem; padding: 2.5rem;")
+        h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")
+          x-icon(name="lock" size=28 style="vertical-align: middle; margin-right: 0.5rem;")
+          | #{__('Change Password')}
+        
+        form(action='/profile/password' method='POST' style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px; margin: 0 auto;")
+          input(type="hidden" name="_csrf" value=_csrf)
+          
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Current Password')
+            input.input-modern(
+              type="password" 
+              name="oldpassword" 
+              required 
+              pattern=".{4,}" 
+              autocomplete="password" 
+              placeholder=__("Enter current password")
+              style="width: 100%;"
+            )
+          
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('New Password')
+            x-password
+          
+          button.btn-gradient.secondary(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Change Password')
+
+    // Privacy Settings Section
+    .glass-panel(style="padding: 2.5rem;")
+      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")= __('Privacy Settings')
+      
+      .glass-card(style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; margin-bottom: 2rem;")
+        p(style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin: 0;")
+          | #{__('Please review our')} 
+          a(href=config.accounts.privacyPolicy target="_blank" style="color: #667eea; text-decoration: none;") #{__('Privacy Policy')}
+          |  #{__('and our')} 
+          a(href=config.accounts.termsOfUse target="_blank" style="color: #667eea; text-decoration: none;") #{__('Terms of Service')}
+          | . #{__('Make sure you understand what personal data we collect, and how we use that data to personalise and improve our content.')}
+      
       if user.deletionRequested
-        a.btn.btn-green(href="/profile/undelete")= __('Don’t delete my account')
-      else
-        button.btn.btn-red(data-modal="delete")= __('Delete my account')
+        .alert(style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); padding: 1rem; border-radius: 10px; margin-bottom: 2rem;")
+          p(style="color: #ef4444; font-weight: 600; margin: 0;") 
+            | Your account is currently marked for deletion and will be removed in 
+            strong #{Math.floor(7 - (Date.now() - user.deletionRequested) / (1000 * 60 * 60 * 24))} days
+            | .
+      
+      .btn-row(style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;")
+        a.btn-gradient.accent(href="/profile/data.json" download style="padding: 12px 24px;")
+          | 📥 #{__('Download all my data')}
+        
+        if user.deletionRequested
+          a.btn-gradient(href="/profile/undelete" style="padding: 12px 24px; background: linear-gradient(135deg, #10b981, #059669);")
+            | ✅ Don't delete my account
+        else
+          button.btn-gradient(data-modal="delete" style="padding: 12px 24px; background: linear-gradient(135deg, #ef4444, #dc2626);")
+            | ⚠️ Delete my account
+    
+    // Delete Account Modal
     if !user.deletionRequested
-      x-modal#delete
-        button.close: x-icon(name="close")
-        .modal-body
-          h2 #[x-icon(name="delete" size=32)] #{__('Delete my account')}
-          p= __('Are you sure that you want to delete your $0 account and all associated data?', config.siteName)
-          .btn-row: a.btn.btn-red(href="/profile/delete")= __('Delete')
-
-    include ../_footer
+      x-modal#delete(style="max-width: 500px;")
+        .glass-panel(style="padding: 2rem; position: relative;")
+          button.close(style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: rgba(255, 255, 255, 0.6); cursor: pointer;")
+            x-icon(name="close" size=24)
+          
+          .modal-body(style="text-align: center;")
+            .gradient-text(style="font-size: 2rem; margin-bottom: 1rem;")
+              x-icon(name="delete" size=32 style="vertical-align: middle; margin-right: 0.5rem;")
+              | #{__('Delete Account')}
+            
+            .glass-card(style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.5rem; margin-bottom: 2rem;")
+              p(style="color: rgba(255, 255, 255, 0.9); margin: 0;")= __('Are you sure that you want to delete your $0 account and all associated data?', config.siteName)
+              p(style="color: rgba(255, 255, 255, 0.7); margin: 0.5rem 0 0 0; font-size: 0.9rem;")
+                strong #{__('This action cannot be undone!')}
+            
+            .btn-row(style="display: flex; gap: 1rem; justify-content: center;")
+              button.btn-gradient.secondary(onclick="document.getElementById('delete').classList.remove('open')" style="padding: 10px 24px;")
+                | #{__('Cancel')}
+              a.btn-gradient(href="/profile/delete" style="padding: 10px 24px; background: linear-gradient(135deg, #ef4444, #dc2626);")
+                | #{__('Yes, Delete')}
+    
+    // Back to dashboard link
+    .text-center(style="margin-top: 3rem;")
+      a(href='/dashboard' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
+        | ← #{__('Back to Dashboard')}

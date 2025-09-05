@@ -1,17 +1,53 @@
 extends _template
 
 block preheader
-  | Welcome to #{config.siteName}!
+  | Welcome to Kha-Boom! - Your Learning Journey Begins! 🎆
 
 block body
-  h1(style="font-size: 24px;margin:0 0 20px 0") Hi #{user.shortName},
+  div(style="text-align:center;padding:20px 0;border-bottom:2px solid #f0f0f0;margin-bottom:30px")
+    h1(style="font-size:28px;margin:0 0 10px 0;color:#1a1a2e;font-family:'Poppins',sans-serif") Welcome to Kha-Boom! 🎉
+    p(style="color:#667eea;font-size:18px;margin:0;font-weight:500") Your explosive learning journey starts here!
 
-  p Welcome to #{config.siteName}! When you’re logged in, we will save your progress data, and personalise the content based on your ability and interests.
+  h2(style="font-size:20px;margin:30px 0 15px 0;color:#1a1a2e") Hi #{user.shortName}! 👋
+
+  div(style="background:linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);padding:20px;border-radius:15px;margin:20px 0")
+    p(style="color:#333;line-height:1.8") 
+      | Welcome to 
+      strong(style="color:#667eea") Kha-Boom!
+      | , the platform where learning becomes an adventure! We're thrilled to have you join our community of curious minds and passionate learners.
+    
+    p(style="color:#333;line-height:1.8") When you're logged in, we'll:
+    ul(style="color:#333;line-height:1.8;margin:10px 0;padding-left:20px")
+      li 🎯 Track your progress across all courses
+      li 🎆 Personalize content based on your interests
+      li 🏆 Celebrate your achievements with badges
+      li 🚀 Recommend the perfect learning paths for you
 
   if user.emailVerificationToken
-    p To get started, please confirm your email address using this link:
-    +button(`https://${config.domain}/confirm/${user.id}/${user.emailVerificationToken}`, "Confirm your email")
-    p You can also copy and paste this URL into your browser: https://#{config.domain}/confirm/#{user.id}/#{user.emailVerificationToken}
-    p (If you did not create a #{config.siteName} account, you can simply ignore this email, or #[a(href="mailto:#{config.accounts.supportEmail}") let us know].)
+    div(style="background:#fff;border:2px solid #667eea;border-radius:15px;padding:25px;margin:30px 0;text-align:center")
+      p(style="color:#1a1a2e;font-size:16px;margin-bottom:5px") 🔓 One more step to unlock your account!
+      p(style="color:#666;margin-bottom:20px") Please confirm your email address to get started:
+      +button(`https://${config.domain}/confirm/${user.id}/${user.emailVerificationToken}`, "Confirm Email & Start Learning")
+      
+      p(style="color:#999;font-size:13px;margin-top:20px") 
+        | Can't click the button? Copy this link:
+        br
+        span(style="color:#667eea;font-size:12px;word-break:break-all") https://#{config.domain}/confirm/#{user.id}/#{user.emailVerificationToken}
+    
+    p(style="color:#999;font-size:13px;text-align:center;margin-top:20px") 
+      | Didn't sign up for Kha-Boom!? You can ignore this email or 
+      a(href="mailto:#{config.accounts.supportEmail}" style="color:#667eea") let us know
+      | .
   else
-    +button(`https://${config.domain}/courses`, "Get Started")
+    div(style="text-align:center;margin:30px 0")
+      p(style="color:#1a1a2e;font-size:18px;margin-bottom:20px") 🚀 Ready to explore amazing courses?
+      +button(`https://${config.domain}/courses`, "Start Learning Now")
+  
+  div(style="margin-top:40px;padding-top:30px;border-top:2px solid #f0f0f0;text-align:center")
+    p(style="color:#666;font-size:14px") 
+      | Need help? Our support team is here for you!
+      br
+      a(href="mailto:#{config.accounts.supportEmail}" style="color:#667eea;font-weight:500") #{config.accounts.supportEmail}
+    
+    p(style="color:#999;font-size:16px;margin-top:20px;font-weight:500") Happy Learning! 🌈
+    p(style="color:#667eea;font-size:14px;margin:5px 0;font-weight:600") The Kha-Boom! Team

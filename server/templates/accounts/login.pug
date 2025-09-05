@@ -1,39 +1,126 @@
-extends ../_layout
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Sign In - Kha-Boom!
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+    link(href="/main.css" rel='stylesheet')
+    style.
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, 
+          rgba(102, 126, 234, 0.1) 0%, 
+          rgba(118, 75, 162, 0.1) 25%, 
+          rgba(240, 147, 251, 0.1) 50%, 
+          rgba(245, 87, 108, 0.1) 75%, 
+          rgba(79, 172, 254, 0.1) 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 20s ease infinite;
+      }
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+  
+  body
+    // Decorative blobs
+    .liquid-blob(style="width: 400px; height: 400px; top: -100px; left: -100px; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); opacity: 0.3; filter: blur(80px); animation: blob 15s infinite;")
+    .liquid-blob(style="width: 350px; height: 350px; bottom: -100px; right: -100px; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); opacity: 0.3; filter: blur(80px); animation: blob 20s infinite reverse;")
+    .liquid-blob(style="width: 300px; height: 300px; top: 50%; left: 60%; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); opacity: 0.2; filter: blur(80px); animation: blob 25s infinite;")
+    
+    .container(style="position: relative; z-index: 1; padding: 2rem;")
+      .glass-panel(style="max-width: 450px; width: 100%; padding: 3rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);")
+        .text-center(style="margin-bottom: 2.5rem;")
+          h1.gradient-text(style="font-size: 3.5rem; font-weight: 800; margin: 0 0 0.5rem 0; font-family: 'Poppins', sans-serif;") Kha-Boom!
+          p(style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; font-weight: 300;") Welcome back, explorer!
+        
+        // Flash messages would go here if needed
 
-block vars
-  - var title = __('Sign in')
-  - var styles = ['/accounts.css']
-  - var scripts = ['/accounts.js']
+        if oAuthProviders.length
+          .btn-row(style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;")
+            for p in oAuthProviders
+              a(href=`/auth/${p.id}` style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 14px 24px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; color: white; text-decoration: none; font-weight: 500; transition: all 0.3s; backdrop-filter: blur(10px);" class=p.id onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
+                span Sign in with #{p.name}
+          
+          .divider(style="position: relative; text-align: center; margin: 2rem 0;")
+            span(style="background: rgba(255, 255, 255, 0.05); padding: 0 1rem; color: rgba(255, 255, 255, 0.4); position: relative; z-index: 1; font-size: 0.9rem;") or continue with email
+            hr(style="position: absolute; top: 50%; left: 0; right: 0; border: none; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 0;")
 
-block main
-  .container.narrow
-    h1 #[x-icon(name="lock" size=54)] #{__('Sign in')}
-    +flash(messages)
+        form(method="POST" style="display: flex; flex-direction: column; gap: 1.8rem;")
+          input(type="hidden" name="_csrf" value=_csrf)
 
-    if oAuthProviders.length
-      .btn-row.text-center
-        for p in oAuthProviders
-          a.btn.btn-large(href=`/auth/${p.id}` class=p.id)
-            x-icon(name=p.id size=28)
-            | #{p.name}
-      hr
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; margin-bottom: 0.6rem; display: block; font-weight: 500;") Email Address
+            input(
+              type="email" 
+              name="email" 
+              placeholder="your@email.com" 
+              required 
+              autofocus=true 
+              autocomplete="email" 
+              value=req.body.email
+              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none;"
+              onfocus="this.style.borderColor='#667eea'; this.style.background='rgba(102, 126, 234, 0.1)';" 
+              onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
+            )
 
-    form(method="POST").form-large.form-min-height
-      input(type="hidden" name="_csrf" value=_csrf)
+          .form-group
+            label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; margin-bottom: 0.6rem; display: block; font-weight: 500;") Password
+            input(
+              type="password" 
+              name="password" 
+              placeholder="••••••••" 
+              required 
+              minlength="4" 
+              autocomplete="password"
+              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none;"
+              onfocus="this.style.borderColor='#667eea'; this.style.background='rgba(102, 126, 234, 0.1)';" 
+              onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
+            )
 
-      label.form-field
-        input(type="email" name="email" placeholder=__("Email") required autofocus=true autocomplete="email" value=req.body.email)
-        span.placeholder= __('Email')
+          button(type='submit' style="padding: 16px 32px; font-size: 1.05rem; margin-top: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
+            | Sign In
 
-      label.form-field
-        input.form-field(type="password" name="password" placeholder=__("Password") required minlength="4" autocomplete="password")
-        span.placeholder= __('Password')
-
-      button.btn.btn-red.btn-large(type='submit')= __('Sign in')
-
-      p
-        a(href='/forgot')= __('Forgot Password')
-        | &nbsp; &nbsp; &nbsp;
-        a(href='/signup')= __('Create New Account')
-
-    include ../_footer
+        .links(style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);")
+          a(href='/forgot' style="color: #4facfe; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;" onmouseover="this.style.color='#00f2fe';" onmouseout="this.style.color='#4facfe';") Forgot Password?
+          a(href='/signup' style="color: #f093fb; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;" onmouseover="this.style.color='#f5576c';" onmouseout="this.style.color='#f093fb';") Create New Account
+      
+      // Back to home link
+      .text-center(style="margin-top: 2rem;")
+        a(href='/' style="color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s;" onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.transform='translateX(-5px)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.5)'; this.style.transform='translateX(0)';")
+          span(style="font-size: 1.2rem;") ←
+          | Back to Home
+    
+    style.
+      @keyframes blob {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(30px, -50px) scale(1.1); }
+        50% { transform: translate(-20px, 30px) scale(0.9); }
+        75% { transform: translate(-40px, -20px) scale(1.05); }
+      }
+    
+    script(src="/main.js")

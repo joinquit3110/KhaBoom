@@ -1,0 +1,359 @@
+doctype html
+html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Courses - Kha-Boom!
+    meta(name="description" content="Explore our interactive courses and start your learning journey")
+    meta(name="csrf-token" content=_csrf)
+    
+    // Google Fonts
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+    
+    // Main styles
+    link(href=cacheBust('/main.css') rel='stylesheet')
+    
+    style.
+      .courses-hero {
+        padding: 6rem 2rem 3rem;
+        text-align: center;
+        position: relative;
+      }
+      .courses-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1rem 2rem;
+        background: rgba(15, 15, 35, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      }
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .search-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        position: relative;
+      }
+      .search-input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1.5rem;
+        border-radius: 50px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+      }
+      .search-icon {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .filters-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 2rem 0;
+      }
+      .filter-btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .filter-btn:hover, .filter-btn.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-color: transparent;
+      }
+      .courses-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      .start-learning-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(15, 15, 35, 0.98);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        z-index: 1000;
+        display: none;
+      }
+      .start-learning-modal.active {
+        display: block;
+      }
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        display: none;
+      }
+      .modal-overlay.active {
+        display: block;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after, .nav-link.active::after {
+        width: 100%;
+      }
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .logo-text {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+  
+  body
+    // Navigation Header
+    nav.courses-nav
+      .nav-container
+        .logo-container
+          .gradient-text.logo-text Kha-Boom!
+        
+        .nav-links
+          a.nav-link(href="/") Home
+          a.nav-link.active(href="/courses") Courses
+          a.nav-link(href="/about") About
+          
+          if user
+            .profile-container(style="position: relative;")
+              button.btn-gradient(onclick="toggleProfileDropdown()" style="padding: 8px; border-radius: 50%; width: 45px; height: 45px;")
+                img(src=user.avatar(56) alt="Profile" style="width: 100%; height: 100%; border-radius: 50%;")
+              
+              .profile-dropdown#profileDropdown
+                a.dropdown-item(href="/dashboard")
+                  x-icon(name='dashboard')
+                  span Dashboard
+                a.dropdown-item(href="/profile")
+                  x-icon(name='settings')
+                  span Profile Settings
+                .dropdown-divider
+                a.dropdown-item(href="/logout")
+                  x-icon(name='logout')
+                  span Sign Out
+          else
+            a.btn-gradient.secondary(href="/login" style="padding: 10px 24px;") Login
+            a.btn-gradient(href="/signup" style="padding: 10px 24px;") Sign Up
+    
+    // Hero Section
+    section.courses-hero
+      .liquid-blob(style="width: 300px; height: 300px; top: 10%; right: 5%; opacity: 0.4;")
+      .liquid-blob(style="width: 250px; height: 250px; bottom: 10%; left: 5%; opacity: 0.4;")
+      
+      h1.gradient-text(style="font-size: 3rem; margin-bottom: 1rem;") Explore Our Courses
+      p(style="font-size: 1.3rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;") 
+        | Choose from our collection of interactive learning experiences
+      
+      // Search Bar
+      .search-container
+        input.search-input#courseSearch(
+          type="text" 
+          placeholder="Search for courses..." 
+          autocomplete="on"
+        )
+        span.search-icon 🔍
+      
+      // Filters
+      .filters-container
+        button.filter-btn.active(data-filter="all") All Courses
+        button.filter-btn(data-filter="beginner") Beginner
+        button.filter-btn(data-filter="intermediate") Intermediate
+        button.filter-btn(data-filter="advanced") Advanced
+        
+        select.filter-btn(id="sortSelect" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2);")
+          option(value="name") Sort by Name
+          option(value="difficulty") Sort by Difficulty
+          option(value="popular") Most Popular
+    
+    // Courses Grid
+    section.courses-grid
+      .kha-grid#coursesContainer
+        for c in courses || []
+          - var course = getCourse(c, locale.id)
+          - var difficulty = course.difficulty || 'beginner'
+          .course-card(data-course-id=c data-difficulty=difficulty data-name=course.title.toLowerCase())
+            img.course-image(src=(course.hero || course.icon || '/images/placeholder.jpg') alt=course.title)
+            
+            .course-content
+              h3= course.title
+              p= course.description || 'Discover the exciting world of ' + course.title
+              
+              if course.locale !== locale.id
+                span(style="display: inline-block; margin-top: 0.5rem;")
+                  img(src="/images/flags/gb.png" width=20 height=20 style="vertical-align: middle;")
+                  span(style="margin-left: 0.5rem; font-size: 0.9rem;") English
+            
+            .course-footer
+              span.difficulty(class=difficulty)= difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+              
+              if user
+                a.btn-gradient(href=`/${c}` style="padding: 8px 20px; font-size: 0.9rem;") Start Learning
+              else
+                button.btn-gradient(
+                  onclick=`showLoginPrompt('${c}', '${course.title}')` 
+                  style="padding: 8px 20px; font-size: 0.9rem;"
+                ) Start Learning
+    
+    // Login Prompt Modal
+    .modal-overlay#modalOverlay(onclick="hideLoginPrompt()")
+    .start-learning-modal#loginPromptModal
+      h2(style="color: white; margin-bottom: 1rem;") Login Required
+      p(style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;")
+        | Please log in to access 
+        span#courseName course content.
+      
+      .btn-group(style="display: flex; gap: 1rem; justify-content: center;")
+        button.btn-gradient.secondary(onclick="hideLoginPrompt()" style="padding: 10px 24px;") Cancel
+        a.btn-gradient#loginButton(href="/login" style="padding: 10px 24px;") Go to Login
+    
+    // Footer
+    footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3); margin-top: 5rem;")
+      .container(style="text-align: center;")
+        p(style="color: rgba(255, 255, 255, 0.6);") © 2025 Kha-Boom! All rights reserved.
+    
+    script(src=cacheBust('/main.js'))
+    script.
+      // Profile dropdown toggle
+      function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('active');
+      }
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const profileContainer = document.querySelector('.profile-container');
+        if (dropdown && profileContainer && !profileContainer.contains(event.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+      
+      
+      // Login Prompt Modal
+      function showLoginPrompt(courseId, courseName) {
+        document.getElementById('modalOverlay').classList.add('active');
+        document.getElementById('loginPromptModal').classList.add('active');
+        document.getElementById('courseName').textContent = courseName;
+        document.getElementById('loginButton').href = `/login?redirect=/${courseId}`;
+      }
+      
+      function hideLoginPrompt() {
+        document.getElementById('modalOverlay').classList.remove('active');
+        document.getElementById('loginPromptModal').classList.remove('active');
+      }
+      
+      // Course Search
+      const searchInput = document.getElementById('courseSearch');
+      const coursesContainer = document.getElementById('coursesContainer');
+      const courseCards = coursesContainer.querySelectorAll('.course-card');
+      
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        courseCards.forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          const description = card.querySelector('p').textContent.toLowerCase();
+          
+          if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+      
+      // Filter functionality
+      const filterButtons = document.querySelectorAll('.filter-btn[data-filter]');
+      
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const filter = this.dataset.filter;
+          
+          // Update active state
+          filterButtons.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Filter courses
+          courseCards.forEach(card => {
+            if (filter === 'all' || card.dataset.difficulty === filter) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+      
+      // Sort functionality
+      const sortSelect = document.getElementById('sortSelect');
+      
+      sortSelect.addEventListener('change', function() {
+        const sortBy = this.value;
+        const cardsArray = Array.from(courseCards);
+        
+        cardsArray.sort((a, b) => {
+          if (sortBy === 'name') {
+            return a.dataset.name.localeCompare(b.dataset.name);
+          } else if (sortBy === 'difficulty') {
+            const difficultyOrder = { 'beginner': 0, 'intermediate': 1, 'advanced': 2 };
+            return difficultyOrder[a.dataset.difficulty] - difficultyOrder[b.dataset.difficulty];
+          }
+          return 0;
+        });
+        
+        // Re-append sorted cards
+        cardsArray.forEach(card => coursesContainer.appendChild(card));
+      });

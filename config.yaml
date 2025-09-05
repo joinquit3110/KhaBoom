@@ -1,12 +1,12 @@
 # ==============================================================================
-# Mathigon Studio Default Settings
-# (c) Mathigon
+# Kha-Boom! Platform Configuration
+# (c) Kha-Boom!
 # ==============================================================================
 
 
-siteName: Mathigon Studio
-privacyURL: https://amplify.com/customer-privacy
-banner: (c) Mathigon
+siteName: Kha-Boom!
+privacyURL: https://khaboom.edu.vn/privacy
+banner: (c) Kha-Boom! 2025
 locales: [en]
 
 contentDir: content
@@ -30,7 +30,7 @@ social:
 
 footer:
   rows: []
-  copyright: © Mathigon, 2022
+  copyright: © Kha-Boom!, 2025
 
 courses:
   revealAll: false
@@ -48,5 +48,5 @@ accounts:
 
 tutor:
   enabled: true
-  name: Archie
+  name: Stewie
   icon: images/archie.svg

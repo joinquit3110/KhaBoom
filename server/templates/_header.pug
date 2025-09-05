@@ -3,11 +3,8 @@ include _mixins
 header
   block logo
     a#logo(href=(user ? '/dashboard' : '/') title=config.siteName)
-      != include(config.header.logo)
-      if config.header.titleString
-        span= config.header.titleString
-      else
-        != include(config.header.title)
+      img(src="/images/logokb.png" alt="Kha-Boom!" style="height: 40px; width: auto; margin-right: 10px;")
+      span(style="font-weight: bold; font-size: 1.5rem; color: #667eea;") Kha-Boom!
 
   //- Accessibility Button
   button#skip-nav= __("Skip Navigation")
@@ -42,12 +39,6 @@ header
             else
               button.nav-link(data-modal="login") #[x-icon(name="login")] #{__('Sign in')}
               a.nav-link(href="/signup") #[x-icon(name='user')] #{__('Create New Account')}
-          label.nav-link
-            x-icon(name="brightness")
-            | #{__('Dark Mode')}
-            .form-checkbox
-              input.show-labels#dark-mode(type="checkbox")
-              .control
           if availableLocales.length > 1
             button.nav-link(data-modal="language")
               x-icon(name="language")

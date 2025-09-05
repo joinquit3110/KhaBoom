@@ -1,0 +1,247 @@
+doctype html
+html(lang="en" theme=theme)
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Kha-Boom!
+    meta(name="description" content="Discover the future of interactive online education with Kha-Boom!")
+    
+    // Google Fonts
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+    
+    // Main styles
+    link(href=cacheBust('/main.css') rel='stylesheet')
+    style.
+      .landing-hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-content {
+        text-align: center;
+        z-index: 2;
+        max-width: 800px;
+        padding: 2rem;
+      }
+      .hero-title {
+        font-size: clamp(3rem, 8vw, 5rem);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+      }
+      .hero-subtitle {
+        font-size: clamp(1.2rem, 3vw, 1.8rem);
+        font-weight: 300;
+        margin-bottom: 3rem;
+        opacity: 0.9;
+      }
+      .landing-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1rem 2rem;
+        transition: all 0.3s ease;
+      }
+      .landing-nav.scrolled {
+        background: rgba(15, 15, 35, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      }
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .logo-text {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after {
+        width: 100%;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+      }
+      .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .cta-section {
+        padding: 5rem 2rem;
+        text-align: center;
+        position: relative;
+      }
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+  body
+    // Custom Landing Navigation
+    nav.landing-nav#navbar
+      .nav-container
+        .logo-container
+          .gradient-text.logo-text Kha-Boom!
+        
+        .nav-links
+          a.nav-link(href="/") Home
+          a.nav-link(href="/courses") Courses
+          a.nav-link(href="/about") About
+          
+          if user
+            .profile-container(style="position: relative;")
+              button.btn-gradient(onclick="toggleProfileDropdown()" style="padding: 8px; border-radius: 50%; width: 45px; height: 45px;")
+                img(src=user.avatar(56) alt="Profile" style="width: 100%; height: 100%; border-radius: 50%;")
+              
+              .profile-dropdown#profileDropdown
+                a.dropdown-item(href="/dashboard")
+                  x-icon(name='dashboard')
+                  span Dashboard
+                a.dropdown-item(href="/profile")
+                  x-icon(name='settings')
+                  span Profile Settings
+                .dropdown-divider
+                a.dropdown-item(href="/logout")
+                  x-icon(name='logout')
+                  span Sign Out
+          else
+            a.btn-gradient.secondary(href="/login" style="padding: 10px 24px;") Login
+            a.btn-gradient(href="/signup" style="padding: 10px 24px;") Sign Up
+    
+    // Hero Section
+    section.landing-hero
+      .liquid-blob(style="width: 400px; height: 400px; top: -100px; left: -100px;")
+      .liquid-blob(style="width: 300px; height: 300px; bottom: -50px; right: -50px;")
+      .liquid-blob(style="width: 250px; height: 250px; top: 50%; left: 70%;")
+      
+      .hero-content
+        h1.hero-title.gradient-text Welcome to Kha-Boom!
+        p.hero-subtitle(style="color: rgba(255, 255, 255, 0.9);") Experience the explosive power of interactive learning
+        .btn-group
+          a.btn-gradient(href="/courses" style="padding: 15px 40px; font-size: 1.1rem;") Explore Courses
+          a.btn-gradient.secondary(href="/signup" style="padding: 15px 40px; font-size: 1.1rem;") Get Started Free
+    
+    // Features Section
+    section.features(style="padding: 5rem 0; position: relative;")
+      .container
+        h2.section-title.gradient-text Why Choose Kha-Boom?
+        
+        .feature-grid
+          .glass-card
+            .feature-icon(style="background: linear-gradient(135deg, #667eea, #764ba2);")
+              span(style="color: white;") 🚀
+            h3(style="font-weight: 600; margin-bottom: 1rem;") Interactive Learning
+            p(style="color: rgba(255, 255, 255, 0.8);") Engage with dynamic content that adapts to your learning style and pace.
+          
+          .glass-card
+            .feature-icon(style="background: linear-gradient(135deg, #f093fb, #f5576c);")
+              span(style="color: white;") 🎯
+            h3(style="font-weight: 600; margin-bottom: 1rem;") Personalized Paths
+            p(style="color: rgba(255, 255, 255, 0.8);") AI-powered recommendations guide you through customized learning journeys.
+          
+          .glass-card
+            .feature-icon(style="background: linear-gradient(135deg, #4facfe, #00f2fe);")
+              span(style="color: white;") 🏆
+            h3(style="font-weight: 600; margin-bottom: 1rem;") Track Progress
+            p(style="color: rgba(255, 255, 255, 0.8);") Monitor your achievements and celebrate milestones with detailed analytics.
+          
+          .glass-card
+            .feature-icon(style="background: linear-gradient(135deg, #a8edea, #fed6e3);")
+              span(style="color: white;") 🤝
+            h3(style="font-weight: 600; margin-bottom: 1rem;") Community
+            p(style="color: rgba(255, 255, 255, 0.8);") Connect with learners worldwide and grow together.
+    
+    // CTA Section
+    section.cta-section
+      .liquid-blob(style="width: 200px; height: 200px; top: 0; right: 10%;")
+      h2.section-title(style="color: white; margin-bottom: 1rem;") Ready to Start Your Learning Journey?
+      p(style="font-size: 1.3rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;") Join thousands of learners transforming their skills with Kha-Boom!
+      .btn-group
+        a.btn-gradient(href="/signup" style="padding: 18px 50px; font-size: 1.2rem;") Start Learning Today
+        a.btn-gradient.accent(href="/courses" style="padding: 18px 50px; font-size: 1.2rem;") Browse Courses
+    
+    // Footer
+    footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3);")
+      .container(style="text-align: center;")
+        p(style="color: rgba(255, 255, 255, 0.6); margin-bottom: 1rem;") © 2025 Kha-Boom! All rights reserved.
+    
+    script(src=cacheBust('/main.js'))
+    script.
+      // Add scroll effect to navbar
+      window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+      
+      // Profile dropdown toggle
+      function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('active');
+      }
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const profileContainer = document.querySelector('.profile-container');
+        if (dropdown && profileContainer && !profileContainer.contains(event.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+      

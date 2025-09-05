@@ -12,7 +12,7 @@ if xhr
 
 else
   doctype html
-  html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme class=htmlClass)
+  html(lang=locale.id dir=(locale.dir || 'ltr') theme="dark" class=htmlClass)
     head
       include _head
       block head
@@ -34,14 +34,17 @@ else
     body
       noscript.warning
         .warning-body
-          include ../../frontend/assets/images/logo.svg
-          p= __('Please enable JavaScript in your browser to access $0.', config.siteName)
+          h1.gradient-text(style="font-size: 2rem; margin-bottom: 1rem;") Kha-Boom!
+          p Please enable JavaScript in your browser to access Kha-Boom!
 
       <!--[if IE]>
       .warning
         .warning-body
-          include ../../frontend/assets/images/logo.svg
-          p= __('Unfortunately, Internet Explorer does not support all of $0’s features. We recommend using <a href="https://www.google.com/chrome/" target="_blank" rel="noopener">Google Chrome</a>.', config.siteName)
+          h1.gradient-text(style="font-size: 2rem; margin-bottom: 1rem;") Kha-Boom!
+          p(style="margin-bottom: 1rem;") Unfortunately, Internet Explorer does not support all of Kha-Boom!'s features.
+          p We recommend using 
+            a(href="https://www.google.com/chrome/" target="_blank" rel="noopener" style="color: #667eea;") Google Chrome
+            |  for the best experience.
       <![endif]-->
 
       include _header

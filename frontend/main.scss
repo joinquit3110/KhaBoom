@@ -1,5 +1,5 @@
 // =============================================================================
-// Main Styles
+// Main Styles - Kha-Boom! Design System
 // (c) Kha-Boom!
 // =============================================================================
 
@@ -15,23 +15,77 @@
 @import "./styles/footer";
 @import "./styles/courses";
 
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
 
 html {
   font-family: $fonts;
   cursor: default;
-  background-color: $background;
+  background: $background;
   min-width: 320px;
   font-size: 18px;
   line-height: 1.6;
   touch-action: manipulation;
-  &[theme="dark"] { background: $dark-mode; }
+  scroll-behavior: smooth;
+  
+  &[theme="dark"] { 
+    background: $background-dark;
+    
+    .glass-card, .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
 }
 
 html:not(.ready) * { transition: none !important; animation: none !important; }
 html:not(.is-tabbing) *:focus { outline: none !important; }
 html.grabbing, html.grabbing * { cursor: grabbing !important; }
 
-body { @include theme(color, $text-dark, rgba(white, 90%)); }
+body { 
+  @include theme(color, $text-dark, rgba(white, 90%));
+  position: relative;
+  min-height: 100vh;
+  
+  // Animated gradient background
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+      rgba($purple-light, 0.05) 0%, 
+      rgba($pink-light, 0.05) 25%, 
+      rgba($blue-light, 0.05) 50%, 
+      rgba($purple-dark, 0.05) 75%, 
+      rgba($pink-dark, 0.05) 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  html[theme="dark"] & {
+    &::before {
+      background: linear-gradient(45deg, 
+        rgba($purple-light, 0.1) 0%, 
+        rgba($pink-light, 0.1) 25%, 
+        rgba($blue-light, 0.1) 50%, 
+        rgba($purple-dark, 0.1) 75%, 
+        rgba($pink-dark, 0.1) 100%);
+    }
+  }
+}
+
+// Gradient animation
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 main {
   padding-top: 44px;
@@ -226,5 +280,304 @@ x-modal#login {
     white-space: nowrap;
     padding: 0 12px;
     transform: translateX(-50%);
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+// Kha-Boom! Design System Components
+
+// Glass Morphism Card
+.glass-card {
+  background: $glass-bg;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid $glass-border;
+  padding: 2rem;
+  transition: all 0.3s $smooth;
+  box-shadow: $glass-shadow;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+// Glass Panel (larger sections)
+.glass-panel {
+  background: $glass-bg;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 30px;
+  border: 1px solid $glass-border;
+  padding: 3rem;
+  box-shadow: $glass-shadow;
+}
+
+// Gradient Buttons
+.btn-gradient {
+  background: $gradient-primary;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 14px;
+  display: inline-block;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba($purple-dark, 0.3);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  &.secondary {
+    background: $gradient-secondary;
+    
+    &:hover {
+      box-shadow: 0 10px 20px rgba($pink-dark, 0.3);
+    }
+  }
+  
+  &.accent {
+    background: $gradient-accent;
+    
+    &:hover {
+      box-shadow: 0 10px 20px rgba($blue-dark, 0.3);
+    }
+  }
+}
+
+// Liquid Blob Animation
+.liquid-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: $gradient-primary;
+  opacity: 0.6;
+  filter: blur(40px);
+  animation: blob 10s infinite;
+  pointer-events: none;
+  
+  &:nth-child(2) {
+    background: $gradient-secondary;
+    animation-duration: 15s;
+    animation-delay: 2s;
+  }
+  
+  &:nth-child(3) {
+    background: $gradient-accent;
+    animation-duration: 20s;
+    animation-delay: 4s;
+  }
+}
+
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  50% {
+    transform: translate(-20px, 30px) scale(0.9);
+  }
+  75% {
+    transform: translate(-40px, -20px) scale(1.05);
+  }
+}
+
+// Gradient Text
+.gradient-text {
+  background: $gradient-primary;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+}
+
+// Modern Input Fields
+.input-modern {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 12px 20px;
+  color: $text-dark;
+  font-size: 16px;
+  transition: all 0.3s $smooth;
+  width: 100%;
+  
+  &:focus {
+    outline: none;
+    border-color: $purple-light;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba($purple-light, 0.2);
+  }
+  
+  &::placeholder {
+    color: rgba($text-medium, 0.6);
+  }
+  
+  html[theme="dark"] & {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    
+    &:focus {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// Course Cards with Glass Effect
+.course-card {
+  @extend .glass-card;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  
+  .course-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+  }
+  
+  .course-content {
+    padding: 1.5rem;
+    
+    h3 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      color: $text-dark;
+      
+      html[theme="dark"] & {
+        color: white;
+      }
+    }
+    
+    p {
+      color: $text-medium;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 1rem 0;
+    }
+  }
+  
+  .course-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba($green, 0.2);
+      color: $green;
+      
+      &.intermediate {
+        background: rgba($yellow, 0.2);
+        color: $yellow;
+      }
+      
+      &.advanced {
+        background: rgba($red, 0.2);
+        color: $red;
+      }
+    }
+  }
+}
+
+// Responsive Grid System
+.kha-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+// Profile Dropdown
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: $glass-bg;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid $glass-border;
+  border-radius: 20px;
+  padding: 1rem;
+  min-width: 250px;
+  box-shadow: $glass-shadow;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s $smooth;
+  
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    color: $text-dark;
+    text-decoration: none;
+    transition: all 0.2s;
+    
+    html[theme="dark"] & {
+      color: white;
+    }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+    
+    x-icon {
+      margin-right: 10px;
+    }
+  }
+  
+  .dropdown-divider {
+    height: 1px;
+    background: $glass-border;
+    margin: 0.5rem 0;
   }
 }

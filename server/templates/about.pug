@@ -1,0 +1,353 @@
+doctype html
+html(lang="en" theme=theme)
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title About - Kha-Boom!
+    meta(name="description" content="Learn about Kha-Boom! and our mission to revolutionize online education")
+    
+    // Google Fonts
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+    
+    // Main styles
+    link(href=cacheBust('/main.css') rel='stylesheet')
+    
+    style.
+      .about-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1rem 2rem;
+        background: rgba(15, 15, 35, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      }
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .about-hero {
+        padding: 8rem 2rem 4rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .mission-section {
+        padding: 4rem 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .team-card {
+        text-align: center;
+        padding: 2rem;
+      }
+      .team-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+      }
+      .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 3rem auto;
+      }
+      .value-card {
+        padding: 2rem;
+        text-align: left;
+      }
+      .value-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 0 2rem;
+      }
+      .timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+      }
+      .timeline-item {
+        position: relative;
+        padding: 2rem;
+        margin: 2rem 0;
+        width: calc(50% - 2rem);
+      }
+      .timeline-item:nth-child(odd) {
+        left: 0;
+        text-align: right;
+      }
+      .timeline-item:nth-child(even) {
+        left: calc(50% + 2rem);
+        text-align: left;
+      }
+      .timeline-dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        top: 2rem;
+      }
+      .timeline-item:nth-child(odd) .timeline-dot {
+        right: -2.5rem;
+      }
+      .timeline-item:nth-child(even) .timeline-dot {
+        left: -2.5rem;
+      }
+      @media (max-width: 768px) {
+        .timeline::before {
+          left: 2rem;
+        }
+        .timeline-item {
+          width: calc(100% - 4rem);
+          left: 4rem !important;
+          text-align: left !important;
+        }
+        .timeline-dot {
+          left: -2.5rem !important;
+        }
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after, .nav-link.active::after {
+        width: 100%;
+      }
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .logo-text {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+  
+  body
+    // Navigation Header
+    nav.about-nav
+      .nav-container
+        .logo-container
+          .gradient-text.logo-text Kha-Boom!
+        
+        .nav-links
+          a.nav-link(href="/") Home
+          a.nav-link(href="/courses") Courses
+          a.nav-link.active(href="/about") About
+          
+          if user
+            .profile-container(style="position: relative;")
+              button.btn-gradient(onclick="toggleProfileDropdown()" style="padding: 8px; border-radius: 50%; width: 45px; height: 45px;")
+                img(src=user.avatar(56) alt="Profile" style="width: 100%; height: 100%; border-radius: 50%;")
+              
+              .profile-dropdown#profileDropdown
+                a.dropdown-item(href="/dashboard")
+                  x-icon(name='dashboard')
+                  span Dashboard
+                a.dropdown-item(href="/profile")
+                  x-icon(name='settings')
+                  span Profile Settings
+                .dropdown-divider
+                a.dropdown-item(href="/logout")
+                  x-icon(name='logout')
+                  span Sign Out
+          else
+            a.btn-gradient.secondary(href="/login" style="padding: 10px 24px;") Login
+            a.btn-gradient(href="/signup" style="padding: 10px 24px;") Sign Up
+    
+    // Hero Section
+    section.about-hero
+      .liquid-blob(style="width: 400px; height: 400px; top: -100px; right: -100px; opacity: 0.5;")
+      .liquid-blob(style="width: 300px; height: 300px; bottom: -50px; left: -50px; opacity: 0.5;")
+      
+      h1.gradient-text(style="font-size: 3.5rem; margin-bottom: 1rem;") About Kha-Boom!
+      p(style="font-size: 1.4rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto;")
+        | We're on a mission to make learning explosive, engaging, and accessible to everyone
+    
+    // Mission Section
+    section.mission-section
+      .glass-panel
+        h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 2rem; text-align: center;") Our Mission
+        p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 2rem;")
+          | At Kha-Boom!, we believe that education should be an adventure, not a chore. Our platform combines 
+          | cutting-edge technology with innovative pedagogy to create learning experiences that are as entertaining 
+          | as they are educational.
+        p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8;")
+          | Through interactive content, personalized learning paths, and gamified experiences, we're transforming 
+          | how people learn and grow in the digital age.
+    
+    // Values Section
+    section(style="padding: 4rem 2rem;")
+      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Our Values
+      
+      .values-grid
+        .glass-card.value-card
+          .value-icon(style="background: linear-gradient(135deg, #667eea, #764ba2);")
+            span(style="color: white;") 🎯
+          h3(style="margin-bottom: 1rem; color: white;") Innovation
+          p(style="color: rgba(255, 255, 255, 0.8);")
+            | We constantly push boundaries to create the most engaging and effective learning experiences.
+        
+        .glass-card.value-card
+          .value-icon(style="background: linear-gradient(135deg, #f093fb, #f5576c);")
+            span(style="color: white;") 🌍
+          h3(style="margin-bottom: 1rem; color: white;") Accessibility
+          p(style="color: rgba(255, 255, 255, 0.8);")
+            | Education should be available to everyone, regardless of background or location.
+        
+        .glass-card.value-card
+          .value-icon(style="background: linear-gradient(135deg, #4facfe, #00f2fe);")
+            span(style="color: white;") 🤝
+          h3(style="margin-bottom: 1rem; color: white;") Community
+          p(style="color: rgba(255, 255, 255, 0.8);")
+            | Learning is better together. We foster a supportive community of curious minds.
+        
+        .glass-card.value-card
+          .value-icon(style="background: linear-gradient(135deg, #fa709a, #fee140);")
+            span(style="color: white;") ✨
+          h3(style="margin-bottom: 1rem; color: white;") Excellence
+          p(style="color: rgba(255, 255, 255, 0.8);")
+            | We maintain the highest standards in content quality and user experience.
+    
+    // Team Section
+    section(style="padding: 4rem 2rem; background: rgba(0, 0, 0, 0.2);")
+      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Meet Our Team
+      
+      .team-grid
+        .glass-card.team-card
+          .team-avatar
+            span(style="color: white;") 👨‍💼
+          h3(style="color: white; margin-bottom: 0.5rem;") Alex Johnson
+          p(style="color: #667eea; margin-bottom: 1rem;") CEO & Founder
+          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
+            | Passionate about making education accessible and fun for everyone.
+        
+        .glass-card.team-card
+          .team-avatar
+            span(style="color: white;") 👩‍💻
+          h3(style="color: white; margin-bottom: 0.5rem;") Sarah Chen
+          p(style="color: #f093fb; margin-bottom: 1rem;") CTO
+          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
+            | Leading our tech innovation with 15+ years of experience.
+        
+        .glass-card.team-card
+          .team-avatar
+            span(style="color: white;") 👨‍🎨
+          h3(style="color: white; margin-bottom: 0.5rem;") Mike Rodriguez
+          p(style="color: #4facfe; margin-bottom: 1rem;") Head of Design
+          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
+            | Creating beautiful and intuitive learning experiences.
+        
+        .glass-card.team-card
+          .team-avatar
+            span(style="color: white;") 👩‍🏫
+          h3(style="color: white; margin-bottom: 0.5rem;") Dr. Emily Watson
+          p(style="color: #fa709a; margin-bottom: 1rem;") Head of Education
+          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
+            | Ensuring our content meets the highest educational standards.
+    
+    // Journey Timeline
+    section(style="padding: 4rem 2rem;")
+      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Our Journey
+      
+      .timeline
+        .glass-card.timeline-item
+          .timeline-dot
+          h3(style="color: #667eea; margin-bottom: 0.5rem;") 2020
+          p(style="color: rgba(255, 255, 255, 0.8);") Founded with a vision to revolutionize online learning
+        
+        .glass-card.timeline-item
+          .timeline-dot
+          h3(style="color: #f093fb; margin-bottom: 0.5rem;") 2021
+          p(style="color: rgba(255, 255, 255, 0.8);") Launched our first interactive courses
+        
+        .glass-card.timeline-item
+          .timeline-dot
+          h3(style="color: #4facfe; margin-bottom: 0.5rem;") 2022
+          p(style="color: rgba(255, 255, 255, 0.8);") Reached 5,000+ active learners
+        
+        .glass-card.timeline-item
+          .timeline-dot
+          h3(style="color: #fa709a; margin-bottom: 0.5rem;") 2023
+          p(style="color: rgba(255, 255, 255, 0.8);") Introduced AI-powered personalized learning
+        
+        .glass-card.timeline-item
+          .timeline-dot
+          h3(style="color: #30cfd0; margin-bottom: 0.5rem;") 2024
+          p(style="color: rgba(255, 255, 255, 0.8);") Expanding globally with 50+ courses
+    
+    // Footer
+    footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3); margin-top: 5rem;")
+      .container(style="text-align: center;")
+        p(style="color: rgba(255, 255, 255, 0.6); margin-bottom: 1rem;") © 2025 Kha-Boom! All rights reserved.
+    
+    script(src=cacheBust('/main.js'))
+    script.
+      // Profile dropdown toggle
+      function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('active');
+      }
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const profileContainer = document.querySelector('.profile-container');
+        if (dropdown && profileContainer && !profileContainer.contains(event.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+      

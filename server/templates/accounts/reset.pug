@@ -2,18 +2,49 @@ extends ../_layout
 
 block vars
   - var title = __('Reset Password')
-  - var styles = ['/accounts.css']
+  - var styles = ['/main.css', '/accounts.css']
   - var scripts = ['/accounts.js']
 
 block main
-  .container.narrow
-    h1 #[x-icon(name="lock" size=54)] #{__('Reset Password')}
-    +flash(messages)
+  .container(style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;")
+    // Decorative blobs
+    .liquid-blob(style="width: 280px; height: 280px; top: 15%; right: 10%; opacity: 0.3; position: fixed;")
+    .liquid-blob(style="width: 220px; height: 220px; bottom: 15%; left: 10%; opacity: 0.3; position: fixed;")
+    
+    .glass-panel(style="max-width: 450px; width: 100%; padding: 3rem;")
+      .text-center(style="margin-bottom: 2rem;")
+        .gradient-text(style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;") Kha-Boom!
+        h1(style="font-size: 1.8rem; font-weight: 600; color: white; margin: 0;") #{__('Reset Your Password')}
+      
+      +flash(messages)
 
-    form.form-large.password-form.form-min-height(method="POST")
-      input(type="hidden" name="_csrf" value=_csrf)
-      p= __("Choose a new password for your account:")
-      x-password: x-icon(name="eye")
-      button.btn.btn-red.btn-large(type="submit")= __('Change Password')
-
-    include ../_footer
+      form(method="POST" style="display: flex; flex-direction: column; gap: 1.5rem;")
+        input(type="hidden" name="_csrf" value=_csrf)
+        
+        .glass-card(style="padding: 1.5rem; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);")
+          p(style="color: rgba(255, 255, 255, 0.9); margin: 0; text-align: center;")= __("Choose a new password for your account:")
+        
+        .form-group
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('New Password')
+          .password-wrapper(style="position: relative;")
+            x-password
+              x-icon(name="eye" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255, 255, 255, 0.5);")
+        
+        .form-group
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Password Requirements')
+          ul(style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin: 0; padding-left: 1.5rem;")
+            li At least 8 characters long
+            li Include uppercase and lowercase letters
+            li Include at least one number
+            li Include at least one special character
+        
+        button.btn-gradient(type="submit" style="padding: 14px 32px; font-size: 1rem; margin-top: 0.5rem;")= __('Set New Password')
+      
+      // Back to login link
+      .text-center(style="margin-top: 2rem;")
+        a(href='/login' style="color: #667eea; text-decoration: none; font-size: 0.9rem;")= __('Back to Login')
+      
+      // Back to home link
+      .text-center(style="margin-top: 1rem;")
+        a(href='/' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
+          | ← #{__('Back to Home')}

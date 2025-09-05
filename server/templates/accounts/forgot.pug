@@ -2,23 +2,48 @@ extends ../_layout
 
 block vars
   - var title = __('Reset Password')
-  - var styles = ['/accounts.css']
+  - var styles = ['/main.css', '/accounts.css']
   - var scripts = ['/accounts.js']
 
 block main
-  .container.narrow
-    h1 #[x-icon(name="lock" size=54)] #{__('Reset Password')}
-    +flash(messages)
+  .container(style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;")
+    // Decorative blobs
+    .liquid-blob(style="width: 250px; height: 250px; top: 20%; left: 10%; opacity: 0.3; position: fixed;")
+    .liquid-blob(style="width: 200px; height: 200px; bottom: 20%; right: 10%; opacity: 0.3; position: fixed;")
+    
+    .glass-panel(style="max-width: 450px; width: 100%; padding: 3rem;")
+      .text-center(style="margin-bottom: 2rem;")
+        .gradient-text(style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;") Kha-Boom!
+        h1(style="font-size: 1.8rem; font-weight: 600; color: white; margin: 0;") #{__('Reset Password')}
+      
+      +flash(messages)
 
-    form.form-large.form-min-height(method='POST')
-      input(type="hidden" name="_csrf" value=_csrf)
+      form(method='POST' style="display: flex; flex-direction: column; gap: 1.5rem;")
+        input(type="hidden" name="_csrf" value=_csrf)
 
-      p= __('Enter your email address or username below, and we will send you instructions how to reset your password.')
+        .glass-card(style="padding: 1.5rem; margin-bottom: 1rem;")
+          p(style="color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.6;")= __('Enter your email address below, and we will send you instructions on how to reset your password.')
 
-      label.form-field
-        input(type="email" name="email" placeholder=__("Email") required autocomplete="email" autofocus=req.body.email)
-        span.placeholder= __('Email')
+        .form-group
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Email Address')
+          input.input-modern(
+            type="email" 
+            name="email" 
+            placeholder=__("Enter your email") 
+            required 
+            autocomplete="email" 
+            autofocus=req.body.email
+            style="width: 100%;"
+          )
 
-      button.btn.btn-red.btn-large(type='submit')= __('Reset Password')
-
-    include ../_footer
+        button.btn-gradient(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Send Reset Link')
+      
+      // Back to login link
+      .text-center(style="margin-top: 2rem;")
+        p(style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;") #{__('Remember your password?')}
+        a(href='/login' style="color: #667eea; text-decoration: none; font-size: 0.9rem;")= __('Back to Login')
+      
+      // Back to home link
+      .text-center(style="margin-top: 1rem;")
+        a(href='/' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
+          | ← #{__('Back to Home')}

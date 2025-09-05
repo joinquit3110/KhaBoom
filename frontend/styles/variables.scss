@@ -1,5 +1,5 @@
 // =============================================================================
-// CSS Variables
+// CSS Variables - Kha-Boom! Design System
 // (c) Kha-Boom!
 // =============================================================================
 
@@ -8,36 +8,57 @@
 @use "sass:math";
 @import "@mathigon/boost/src/components/mixins";
 
-// Rainbow
-$red:    #cd0e66 !default;
-$blue:   #0f82f2 !default;
-$green:  #22ab24 !default;
-$yellow: #fd8c00 !default;
+// Kha-Boom! Primary Colors
+$purple-light: #667eea !default;
+$purple-dark: #764ba2 !default;
+$pink-light: #f093fb !default;
+$pink-dark: #f5576c !default;
+$blue-light: #4facfe !default;
+$blue-dark: #00f2fe !default;
 
-$orange: #eb4726 !default;
-$purple: #6d3bbf !default;
-$teal:   #009ea6 !default;
-$lime:   #bfc212 !default;
+// Base Colors
+$red:    #ef4444 !default;
+$blue:   #3b82f6 !default;
+$green:  #10b981 !default;
+$yellow: #f59e0b !default;
+
+$orange: #fb923c !default;
+$purple: #8b5cf6 !default;
+$teal:   #14b8a6 !default;
+$lime:   #84cc16 !default;
 
 // Theme Colours
-$primary: #cd0e66 !default;
-$secondary: #181824 !default;
+$primary: $purple-light !default;
+$secondary: #0f0f23 !default;
 $background: white !default;
+$background-dark: #0f0f23 !default;
 
-$fonts: 'Source Sans Pro', Helvetica, sans-serif !default;
+// Gradients
+$gradient-primary: linear-gradient(135deg, $purple-light 0%, $purple-dark 100%) !default;
+$gradient-secondary: linear-gradient(135deg, $pink-light 0%, $pink-dark 100%) !default;
+$gradient-accent: linear-gradient(135deg, $blue-light 0%, $blue-dark 100%) !default;
+$gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%) !default;
 
-$success: #22ab24 !default;
-$error: #cd0e66 !default;
+// Glass Effect Colors
+$glass-bg: rgba(255, 255, 255, 0.1) !default;
+$glass-border: rgba(255, 255, 255, 0.2) !default;
+$glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37) !default;
+
+$fonts: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !default;
+
+$success: #10b981 !default;
+$error: #ef4444 !default;
+$warning: #f59e0b !default;
 
 // Course component styles
 $variable-color: $red !default;
 $blank-color: $blue !default;
 $glossary-color: $yellow !default;
 
-$dark-grey: #181824 !default;
-$grey: #3a3645 !default;
-$medium-grey: #656073 !default;
-$light-grey: #c5c2cc !default;
+$dark-grey: #1a1a2e !default;
+$grey: #2d2d44 !default;
+$medium-grey: #4a4a68 !default;
+$light-grey: #9ca3af !default;
 
 $text-dark:   #333 !default;
 $text-normal: #666 !default;
@@ -47,10 +68,11 @@ $text-light:  #aaa !default;
 $border-light: #ccc !default;
 $grey-background: mix($grey, white, 5%) !default;
 
-$dark-mode: mix($grey, $dark-grey, 30%) !default;
-$dark-mode-background: mix($dark-mode, white, 95%) !default;
+$dark-mode: #0f0f23 !default;
+$dark-mode-background: #1a1a2e !default;
 
 $bounce: cubic-bezier(.33,1.9,.52,.7) !default;
+$smooth: cubic-bezier(0.4, 0, 0.2, 1) !default;
 
 // TODO Clean up these shadow styles...
 $shadow: 0 3px 8px rgba(black, 30%) !default;
