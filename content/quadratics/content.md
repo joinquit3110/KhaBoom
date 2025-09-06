@@ -141,7 +141,7 @@ quadratic equations and to understand their graphs.
 
 > id: definitions
 > section: solving
-> sectionStatus: dev
+
 
 You already know how to solve [_linear equations_](gloss:linear-equation):
 equations of the form `ax + b`, where _x_ is a [variable](gloss:variable), and
@@ -1148,7 +1148,7 @@ but it still works the same way:
 ## The Quadratic Formula
 
 > section: formula
-> sectionStatus: dev
+
 
     // https://betterexplained.com/articles/quadratic-formula/
 

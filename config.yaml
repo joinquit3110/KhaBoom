@@ -30,7 +30,7 @@ social:
 
 footer:
   rows: []
-  copyright: © Kha-Boom!, 2025
+  copyright: © Kha-Boom! 2025
 
 courses:
   revealAll: false
@@ -38,7 +38,7 @@ courses:
 
 accounts:
   enabled: true
-  mongodb: mongodb+srv://riptid3110:01667849897@khaboomdb.q0mfgdv.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB
+  mongoServer: mongodb+srv://riptid3110:01667849897@khaboomdb.q0mfgdv.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB
   minAge: 13
   privacyPolicy: https://amplify.com/customer-privacy
   termsOfUse: https://amplify.com/acceptable-use-policy

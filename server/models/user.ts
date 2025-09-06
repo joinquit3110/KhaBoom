@@ -86,7 +86,7 @@ const UserSchema = new Schema<UserDocument, UserModel>({
   passwordResetToken: {type: String, ...INDEX},
   passwordResetExpires: Number,
   emailVerificationToken: String,
-  oAuthTokens: {type: [String], default: [], ...INDEX},
+  oAuthTokens: {type: [String], default: []},
   deletionRequested: Number,
   acceptedPolicies: Boolean
 }, {timestamps: true});

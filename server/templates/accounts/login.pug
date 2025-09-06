@@ -7,6 +7,11 @@ html(lang="en")
     link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
     link(href="/main.css" rel='stylesheet')
     style.
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         padding: 0;
@@ -14,6 +19,7 @@ html(lang="en")
         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
         font-family: 'Inter', sans-serif;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         overflow: hidden;
@@ -52,10 +58,10 @@ html(lang="en")
     .liquid-blob(style="width: 350px; height: 350px; bottom: -100px; right: -100px; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); opacity: 0.3; filter: blur(80px); animation: blob 20s infinite reverse;")
     .liquid-blob(style="width: 300px; height: 300px; top: 50%; left: 60%; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); opacity: 0.2; filter: blur(80px); animation: blob 25s infinite;")
     
-    .container(style="position: relative; z-index: 1; padding: 2rem;")
-      .glass-panel(style="max-width: 450px; width: 100%; padding: 3rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);")
+    .container(style="position: relative; z-index: 1; padding: 2rem; width: 100%;")
+      .glass-panel(style="max-width: 560px; width: min(92vw, 560px); margin: 0 auto; padding: 3rem; background: rgba(255,255,255,.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 25px 45px rgba(0,0,0,.2);")
         .text-center(style="margin-bottom: 2.5rem;")
-          h1.gradient-text(style="font-size: 3.5rem; font-weight: 800; margin: 0 0 0.5rem 0; font-family: 'Poppins', sans-serif;") Kha-Boom!
+          h1.gradient-text(style="font-size: 3.5rem; font-weight: 800; margin: 0 0 .5rem 0; font-family: 'Poppins', sans-serif; white-space: nowrap;") Kha&#8209;Boom!
           p(style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; font-weight: 300;") Welcome back, explorer!
         
         // Flash messages would go here if needed
@@ -73,7 +79,7 @@ html(lang="en")
         form(method="POST" style="display: flex; flex-direction: column; gap: 1.8rem;")
           input(type="hidden" name="_csrf" value=_csrf)
 
-          .form-group
+          .form-group(style="margin-bottom: 1.5rem;")
             label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; margin-bottom: 0.6rem; display: block; font-weight: 500;") Email Address
             input(
               type="email" 
@@ -83,12 +89,12 @@ html(lang="en")
               autofocus=true 
               autocomplete="email" 
               value=req.body.email
-              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none;"
+              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none; box-sizing: border-box;"
               onfocus="this.style.borderColor='#667eea'; this.style.background='rgba(102, 126, 234, 0.1)';" 
               onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
             )
 
-          .form-group
+          .form-group(style="margin-bottom: 1.5rem;")
             label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; margin-bottom: 0.6rem; display: block; font-weight: 500;") Password
             input(
               type="password" 
@@ -97,12 +103,12 @@ html(lang="en")
               required 
               minlength="4" 
               autocomplete="password"
-              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none;"
+              style="width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; font-size: 16px; transition: all 0.3s; outline: none; box-sizing: border-box;"
               onfocus="this.style.borderColor='#667eea'; this.style.background='rgba(102, 126, 234, 0.1)';" 
               onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
             )
 
-          button(type='submit' style="padding: 16px 32px; font-size: 1.05rem; margin-top: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
+          button(type='submit' style="width: 100%; padding: 16px 32px; font-size: 1.05rem; margin-top: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
             | Sign In
 
         .links(style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);")

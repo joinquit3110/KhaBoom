@@ -19,6 +19,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 
+
 html {
   font-family: $fonts;
   cursor: default;
@@ -46,7 +47,9 @@ html.grabbing, html.grabbing * { cursor: grabbing !important; }
 body { 
   @include theme(color, $text-dark, rgba(white, 90%));
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
   
   // Animated gradient background
   &::before {
@@ -458,7 +461,10 @@ x-modal#login {
   position: relative;
   overflow: hidden;
   padding: 0;
-  
+  display:flex;
+  flex-direction: column;
+  height: 100%;
+
   .course-image {
     width: 100%;
     height: 200px;
@@ -468,7 +474,10 @@ x-modal#login {
   
   .course-content {
     padding: 1.5rem;
-    
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+
     h3 {
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
@@ -485,6 +494,10 @@ x-modal#login {
       font-size: 14px;
       line-height: 1.6;
       margin: 0 0 1rem 0;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
     }
   }
   
@@ -493,7 +506,15 @@ x-modal#login {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+    margin-top: auto;
+
+    .btn-gradient {
+      white-space:nowrap;
+      font-size: 13px;
+      padding: 8px 20px;
+      line-height: 1.2;
+    }
+
     .difficulty {
       display: inline-block;
       padding: 4px 12px;
@@ -580,4 +601,9 @@ x-modal#login {
     background: $glass-border;
     margin: 0.5rem 0;
   }
+
+}
+
+footer { 
+  margin-top: auto; 
 }

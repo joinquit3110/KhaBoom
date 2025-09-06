@@ -26,6 +26,7 @@ interface CourseAnalyticsModel extends Model<CourseAnalyticsDocument> {
   track: (userId: string, points?: number) => Promise<void>;
   getStats: (userId: string, start: Date, end: Date) => Promise<UserStats>;
   getLastWeekStats: (userId: string) => Promise<UserStats>;
+  getLeaderboard: () => Promise<any[]>;
 }
 
 const CourseAnalyticsSchema = new Schema<CourseAnalyticsDocument, CourseAnalyticsModel>({
@@ -63,6 +64,44 @@ CourseAnalyticsSchema.statics.getStats = async function(user: string, start: Dat
   const points = total(items.map(a => a.points));
   const minutes = Math.ceil(total(items.map(a => a.seconds)) / 60);
   return {points, minutes};
+};
+
+CourseAnalyticsSchema.statics.getLeaderboard = async function() {
+  // Import User model here to avoid circular dependency
+  const {User} = await import('./user');
+  
+  // Get stats for the last 30 days for all users
+  const thirtyDaysAgo = date.subDays(new Date(), 30);
+  const pipeline: any[] = [
+    { $match: { date: { $gte: thirtyDaysAgo } } },
+    { 
+      $group: {
+        _id: '$user',
+        totalPoints: { $sum: '$points' },
+        totalSeconds: { $sum: '$seconds' }
+      }
+    },
+    { $sort: { totalPoints: -1 as -1 } },
+    { $limit: 10 }
+  ];
+  
+  const results = await CourseAnalytics.aggregate(pipeline);
+  
+  // Get user details and format the leaderboard
+  const leaderboard = [];
+  for (const result of results) {
+    const user = await User.findById(result._id);
+    if (user) {
+      leaderboard.push({
+        name: user.fullName,
+        avatar: user.avatar(56),
+        points: result.totalPoints,
+        minutes: Math.ceil(result.totalSeconds / 60)
+      });
+    }
+  }
+  
+  return leaderboard;
 };
 
 export const CourseAnalytics = model<CourseAnalyticsDocument, CourseAnalyticsModel>('CourseAnalytics', CourseAnalyticsSchema);

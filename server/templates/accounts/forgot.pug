@@ -1,4 +1,4 @@
-extends ../_layout
+extends ../_layout_no_header
 
 block vars
   - var title = __('Reset Password')
@@ -6,8 +6,7 @@ block vars
   - var scripts = ['/accounts.js']
 
 block main
-  .container(style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;")
-    // Decorative blobs
+  .container(style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; gap:1rem;")
     .liquid-blob(style="width: 250px; height: 250px; top: 20%; left: 10%; opacity: 0.3; position: fixed;")
     .liquid-blob(style="width: 200px; height: 200px; bottom: 20%; right: 10%; opacity: 0.3; position: fixed;")
     
@@ -33,7 +32,7 @@ block main
             required 
             autocomplete="email" 
             autofocus=req.body.email
-            style="width: 100%;"
+            style="width: 100%; box-sizing: border-box; display: block;"
           )
 
         button.btn-gradient(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Send Reset Link')
@@ -43,7 +42,7 @@ block main
         p(style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;") #{__('Remember your password?')}
         a(href='/login' style="color: #667eea; text-decoration: none; font-size: 0.9rem;")= __('Back to Login')
       
-      // Back to home link
-      .text-center(style="margin-top: 1rem;")
-        a(href='/' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
-          | ← #{__('Back to Home')}
+    // Back to home link
+    .text-center(style="margin-top: 1rem;")
+      a(href='/' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
+        | ← #{__('Back to Home')}

@@ -44,6 +44,8 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
       }
       .search-input {
         width: 100%;
+        box-sizing: border-box;
+        display: block;
         padding: 1rem 3rem 1rem 1.5rem;
         border-radius: 50px;
         border: 2px solid rgba(255, 255, 255, 0.1);
@@ -81,9 +83,46 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
         cursor: pointer;
         transition: all 0.3s ease;
       }
+      select.filter-btn{
+      display:inline-block;
+      width:auto;                 
+      max-width:240px;            
+      box-sizing:border-box;
+      padding-right:2.2rem;       
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background:rgba(255,255,255,0.1) !important;
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:25px;        
+      }
+      select.filter-btn{
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5 7l5 6 5-6' fill='none' stroke='white' stroke-width='2'/></svg>");
+      background-repeat:no-repeat;
+      background-position:right .8rem center;
+      }
+      select.filter-btn option{
+      background-color:#1e1b3a;  
+      color:#fff;
+      }
+      select.filter-btn option:checked,
+      select.filter-btn option:hover{
+      background-color:#2a2652;
+      color:#fff;
+      }
       .filter-btn:hover, .filter-btn.active {
         background: linear-gradient(135deg, #667eea, #764ba2);
         border-color: transparent;
+      }
+      select.filter-btn:hover,
+      select.filter-btn:focus {
+      background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5 7l5 6 5-6' fill='none' stroke='white' stroke-width='2'/></svg>"),
+      linear-gradient(135deg, #667eea, #764ba2);
+      background-repeat: no-repeat, no-repeat;
+      background-position: right .8rem center, 0 0;
+      border-color: transparent;
       }
       .courses-grid {
         max-width: 1200px;
@@ -91,35 +130,34 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
         padding: 2rem;
       }
       .start-learning-modal {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        position: relative;
+        width: min(90vw, 500px);
+        max-height: min(90vh, 560px);  
+        overflow: auto;                
         background: rgba(15, 15, 35, 0.98);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 20px;
-        padding: 2rem;
-        max-width: 400px;
-        width: 90%;
-        z-index: 1000;
-        display: none;
+        padding: 1.75rem 2rem;
+        z-index: 1001;                
+        text-align: center;
+        display: none;                
       }
       .start-learning-modal.active {
         display: block;
       }
       .modal-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         background: rgba(0, 0, 0, 0.7);
         z-index: 999;
         display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
       }
       .modal-overlay.active {
-        display: block;
+        display: flex;
       }
       .nav-links {
         display: flex;
@@ -213,7 +251,7 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
         button.filter-btn(data-filter="intermediate") Intermediate
         button.filter-btn(data-filter="advanced") Advanced
         
-        select.filter-btn(id="sortSelect" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2);")
+        select.filter-btn(id="sortSelect")
           option(value="name") Sort by Name
           option(value="difficulty") Sort by Difficulty
           option(value="popular") Most Popular
@@ -240,27 +278,23 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
               span.difficulty(class=difficulty)= difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
               
               if user
-                a.btn-gradient(href=`/${c}` style="padding: 8px 20px; font-size: 0.9rem;") Start Learning
+                a.btn-gradient(href=`/${c}`) Start Learning
               else
-                button.btn-gradient(
-                  onclick=`showLoginPrompt('${c}', '${course.title}')` 
-                  style="padding: 8px 20px; font-size: 0.9rem;"
-                ) Start Learning
+                button.btn-gradient(onclick=`showLoginPrompt('${c}', '${course.title}')`) Start Learning
     
     // Login Prompt Modal
     .modal-overlay#modalOverlay(onclick="hideLoginPrompt()")
-    .start-learning-modal#loginPromptModal
-      h2(style="color: white; margin-bottom: 1rem;") Login Required
-      p(style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;")
-        | Please log in to access 
-        span#courseName course content.
-      
-      .btn-group(style="display: flex; gap: 1rem; justify-content: center;")
-        button.btn-gradient.secondary(onclick="hideLoginPrompt()" style="padding: 10px 24px;") Cancel
-        a.btn-gradient#loginButton(href="/login" style="padding: 10px 24px;") Go to Login
-    
+      .start-learning-modal#loginPromptModal(onclick="event.stopPropagation()")
+        h2(style="color: white; margin-bottom: 1rem;") Login Required!
+        p(style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;")
+          | Please log in to access 
+          span#courseName.gradient-text
+        .btn-group(style="display: flex; gap: 1rem; justify-content: center;")
+          button.btn-gradient.secondary(onclick="hideLoginPrompt()" style="padding: 10px 24px;") Cancel
+          a.btn-gradient#loginButton(href="/login" style="padding: 10px 24px;") Go to Login
+
     // Footer
-    footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3); margin-top: 5rem;")
+    footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3);")
       .container(style="text-align: center;")
         p(style="color: rgba(255, 255, 255, 0.6);") © 2025 Kha-Boom! All rights reserved.
     

@@ -347,7 +347,7 @@ __normal distribution__.
 ## Probability Trees and Venn Diagrams
 
 > section: trees
-> sectionStatus: dev
+
 
 {.todo} TODO
 
@@ -375,7 +375,7 @@ The Galton Board has ${rows}{rows|8|2,9,1} rows. The probability the ball bounce
 ## Conditional Probability
 
 > section: conditional
-> sectionStatus: dev
+
 
 TODO
 
@@ -488,7 +488,7 @@ This gives a  chance of `6/9 = 2/3` like before.
 ## The Birthday Problem
 
 > section: birthdays
-> sectionStatus: dev
+
 
 TODO
 

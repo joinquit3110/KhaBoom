@@ -8,6 +8,11 @@ html(lang="en")
     link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
     link(href="/main.css" rel='stylesheet')
     style.
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         padding: 0;
@@ -15,6 +20,7 @@ html(lang="en")
         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
         font-family: 'Inter', sans-serif;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         overflow-x: hidden;
@@ -59,8 +65,8 @@ html(lang="en")
     .liquid-blob(style="width: 380px; height: 380px; bottom: -120px; left: -120px; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); opacity: 0.25; filter: blur(90px); animation: blob 25s infinite reverse;")
     .liquid-blob(style="width: 320px; height: 320px; top: 40%; left: 50%; position: fixed; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); opacity: 0.2; filter: blur(90px); animation: blob 30s infinite;")
     
-    .container(style="position: relative; z-index: 1; padding: 2rem; width: 100%; max-width: 550px;")
-      .glass-panel(style="width: 100%; padding: 2.5rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);")
+    .container(style="position: relative; z-index: 1; padding: 2rem; width: 100%;")
+      .glass-panel(style="max-width: 560px; width: min(92vw, 560px); margin: 0 auto; padding: 2.5rem; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 45px rgba(0,0,0,0.2);")
         .text-center(style="margin-bottom: 2rem;")
           h1.gradient-text(style="font-size: 3rem; font-weight: 800; margin: 0 0 0.3rem 0; font-family: 'Poppins', sans-serif;") Join Kha-Boom!
           p(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; font-weight: 300;") Start your explosive learning adventure today
@@ -78,7 +84,7 @@ html(lang="en")
         form(method="POST" style="display: flex; flex-direction: column; gap: 1.3rem;")
           input(type="hidden" name="_csrf" value=_csrf)
 
-          .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;")
+          .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.3rem;")
             .form-group
               label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; margin-bottom: 0.5rem; display: block; font-weight: 500;") First Name
               input(
@@ -87,7 +93,7 @@ html(lang="en")
                 required 
                 autocomplete="fname" 
                 placeholder="John"
-                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;"
+                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#f093fb'; this.style.background='rgba(240, 147, 251, 0.1)';" 
                 onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
               )
@@ -99,12 +105,12 @@ html(lang="en")
                 required 
                 autocomplete="lname" 
                 placeholder="Doe"
-                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;"
+                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#f093fb'; this.style.background='rgba(240, 147, 251, 0.1)';" 
                 onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
               )
 
-          .form-group
+          .form-group(style="margin-bottom: 1.3rem;")
             label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; margin-bottom: 0.5rem; display: block; font-weight: 500;") Email Address
             input(
               name="email" 
@@ -112,12 +118,12 @@ html(lang="en")
               required 
               placeholder="your@email.com" 
               autocomplete="email"
-              style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;"
+              style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; box-sizing: border-box;"
               onfocus="this.style.borderColor='#667eea'; this.style.background='rgba(102, 126, 234, 0.1)';" 
               onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
             )
 
-          .form-group
+          .form-group(style="margin-bottom: 1.3rem;")
             label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; margin-bottom: 0.5rem; display: block; font-weight: 500;") Password
             input(
               name="password" 
@@ -126,15 +132,21 @@ html(lang="en")
               placeholder="Create a strong password" 
               pattern=".{4,}" 
               autocomplete="new-password"
-              style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;"
+              style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; box-sizing: border-box;"
               onfocus="this.style.borderColor='#764ba2'; this.style.background='rgba(118, 75, 162, 0.1)';" 
               onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
             )
 
-          .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;")
+          .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.3rem;")
             .form-group
               label(style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; margin-bottom: 0.5rem; display: block; font-weight: 500;") Country
-              select(name='country' required style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;" onfocus="this.style.borderColor='#4facfe'; this.style.background='rgba(79, 172, 254, 0.1)';" onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';")
+              select(
+                name='country' 
+                required 
+                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; appearance: none; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#4facfe'; this.style.background='rgba(79, 172, 254, 0.1)';" 
+                onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
+              )
                 for c in countries
                   option(value=c.id, selected=(c.id === country) style="background: #1a1a2e; color: white;")= c.name
             
@@ -147,20 +159,25 @@ html(lang="en")
                 placeholder="Date of Birth" 
                 autocomplete="bday" 
                 required
-                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none;"
+                style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; transition: all 0.3s; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#4facfe'; this.style.background='rgba(79, 172, 254, 0.1)';" 
                 onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 0.08)';"
               )
+              // Help smaller viewports stack properly
+              style.
+                @media (max-width: 560px) {
+                  .glass-panel .form-row { grid-template-columns: 1fr; }
+                }
 
-          label(style="display: flex; align-items: flex-start; gap: 0.75rem; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin: 0.5rem 0;")
-            input(type="checkbox" name="policies" required style="width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: #667eea;")
-            span(style="line-height: 1.4;")
+          label(style="display: flex; align-items: flex-start; gap: 0.75rem; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.5;")
+            input(type="checkbox" name="policies" required style="flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: #667eea;")
+            span(style="flex: 1 1 auto;")
               | I've read and accept the 
               a(href=config.accounts.privacyPolicy target="_blank" style="color: #667eea; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';") Privacy Policy
               |  and 
               a(href=config.accounts.termsOfUse target="_blank" style="color: #f093fb; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';") Terms of Service
 
-          button(type='submit' style="padding: 16px 32px; font-size: 1rem; margin-top: 0.8rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(240, 147, 251, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
+          button(type='submit' style="padding: 16px 32px; font-size: 1rem; margin-top: 0.8rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(240, 147, 251, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';")
             | Create Account
         
         // Already have account link
@@ -168,11 +185,11 @@ html(lang="en")
           p(style="color: rgba(255, 255, 255, 0.6); margin-bottom: 0.5rem; font-size: 0.95rem;") Already have an account?
           a(href='/login' style="color: #667eea; text-decoration: none; font-size: 1rem; font-weight: 500;" onmouseover="this.style.color='#764ba2';" onmouseout="this.style.color='#667eea';") Sign In Instead
         
-        // Back to home link
-        .text-center(style="margin-top: 1rem;")
-          a(href='/' style="color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s;" onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.transform='translateX(-5px)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.5)'; this.style.transform='translateX(0)';")
-            span(style="font-size: 1.2rem;") ←
-            | Back to Home
+      // Back to home link
+      .text-center(style="margin-top: 1rem;")
+        a(href='/' style="color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s;" onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.transform='translateX(-5px)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.5)'; this.style.transform='translateX(0)';")
+          span(style="font-size: 1.2rem;") ←
+          | Back to Home
     
     // Add script for additional functionality
     script(src="/main.js")

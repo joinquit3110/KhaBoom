@@ -40,7 +40,7 @@ async function signup(req: express.Request) {
   const existingUser = await User.lookup(email);
   if (existingUser) return {error: 'accountExists', redirect: '/login'};
 
-  const user = new User({type: 'student', email, birthday, password, acceptedPolicies: true});
+  const user = new User({type: 'student', email, birthday, password, acceptedPolicies: true, oAuthTokens: []});
   user.firstName = sanitizeString(req.body.first);
   user.lastName = sanitizeString(req.body.last);
   user.country = COUNTRY_CODES.includes(req.body.country) ? req.body.country : req.country;

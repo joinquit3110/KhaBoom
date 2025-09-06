@@ -275,8 +275,11 @@ export class MathigonStudioApp {
 
       const items = Math.min(4, 6 - recent.length);
       const recommended = COURSES.filter(x => !progress.has(x)).slice(0, items);
+      
+      // Fetch leaderboard data - top 10 users by points
+      const leaderboard = await CourseAnalytics.getLeaderboard();
 
-      res.render('dashboard', {progress, recent, recommended, stats});
+      res.render('dashboard', {progress, recent, recommended, stats, leaderboard});
     });
 
     return this;

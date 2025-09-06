@@ -3,9 +3,7 @@
 // (c) Kha-Boom!
 // =============================================================================
 
-
 @import "./main";
-
 
 h1 { margin-bottom: 1.5em; }
 h1 .avatar {
@@ -19,15 +17,14 @@ h1 .avatar {
 }
 h1 .subtitle { display: block; font-size: 60%; }
 
-
 .dashboard-body { width: 640px; max-width: calc(100% - 48px); }
 .overflow-wrap { margin: -32px -24px; padding: 32px 24px; min-height: 240px; @include overflow-scroll; }
 h2:first-child { margin-top: 0; }
 
 .dashboard-sidebar {
-  width: 280px;
-  @media screen and (max-width: 1015px) { width: 440px; }
-  @media screen and (max-width: 640px) { flex-grow: 1; }
+  width: 420px;
+  @media screen and (min-width: 1440px) { width: 480px; }
+  @media screen and (max-width: 1015px) { width: 100%; }
 }
 .sidebar-wrap { position: sticky; top: 68px; }
 
@@ -43,7 +40,6 @@ h2:first-child { margin-top: 0; }
 .no-courses x-icon { display: inline-block; margin: 0 8px -14px; }
 
 form + p.caption { margin-top: 16px; }
-
 
 // -----------------------------------------------------------------------------
 // Sidebar Panels
@@ -61,6 +57,37 @@ form + p.caption { margin-top: 16px; }
   strong x-icon { margin: 0 -2px -3px 0; }
 }
 
+:root {
+  --kb-gold: #f6c343;
+  --kb-gold-2: #ffd86b;
+}
+
+.stats-title,
+.leader-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin: 16px 0;
+}
+
+.stats-title {
+  background: linear-gradient(90deg, var(--kb-gold), var(--kb-gold-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.leader-title { color: #667eea; }
+
+.sidebar-panel { border-top: 3px solid var(--kb-gold); }
+
+.stats-row path { stroke: rgba(0,0,0,0.1); }
+.stats-row path.m-red  { stroke: #ff6b6b; filter: drop-shadow(0 2px 6px rgba(255,107,107,.35)); }
+.stats-row path.m-blue { stroke: #4facfe; filter: drop-shadow(0 2px 6px rgba(79,172,254,.35)); }
+
 .stats-row {
   display: flex;
   margin: 0 20px 20px;
@@ -76,9 +103,6 @@ form + p.caption { margin-top: 16px; }
     fill: transparent;
     stroke-width: 18px;
     stroke-linecap: round;
-    stroke: rgba(black, 10%);
-    &.m-red { stroke: $red; }
-    &.m-blue { stroke: $blue; }
   }
 }
 

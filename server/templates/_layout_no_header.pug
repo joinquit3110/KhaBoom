@@ -1,0 +1,145 @@
+include _mixins
+
+//- Default template variables
+block vars
+- var title = title ? title + ' - ' + config.siteName : config.siteName
+- var description = description || config.description
+- var thumbnail = thumbnail || '/images/thumbnail.jpg';
+
+if xhr
+  title= title
+  block main
+
+else
+  doctype html
+  html(lang=locale.id dir=(locale.dir || 'ltr') theme="dark" class=htmlClass)
+    head
+      include _head
+      block head
+
+      block fonts
+        //- Source Sans Pro on Google Fonts doesn't have full support for Cyrillic characters.
+        if locale.id !== 'ru'
+          link(href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,300,400i,600i&amp;subset=greek" rel="stylesheet")
+          link(rel="dns-prefetch" href="https://fonts.googleapis.com")
+          link(rel="preconnect" href="https://fonts.gstatic.com/" crossorigin)
+
+      script window.csrfToken = '#{_csrf}'
+      meta(name="csrf-token" content=_csrf)
+
+      block styles
+        for s in (styles || ['/main.css'])
+          link(href=cacheBust(s) rel='stylesheet')
+      
+      // Add dark theme styles
+      style.
+        body {
+          background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+          min-height: 100vh;
+          margin: 0;
+          padding: 0;
+        }
+        .gradient-text {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-radius: 30px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+        }
+        .glass-card {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 15px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-gradient {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 50px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-decoration: none;
+          display: inline-block;
+        }
+        .btn-gradient:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        .liquid-blob {
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          filter: blur(80px);
+          animation: blob 15s infinite;
+        }
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(30px, -50px) scale(1.1); }
+          50% { transform: translate(-20px, 30px) scale(0.9); }
+          75% { transform: translate(-40px, -20px) scale(1.05); }
+        }
+        .input-modern {
+          padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 2px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          color: white;
+          font-size: 15px;
+          transition: all 0.3s;
+          outline: none;
+        }
+        .input-modern:focus {
+          border-color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+        }
+
+    body
+      noscript.warning
+        .warning-body
+          h1.gradient-text(style="font-size: 2rem; margin-bottom: 1rem;") Kha-Boom!
+          p Please enable JavaScript in your browser to access Kha-Boom!
+
+      <!--[if IE]>
+      .warning
+        .warning-body
+          h1.gradient-text(style="font-size: 2rem; margin-bottom: 1rem;") Kha-Boom!
+          p(style="margin-bottom: 1rem;") Unfortunately, Internet Explorer does not support all of Kha-Boom!'s features.
+          p We recommend using 
+            a(href="https://www.google.com/chrome/" target="_blank" rel="noopener" style="color: #667eea;") Google Chrome
+            |  for the best experience.
+      <![endif]-->
+
+      //- No header included here
+      include accounts/privacy-modal
+
+      if showCookieConsent
+        .cookie-warning
+          p #{__(`$0 uses cookies to personalise and improve this website.`, config.siteName)}
+          .btn-row
+            button#yes-to-cookies.btn.btn-white.btn-small #{__('Accept')}
+            a.btn.btn-white.btn-small(href=config.privacyURL) #{__('Privacy Policy')}
+
+      main
+        block main
+
+      block scripts
+        script(src=cacheBust('/polyfill.js'))
+        for s in (scripts || ['/main.js'])
+          script(src=cacheBust(s))
+
+      if env === 'production' && config.googleAnalytics
+        script.
+          window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};
+          ga.l = +new Date;
+          ga('create', #{config.googleAnalytics}, 'auto');
+          ga('set', 'transport', 'beacon');
+          ga('require', 'displayfeatures');
+          ga('require', 'pageVisibilityTracker', {sendInitialPageview: true});
+        script(async src="https://www.google-analytics.com/analytics.js")

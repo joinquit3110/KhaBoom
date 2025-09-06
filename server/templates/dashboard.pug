@@ -1,7 +1,7 @@
 extends _layout
 
 block vars
-  - var title = __('Student Dashboard')
+  - var title = __('User Dashboard')
   - var styles = ['/dashboard.css']
   - var scripts = ['/dashboard.js']
 
@@ -10,7 +10,7 @@ block main
     h1
       img.avatar(src=user.avatar(200) width=100 height=100)
       | #{user.fullName}
-      span.subtitle= __('Student Dashboard')
+      span.subtitle= __('User Dashboard')
 
     .row.padded
       .dashboard-body.grow
@@ -28,7 +28,9 @@ block main
       .dashboard-sidebar: .sidebar-wrap
         .sidebar-panel
           block dashboard-sidebar
-            h2= __('Weekly Stats')
+            h2.stats-title
+              x-icon(name='chart-pie' size=22)
+              |  #{__('Weekly Stats')}
             .stats-row
               .stats
                 svg(width=110 height=96)
@@ -42,21 +44,33 @@ block main
                   path.m-blue(d="M23.89,86.11a44,44,0,1,1,62.22,0" stroke-dasharray=`${208 * stats.minutes / 60} 1000`)
                 h3.m-blue= stats.minutes
                 .small= __('Minutes')
-
-        .sidebar-panel
-          h2= __('Connect with $0', config.siteName)
-          .connect.row
-            if config.social.twitter
-              a.btn.twitter(href=`https://twitter.com/${config.social.twitter.handle}` title="Twitter" target="_blank" rel="noopener")
-                x-icon(name="twitter" size=32)
-            if config.social.facebook
-              a.btn.facebook(href=`https://www.facebook.com/${config.social.facebook.page}/` title="Facebook" target="_blank" rel="noopener")
-                x-icon(name="facebook" size=32)
-            if config.social.instagram
-              a.btn.instagram(href=`https://www.instagram.com/${config.social.instagram.handle}/` title="Instagram" target="_blank" rel="noopener")
-                x-icon(name="instagram" size=32)
-            if config.social.youtube
-              a.btn.youtube(href=`https://www.youtube.com/c/${config.social.youtube.channel}` title="YouTube" target="_blank" rel="noopener")
-                x-icon(name="youtube" size=32)
-
-    include _footer
+            
+            // Leaderboard Section
+            h2.leader-title
+              x-icon(name='trophy' size=22)
+              |  #{__('Leaderboard')}
+            .leaderboard-panel(style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1rem;")
+              if leaderboard && leaderboard.length
+                .leaderboard-list
+                  each user, index in leaderboard
+                    .leaderboard-item(style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'")
+                      .rank(style="font-size: 1.2rem; font-weight: bold; width: 30px; text-align: center; color: " + (index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255, 255, 255, 0.6)'))
+                        if index === 0
+                          | 🥇
+                        else if index === 1  
+                          | 🥈
+                        else if index === 2
+                          | 🥉
+                        else
+                          | #{index + 1}
+                      img.leaderboard-avatar(src=user.avatar style="width: 32px; height: 32px; border-radius: 50%; margin: 0 12px;")
+                      .leaderboard-name(style="flex: 1; font-weight: 500;")= user.name
+                      .leaderboard-stats(style="display: flex; gap: 1.5rem; align-items: center;")
+                        .points(style="color: #f093fb; font-weight: 600;") 
+                          span(style="font-size: 0.8rem; opacity: 0.7;") Points: 
+                          | #{user.points}
+                        .minutes(style="color: #4facfe; font-weight: 600;")
+                          span(style="font-size: 0.8rem; opacity: 0.7;") Min: 
+                          | #{user.minutes}
+              else
+                p(style="text-align: center; color: rgba(255, 255, 255, 0.5); padding: 2rem;")= __('No leaderboard data available yet. Start learning to climb the ranks!')
