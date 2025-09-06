@@ -43,6 +43,7 @@ declare global {
 declare module 'express-session' {
   interface SessionData {
     auth?: {user?: string};
+    redirectTo?: string;
   }
 }
 
@@ -295,12 +296,24 @@ export class MathigonStudioApp {
    * @param options {CourseRequestOptions}
    */
   course(options: CourseRequestOptions = {}) {
-    this.get('/course/:course', (req, res, next) => {
+    // Middleware to check authentication for course access
+    const requireAuth = (handler: (req: express.Request, res: express.Response, next: express.NextFunction) => void) => {
+      return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        if (!req.user && CONFIG.accounts.enabled) {
+          // Store the intended URL in session for redirect after login
+          req.session.redirectTo = req.originalUrl;
+          return res.redirect('/');
+        }
+        handler(req, res, next);
+      };
+    };
+
+    this.get('/course/:course', requireAuth((req, res, next) => {
       const course = getCourse(req.params.course, req.locale.id);
       return course ? res.redirect(course.sections[0].url) : next();
-    });
+    }));
 
-    this.get('/course/:course/:section', async (req, res, next) =>{
+    this.get('/course/:course/:section', requireAuth(async (req, res, next) =>{
       const course = getCourse(req.params.course, req.locale.id);
       const section = course?.sections.find(s => s.id === req.params.section);
       if (!course || !section) return next();
@@ -314,7 +327,7 @@ export class MathigonStudioApp {
       res.locals.availableLocales = course.availableLocales.map(l => LOCALES[l]);
       // Note: nextUp is provided as a legacy fallback for previous versions.
       res.render('course', {course, section, lighten, progressData, nextSection, prevSection, nextUp: nextSection});
-    });
+    }));
 
     this.post('/course/:course/:section', async (req, res, next) => {
       if (!CONFIG.accounts.enabled) return res.status(200).send('ok');

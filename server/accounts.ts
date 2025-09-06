@@ -273,8 +273,15 @@ export default function setupAuthEndpoints(app: MathigonStudioApp) {
 
   app.post('/login', async (req, res) => {
     const response = await login(req);
-    if (response.user) req.session.auth!.user = response.user.id;
-    redirect(req, res, response, '/dashboard', '/login');
+    if (response.user) {
+      req.session.auth!.user = response.user.id;
+      // Check if there's a stored redirect URL from attempted course access
+      const redirectTo = req.session.redirectTo || '/dashboard';
+      delete req.session.redirectTo;
+      redirect(req, res, response, redirectTo, '/login');
+    } else {
+      redirect(req, res, response, '/dashboard', '/login');
+    }
   });
 
   app.get('/logout', (req, res) => {
@@ -289,8 +296,15 @@ export default function setupAuthEndpoints(app: MathigonStudioApp) {
 
   app.post('/signup', async (req, res) => {
     const response = await signup(req);
-    if (response.user) req.session.auth!.user = response.user.id;
-    redirect(req, res, response, '/dashboard', '/signup');
+    if (response.user) {
+      req.session.auth!.user = response.user.id;
+      // Check if there's a stored redirect URL from attempted course access
+      const redirectTo = req.session.redirectTo || '/dashboard';
+      delete req.session.redirectTo;
+      redirect(req, res, response, redirectTo, '/signup');
+    } else {
+      redirect(req, res, response, '/dashboard', '/signup');
+    }
   });
 
   app.get('/confirm/:id/:token', async (req, res) => {
