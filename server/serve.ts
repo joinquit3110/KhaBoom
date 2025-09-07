@@ -3,6 +3,10 @@
 // Kha-Boom! Development Server
 // Enhanced with modern UI/UX
 
+// Load environment variables from .env file
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import {MathigonStudioApp} from './app';
 import {COURSES, getCourse} from './utilities/utilities';
 

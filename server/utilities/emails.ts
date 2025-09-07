@@ -29,7 +29,10 @@ export async function sendEmail(options: MailData) {
     return;
   }
 
-  if (!options.from) options.from = `${CONFIG.siteName} <no_reply@${CONFIG.domain}>`;
+  // Use verified sender email from environment or default
+  if (!options.from) {
+    options.from = process.env.SENDER_EMAIL || 'nghung.star@gmail.com';
+  }
   if (options.user && !options.to) options.to = `${options.user.fullName} <${options.user.email}>`;
 
   try {

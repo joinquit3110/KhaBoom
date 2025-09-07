@@ -82,6 +82,14 @@ export function loadCombinedYAML(file: string, deep = false) {
 
 // Configuration files
 export const CONFIG = loadCombinedYAML('config.yaml', true) as Config;
+// Override SendGrid key from environment variable if present
+if (process.env.SENDGRID_API_KEY) {
+  CONFIG.accounts.sendgridKey = process.env.SENDGRID_API_KEY;
+}
+// Ensure domain is set
+if (!CONFIG.domain) {
+  CONFIG.domain = 'khaboom.edu.vn';
+}
 export const CONTENT_DIR = path.join(PROJECT_DIR, CONFIG.contentDir);
 
 // List of all courses
@@ -102,9 +110,11 @@ export function promisify(fn: (req: express.Request, res: express.Response, next
   return (req: express.Request, res: express.Response, next: express.NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
 }
 
-export function href(req: express.Request, locale = req.locale.id) {
+export function href(req: express.Request, locale?: string) {
+  // Use locale from req if available, otherwise default to 'en'
+  const localeId = locale || (req as any).locale?.id || 'en';
   const path = req.path.endsWith('/') ? req.path.slice(0, req.path.length - 1) : req.path;
-  const subdomain = (locale !== 'en') ? locale + '.' : '';
+  const subdomain = (localeId !== 'en') ? localeId + '.' : '';
   return `https://${subdomain}${CONFIG.domain}${path}`;
 }
 
