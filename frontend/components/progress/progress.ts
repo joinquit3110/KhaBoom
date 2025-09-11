@@ -49,6 +49,19 @@ export class Progress extends CustomElementView {
 
   setProgress(p: number, animation = true) {
     if (p > 0.99) return this.complete(animation);
+    
+    // Set data attribute for CSS styling based on progress percentage
+    const percentage = Math.round(p * 100);
+    if (percentage <= 25) {
+      this.setAttr('data-progress', '0');
+    } else if (percentage <= 50) {
+      this.setAttr('data-progress', '25');
+    } else if (percentage <= 75) {
+      this.setAttr('data-progress', '50');
+    } else if (percentage <= 99) {
+      this.setAttr('data-progress', '75');
+    }
+    
     const c = Math.PI * this.r;
     this.$progress.css('stroke', p ? 'currentColor' : 'none');
     this.$progress.css('stroke-dasharray', `${p * c} ${c}`);
@@ -57,6 +70,9 @@ export class Progress extends CustomElementView {
   complete(animation = true) {
     if (this.completed) return;
     this.completed = true;
+    
+    // Set 100% complete data attribute
+    this.setAttr('data-progress', '100');
 
     this.$progress.css('stroke', 'none');
     this.$progress.css('fill', 'currentColor');

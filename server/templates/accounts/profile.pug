@@ -23,47 +23,22 @@ block main
 
     // Personal Details Section
     .glass-panel(style="margin-bottom: 2rem; padding: 2.5rem;")
-      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")= __('Personal Details')
+      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem; font-weight: 600;")= __('Personal Details')
       
-      form(action="/profile/details" method="POST" style="display: flex; flex-direction: column; gap: 1.5rem;")
+      form(action="/profile/details" method="POST" style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px; margin: 0 auto;")
         input(type="hidden" name="_csrf" value=_csrf)
         
-        .form-row(style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;")
-          .form-group
-            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('First Name')
-            input.input-modern(
-              type='text' 
-              name='first' 
-              required 
-              autocomplete="fname" 
-              placeholder=__("First Name") 
-              value=user.firstName
-              style="width: 100%;"
-            )
-          .form-group
-            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Last Name')
-            input.input-modern(
-              type='text' 
-              name='last' 
-              required 
-              autocomplete="lname" 
-              placeholder=__("Last Name") 
-              value=user.lastName
-              style="width: 100%;"
-            )
+        .form-row(style="display: flex; gap: 1rem; margin-bottom: 0;")
+          .form-group(style="flex: 1;")
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('First Name')
+            input.input-modern(type='text' name='first' required autocomplete="given-name" placeholder=__("First Name") value=user.firstName style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); font-size: 1rem; box-sizing: border-box;")
+          .form-group(style="flex: 1;")
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('Last Name')
+            input.input-modern(type='text' name='last' required autocomplete="family-name" placeholder=__("Last Name") value=user.lastName style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); font-size: 1rem; box-sizing: border-box;")
         
         .form-group
-          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Email')
-          input.input-modern(
-            type='email' 
-            name='email' 
-            required 
-            disabled=(!user.password) 
-            autocomplete="email" 
-            placeholder=__("Email") 
-            value=user.email
-            style="width: 100%; opacity: " + (user.password ? '1' : '0.6')
-          )
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('Email')
+          input.input-modern(type='email' name='email' required disabled=(!user.password) autocomplete="email" placeholder=__("Email") value=user.email style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); font-size: 1rem; box-sizing: border-box; opacity: " + (user.password ? '1' : '0.6'))
           if user.emailVerificationToken
             .alert(style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); padding: 0.75rem; border-radius: 10px; margin-top: 0.5rem;")
               strong(style="color: #ef4444;")= __('Email not verified!')
@@ -72,55 +47,41 @@ block main
         
         if user.birthday
           .form-group
-            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Date of Birth')
-            input.input-modern(
-              type='text' 
-              name='birthday' 
-              disabled 
-              value=user.birthdayString 
-              placeholder=__("Date of Birth")
-              style="width: 100%; opacity: 0.6;"
-            )
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('Date of Birth')
+            input.input-modern(type='text' name='birthday' disabled value=user.birthdayString placeholder=__("Date of Birth") style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); font-size: 1rem; box-sizing: border-box; opacity: 0.6;")
         
         .form-group
-          label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Country')
-          select.input-modern(name='country' style="width: 100%; padding: 12px 20px;")
+          label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('Country')
+          select.input-modern(name='country' style="width: 100%; padding: 12px 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; color: rgba(255, 255, 255, 0.9); font-size: 1rem; box-sizing: border-box; transition: all 0.3s; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"white\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px;")
+            option(value="" style="background: #1a1d2e; color: #fff;")= __('Select Country')
             for c in countries
-              option(value=c.id selected=(c.id === user.country))= c.name
+              option(value=c.id selected=(c.id === user.country) style="background: #1a1d2e; color: #fff;")= c.name
         
         button.btn-gradient(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Update Profile')
 
     // Change Password Section
     if user.password && !user.emailVerificationToken
       .glass-panel(style="margin-bottom: 2rem; padding: 2.5rem;")
-        h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")
-          x-icon(name="lock" size=28 style="vertical-align: middle; margin-right: 0.5rem;")
+        h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem; font-weight: 600;")
+          x-icon(name="lock" size=20 style="vertical-align: middle; margin-right: 0.5rem;")
           | #{__('Change Password')}
         
         form(action='/profile/password' method='POST' style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px; margin: 0 auto;")
           input(type="hidden" name="_csrf" value=_csrf)
           
           .form-group
-            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('Current Password')
-            input.input-modern(
-              type="password" 
-              name="oldpassword" 
-              required 
-              pattern=".{4,}" 
-              autocomplete="password" 
-              placeholder=__("Enter current password")
-              style="width: 100%;"
-            )
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('Current Password')
+            input.input-modern(type="password" name="oldpassword" required pattern=".{4,}" autocomplete="current-password" placeholder=__("Enter current password") style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 20px; color: rgba(255, 255, 255, 0.9); font-size: 1rem;")
           
           .form-group
-            label(style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;")= __('New Password')
+            label(style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin-bottom: 0.5rem; display: block;")= __('New Password')
             x-password
           
           button.btn-gradient.secondary(type='submit' style="padding: 14px 32px; font-size: 1rem;")= __('Change Password')
 
     // Privacy Settings Section
     .glass-panel(style="padding: 2.5rem;")
-      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem;")= __('Privacy Settings')
+      h2.gradient-text(style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem; font-weight: 600;")= __('Privacy Settings')
       
       .glass-card(style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; margin-bottom: 2rem;")
         p(style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin: 0;")
@@ -173,5 +134,5 @@ block main
     
     // Back to dashboard link
     .text-center(style="margin-top: 3rem;")
-      a(href='/dashboard' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
-        | ← #{__('Back to Dashboard')}
+      a.back-link(href='/dashboard' style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 0.9rem;")
+        | ← Back to Dashboard

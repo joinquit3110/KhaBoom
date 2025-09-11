@@ -31,7 +31,7 @@ else
         for s in (styles || ['/main.css'])
           link(href=cacheBust(s) rel='stylesheet')
 
-    body
+    body(class=htmlClass)
       noscript.warning
         .warning-body
           h1.gradient-text(style="font-size: 2rem; margin-bottom: 1rem;") Kha-Boom!

@@ -4,166 +4,238 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-This is Mathigon Studio (customized as KhaBoom), an interactive online course platform built with TypeScript, Node.js, and MongoDB. The platform creates and serves educational content with interactive components.
+KhaBoom is an educational platform for creating and hosting interactive, online courses. It's built on top of Mathigon Studio framework and provides a comprehensive learning management system with user accounts, progress tracking, and interactive course content.
+
+## Architecture
+
+### High-Level Structure
+
+The project follows a **monolithic architecture** with separate frontend/backend concerns:
+
+- **Frontend**: TypeScript/SCSS components with custom web components
+- **Backend**: Express.js application with MongoDB for persistence
+- **Build System**: Custom Node.js build scripts with esbuild bundling
+- **Content Management**: YAML-based configuration with Pug templating
+
+### Key Directories
+
+- `frontend/` - Client-side TypeScript components and styles
+  - `components/` - Interactive course components (blank, gallery, video, etc.)
+  - `main.ts` - Main application entry point
+  - `accounts.ts` - User authentication frontend
+- `server/` - Express.js backend application
+  - `app.ts` - Main Express application class
+  - `accounts.ts` - Authentication endpoints
+  - `interfaces.ts` - TypeScript type definitions
+- `build/` - Build system and asset compilation
+  - `index.js` - Main build script
+  - `assets.js` - Asset bundling logic
+- `content/` - Course content and materials
+- `translations/` - Internationalization files
+
+### Core Components
+
+**MathigonStudioApp Class**: Central Express application wrapper providing:
+- Authentication middleware
+- Course routing and progress tracking
+- Static asset serving
+- Security headers and CSRF protection
+
+**Interactive Components**: Frontend components for educational content:
+- `Blank` - Fill-in-the-blank exercises
+- `Gallery` - Image galleries
+- `Video` - Video players with controls
+- `Slideshow` - Interactive presentations
+- `Progress` - Course progress indicators
+
+**User Management**: Full authentication system with:
+- User registration/login
+- Progress tracking per course/section
+- Dashboard with statistics and leaderboards
+- OAuth integration support
 
 ## Development Commands
 
-### Build Commands
+### Build & Development
 
 ```bash
-# Build frontend assets (JS/CSS) for all configured locales
-npx mgon-build --assets
+# Development build with watch mode
+npm run build:watch
 
-# Build with minification for production
-npx mgon-build --assets --minify
+# Development build (no minification)
+npm run build:dev
 
-# Build and watch for development
-npx mgon-build --assets --watch
+# Production build (with minification and optimization)
+npm run build
 
-# Build search index (when enabled in config.yaml)
-npx mgon-build --search
-
-# Build course thumbnails
-npx mgon-build --thumbnails
-
-# Build all assets for specific locales
-npx mgon-build --assets --locales=en,vi
-```
-
-### Server Commands
-
-```bash
-# Start development server on port 5000
-npx mgon-serve
-
-# The server runs at http://localhost:5000 by default
+# Start development server (port 5000)
+npx ts-node server/serve.ts
+# OR using npm script
+npm run dev
 ```
 
 ### Testing & Quality
 
 ```bash
-# Run Markdown parser tests
-npm test
-
-# Run ESLint
+# Run linter
 npm run lint
 
-# Auto-fix ESLint issues
+# Fix linting issues automatically  
 npm run lint-fix
 
-# Generate screenshots for visual testing
+# Run tests
+npm test
+
+# Generate screenshots for testing
 npx mgon-screenshots
 ```
 
-### Translation
+### Content Management
 
 ```bash
-# Translate content (requires Google Cloud service account)
-npx mgon-build --translate --key google-service-account.json
+# Translate content using Google Cloud
+npm run translate
 
-# Translate all content including existing translations
-npx mgon-build --translate --all --key google-service-account.json
+# Build search index
+npx mgon-build --search
+
+# Generate course thumbnails
+npx mgon-build --thumbnails
 ```
 
-## Architecture Overview
+### Specialized Commands
 
-### Directory Structure
+```bash
+# Run example documentation site
+npm run example
 
-- **`/content`**: Course content organized by topic
-  - Each course folder contains:
-    - `content.md`: Main course content in custom Markdown format
-    - `functions.ts`: Course-specific TypeScript logic
-    - `styles.scss`: Course-specific styling
-    - `hints.yaml`: Hint definitions for interactive elements
-    - `components/`: Custom course components
-    - `images/`, `svg/`, `audio/`: Media assets
+# Manage secrets (Google Cloud integration)
+npx mgon-secrets
 
-- **`/frontend`**: Client-side application code
-  - `main.ts/scss`: Core application entry point
-  - `course.js/css`: Course viewer functionality
-  - `accounts.ts/scss`: User account system
-  - `dashboard.ts/scss`: User dashboard
-  - `/components`: Reusable interactive components (blank, gallery, slideshow, etc.)
+# Check dependency licenses
+npx mgon-build --licenses
+```
 
-- **`/server`**: Express.js backend application
-  - `app.ts`: Main application class (MathigonStudioApp)
-  - `serve.ts`: Development server entry point
-  - `accounts.ts`: User authentication and management
-  - `/models`: Mongoose schemas for MongoDB
-  - `/templates`: Pug templates for server-side rendering
+## Configuration
 
-- **`/build`**: Build tools and utilities
-  - `assets.js`: Asset bundling (SCSS→CSS, TS→JS with ESBuild)
-  - `markdown/`: Custom Markdown parser for course content
-  - `tools/`: Various build utilities (search, translate, thumbnails)
+### Environment Setup
 
-### Key Configuration
+1. Copy `.env.example` to `.env` and configure:
+   - MongoDB connection string
+   - Google Cloud service account (for translation)
+   - SendGrid API key (for emails)
 
-**`config.yaml`**: Main configuration file
-- MongoDB connection: Configured in `accounts.mongodb`
-- Locales: Defined in `locales` array (default: ['en'])
-- Search settings: Enable/disable and configure popular searches
-- Account system: Authentication, age restrictions, privacy policies
-- Tutor settings: AI assistant configuration (Archie)
+2. Main configuration in `config.yaml`:
+   - Site settings (name, locales, search)
+   - Account system configuration
+   - Course display options
+   - Social media integration
 
-### Database
+### TypeScript Configuration
 
-The project uses MongoDB (via Mongoose) with connection string stored in `config.yaml`. The database stores:
-- User accounts and progress
-- Course completion data
-- Interactive element responses
+- Base config: `tsconfig.base.json`
+- Module-specific configs in `frontend/`, `server/`, `content/`
+- Strict mode enabled with experimental decorators
 
-### Build Pipeline
+### ESLint Rules
 
-1. **TypeScript/JavaScript**: Uses ESBuild for bundling
-   - Supports Pug template imports
-   - Vue.js external dependency handling
-   - Localization string replacement (`<<string>>` syntax)
+Extended from Google style guide with TypeScript support:
+- Comma-dangle: never
+- No unused vars (with underscore prefix exception)
+- Sort imports enabled
+- Relaxed JSDoc requirements for development
 
-2. **SCSS/CSS**: Uses Sass + PostCSS
-   - Autoprefixer for browser compatibility
-   - RTL CSS generation for right-to-left languages
-   - CSS nano for minification
-   - Safe area insets for iOS devices
+## Course Development
 
-3. **Markdown Courses**: Custom parser that:
-   - Converts course content to JSON
-   - Processes interactive components
-   - Handles MathJax equations
-   - Supports custom HTML elements and attributes
+### Content Structure
+
+Courses are organized as:
+- `Course` - Top-level container with metadata
+- `Section` - Individual lessons within a course
+- `Step` - Granular learning units within sections
 
 ### Interactive Components
 
-The platform includes numerous interactive educational components exported from `index.ts`:
-- Blank (fill-in-the-blank exercises)
-- Gallery, Slideshow (media display)
-- Sortable, Draggable elements
-- Video players with custom controls
-- Progress indicators
-- Mathematical visualization tools
+When adding new interactive components:
+1. Create component in `frontend/components/[name]/`
+2. Export type in `index.ts`
+3. Register component in `frontend/components/index.ts`
+4. Add corresponding SCSS styles
 
-### Content Format
+### Progress Tracking
 
-Courses use a custom Markdown format with:
-- Step-based structure (separated by `---`)
-- Interactive elements via custom HTML tags
-- MathJax support for mathematical notation
-- Embedded components using `x-` prefixed tags
-- Hint system integration
-- Multi-language support
+User progress is automatically tracked:
+- Section completion status
+- Individual step scores
+- Time spent per section
+- Analytics for course engagement
 
-### Development Workflow
+## Database Models
 
-1. Content is edited in `/content/{course}/content.md`
-2. Assets are built using `mgon-build --assets --watch`
-3. Development server runs via `mgon-serve`
-4. Changes are hot-reloaded in the browser
-5. Custom course logic goes in `/content/{course}/functions.ts`
-6. Course styling in `/content/{course}/styles.scss`
+### Key Collections
 
-### Testing Approach
+- `users` - User accounts and profiles
+- `progress` - Course progress per user
+- `course_analytics` - Usage statistics and leaderboards
+- `login_analytics` - User session tracking
 
-- Markdown parser tests in `/tests/markdown/`
-- Screenshot generation for visual regression testing
-- ESLint for code quality enforcement
-- TypeScript for type safety
+### Progress Data Structure
+
+Each user's progress includes:
+- Course completion percentage
+- Active step tracking
+- Score data per step
+- Custom user data and preferences
+
+## Authentication
+
+### Supported Methods
+
+- Email/password registration
+- OAuth providers (configurable in `config.yaml`)
+- Temporary user sessions for anonymous browsing
+
+### Access Control
+
+- Course access can require authentication
+- Progress tracking requires user account
+- Admin features controlled via user roles
+
+## Build Process
+
+### Asset Pipeline
+
+1. **TypeScript Compilation**: `esbuild` for bundling
+2. **SCSS Processing**: Sass compilation with autoprefixer
+3. **Asset Optimization**: Minification for production
+4. **Cache Busting**: Automatic versioning for static assets
+
+### Localization
+
+- Content translation via Google Cloud Translate
+- YAML-based string management
+- RTL language support with `rtlcss`
+
+## Common Development Workflows
+
+### Adding a New Course
+
+1. Create content directory structure
+2. Define course metadata in YAML
+3. Build course sections and steps
+4. Run `npm run build:dev` to compile
+5. Test in development server
+
+### Debugging Issues
+
+1. Check browser console for frontend errors
+2. Monitor server logs for backend issues
+3. Verify database connections and queries
+4. Use `npm run lint` to catch code issues
+
+### Deployment Preparation
+
+1. Run `npm run build` for production assets
+2. Ensure all environment variables are set
+3. Verify database migrations are complete
+4. Test authentication and course access

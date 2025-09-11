@@ -64,7 +64,16 @@ html(lang="en")
           h1.gradient-text(style="font-size: 3.5rem; font-weight: 800; margin: 0 0 .5rem 0; font-family: 'Poppins', sans-serif; white-space: nowrap;") Kha&#8209;Boom!
           p(style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; font-weight: 300;") Welcome back, explorer!
         
-        // Flash messages would go here if needed
+        // Error and success notifications
+        .notification-container#notificationContainer(style="margin-bottom: 1.5rem;")
+          if messages && messages.errors
+            .alert.error(style="padding: 1rem; background: linear-gradient(135deg, rgba(245,87,108,0.2), rgba(255,107,107,0.1)); border: 1px solid rgba(245,87,108,0.3); border-radius: 12px; color: #ff6b6b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;")
+              x-icon(name="alert-circle" size=20)
+              span= messages.errors.join(', ')
+          if messages && messages.success
+            .alert.success(style="padding: 1rem; background: linear-gradient(135deg, rgba(79,172,254,0.2), rgba(102,126,234,0.1)); border: 1px solid rgba(79,172,254,0.3); border-radius: 12px; color: #4facfe; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;")
+              x-icon(name="check-circle" size=20)
+              span= messages.success.join(', ')
 
         if oAuthProviders.length
           .btn-row(style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;")
@@ -130,3 +139,40 @@ html(lang="en")
       }
     
     script(src="/main.js")
+    script.
+      // Handle form submission with validation
+      document.querySelector('form').addEventListener('submit', function(e) {
+        const email = document.querySelector('input[name="email"]').value;
+        const password = document.querySelector('input[name="password"]').value;
+        
+        // Clear previous errors
+        const existingError = document.querySelector('.alert.error');
+        if (existingError) existingError.remove();
+        
+        // Basic validation
+        if (!email || !password) {
+          e.preventDefault();
+          const container = document.getElementById('notificationContainer');
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'alert error';
+          errorDiv.style = 'padding: 1rem; background: linear-gradient(135deg, rgba(245,87,108,0.2), rgba(255,107,107,0.1)); border: 1px solid rgba(245,87,108,0.3); border-radius: 12px; color: #ff6b6b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;';
+          errorDiv.innerHTML = '<svg width="20" height="20" fill="currentColor"><use href="#icon-alert-circle"></use></svg><span>Please fill in all required fields</span>';
+          container.appendChild(errorDiv);
+        }
+      });
+      
+      // Handle server-side error messages from URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        const container = document.getElementById('notificationContainer');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert error';
+        errorDiv.style = 'padding: 1rem; background: linear-gradient(135deg, rgba(245,87,108,0.2), rgba(255,107,107,0.1)); border: 1px solid rgba(245,87,108,0.3); border-radius: 12px; color: #ff6b6b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;';
+        let errorMessage = 'An error occurred';
+        if (error === 'invalid') errorMessage = 'Invalid email or password';
+        if (error === 'notfound') errorMessage = 'Account not found';
+        if (error === 'locked') errorMessage = 'Account is locked';
+        errorDiv.innerHTML = '<svg width="20" height="20" fill="currentColor"><use href="#icon-alert-circle"></use></svg><span>' + errorMessage + '</span>';
+        container.appendChild(errorDiv);
+      }

@@ -1,27 +1,34 @@
 include _mixins
 
 mixin resultItem(doc)
-  a.search-result(href=doc.url)
-    .search-img(style=doc.image)
-    .search-subtitle= doc.subtitle
-    .search-title= doc.title
+  a.search-result(href=doc.url style="display: flex; align-items: center; padding: 0.8rem 1rem; margin: 0 auto 0.5rem; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; text-decoration: none; transition: all 0.3s; width: calc(100% - 2rem); max-width: 600px; box-sizing: border-box;" onmouseover="this.style.background='linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.08))'; this.style.transform='scale(1.02)'; this.style.borderColor='rgba(139,92,246,0.3)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))'; this.style.transform='scale(1)'; this.style.borderColor='rgba(255,255,255,0.1)'")
+    .search-img(style="width: 40px; height: 40px; min-width: 40px; border-radius: 10px; margin-right: 0.8rem; box-shadow: 0 3px 8px rgba(0,0,0,0.2); background-size: cover; background-position: center; flex-shrink: 0; " + (doc.image || ''))
+    div(style="flex: 1; min-width: 0; overflow: hidden;")
+      .search-subtitle(style="font-size: 0.7rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= doc.subtitle
+      .search-title(style="font-size: 0.95rem; color: rgba(255,255,255,0.95); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= doc.title
 
-if !search.results
-  .search-section= __('Popular Courses')
-  if config.search.popular && config.search.popular.length
-    for doc in config.search.popular
-      if search.docs && search.docs[doc]
-        +resultItem(search.docs[doc])
+.search-container(style="padding: 1rem 0; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;")
+  if !search.results
+    .search-section(style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; text-align: center; width: 100%;")= __('Popular Courses')
+    .search-results-wrapper(style="width: 100%; display: flex; flex-direction: column; align-items: center;")
+      if config.search.popular && config.search.popular.length
+        for doc in config.search.popular
+          if search.docs && search.docs[doc]
+            +resultItem(search.docs[doc])
 
-else if !search.results.length
-  .no-results
-    include ./svgs/abakus.svg
-    | No results found…
+  else if !search.results.length
+    .no-results(style="text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,0.5);")
+      div(style="width: 80px; height: 80px; margin: 0 auto 1.5rem; opacity: 0.3;")
+        include ./svgs/abakus.svg
+      p(style="font-size: 1.1rem; font-weight: 500;") No results found
+      p(style="font-size: 0.9rem; margin-top: 0.5rem;") Try searching with different keywords
 
-else
-  for doc in search.results
-    if doc.type === 'gloss'
-      //- You can directly search the glossary
-      .search-gloss!= doc.subtitle
-    else
-      +resultItem(doc)
+  else
+    .search-results-header(style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; text-align: center; width: 100%;") Search Results
+    .search-results-wrapper(style="width: 100%; display: flex; flex-direction: column; align-items: center;")
+      for doc in search.results
+        if doc.type === 'gloss'
+          //- You can directly search the glossary
+          .search-gloss(style="width: 100%; max-width: 480px; padding: 1rem; margin: 0 auto 0.5rem; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(167,139,250,0.05)); border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; color: rgba(255,255,255,0.9);")!= doc.subtitle
+        else
+          +resultItem(doc)

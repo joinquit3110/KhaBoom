@@ -3,12 +3,79 @@ extends _layout
 block vars
   - var title = (section.title !== 'Introduction' ? section.title + ' – ' : '') + course.title
   - var description = course.description
-  - var styles = ['/course.css', `/content/${course.id}/styles.css`]
-  - var scripts = [`/content/${course.id}/functions.js`, '/course.js']
+  - var styles = ['/main.css', '/course.css', `/content/${course.id}/styles.css`]
+  - var scripts = [`/content/${course.id}/functions.js`, '/course.js', '/reset-success.js']
   - var thumbnail = `/content/${course.id}/thumbnails/${section.id}-${course.locale}.jpg`
   - var theme = (section.background && section.background.includes('dark')) ? 'dark' : undefined;
+  - var htmlClass = 'has-header'
+
+block fonts
+  link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+  link(rel="dns-prefetch" href="https://fonts.googleapis.com")
+  link(rel="preconnect" href="https://fonts.gstatic.com/" crossorigin)
 
 block append head
+  style.
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body, html, * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+      font-family: 'Poppins', sans-serif !important;
+    }
+    
+    /* Style course name above section title */
+    article h1 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.2;
+    }
+    
+    article h1 .course-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #a78bfa !important;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0;
+      opacity: 1;
+    }
+    
+    html[theme="dark"] article h1 .course-title {
+      color: #c4b5fd !important;
+    }
+    
+    article h1 .section-title {
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      margin-top: -4px;
+    }
+    
+    /* Hide reveal elements visually but keep functionality */
+    .reveal-banner {
+      position: absolute !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      overflow: hidden !important;
+    }
+    
+    p.skip-step {
+      position: absolute !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
   script(type="application/ld+json").
     {
       "@context": "http://schema.org",
@@ -43,9 +110,9 @@ block main
 
       h1
         span.course-title= course.title
-        | #{section.title}
+        span.section-title= section.title
 
-      .reveal-banner.off
+      .reveal-banner.off(style="display: none !important;")
         | #{__('Reading time')}: ~#{section.duration} min
         button.complete
           | #{__('Reveal all steps')}
@@ -64,26 +131,27 @@ block main
             | !{course.steps[stepId].html}
 
       footer
-        p.skip-step
+        p.skip-step(style="opacity: 0; height: 0; overflow: hidden; position: absolute; pointer-events: none;")
           | #{__('To reveal more content, you have to complete all the activities and exercises above.')}&nbsp;
           br
           strong #{__('Are you stuck?')} #[a.skip(tabindex=0) #{__('Skip to the next step')}] #{__('or')} #[a.show-all(tabindex=0) #{__('reveal all steps')}]
           svg(width=72 height=10): path(d="M1 1L36 9L71 1" fill="none" stroke="#aaa" stroke-width=2)
 
         block course-next-up
+          if nextSection
+            - var nextUp = nextSection
           style!= `.next-arrow{background:${(nextUp.course || course).color}}.next-section:hover .next-arrow,.next-section:focus .next-arrow{background:${lighten((nextUp.course || course).color)}}`
-          a.next-section(href=nextUp.section.url title=(nextUp.course ? nextUp.course.title : nextUp.section.title)): .next-arrow
+          a.next-section(href=nextUp.section ? nextUp.section.url : nextUp.url title=(nextUp.course ? nextUp.course.title : (nextUp.section ? nextUp.section.title : nextUp.title))): .next-arrow
             if nextUp.course
               .next-icon(style=`background-image: url(${nextUp.course.icon || nextUp.course.hero});`)
             .small= __('Next up:')
-            .title= nextUp.course ? nextUp.course.title : nextUp.section.title
+            .title= nextUp.course ? nextUp.course.title : (nextUp.section ? nextUp.section.title : nextUp.title)
 
     if config.tutor.enabled && !section.locked
       x-tutor(api=`/course/${course.id}/ask`)
         div(slot="icon")!= include(config.tutor.icon)
         div(slot="header")
           != include(config.tutor.icon)
-          | #{config.tutor.name}
 
     script(type="application/json")#glossary!= course.glossJSON
     script(type="application/json")#bios!= course.biosJSON

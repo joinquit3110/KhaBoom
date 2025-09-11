@@ -1,6 +1,7 @@
 include _mixins
 
 style.
+  /* Enhanced Header Styles with Glow Effects */
   header:not(.landing-nav) {
     position: fixed;
     top: 0;
@@ -71,7 +72,97 @@ style.
   header .nav-link:hover {
     color: #667eea;
     background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+  }
+  
+  /* Glow Hover Effect for Nav Links */
+  header .nav-link.glow-hover {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  header .nav-link.glow-hover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.4), transparent);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+  }
+  
+  header .nav-link.glow-hover:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  header .nav-link.glow-hover:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  /* Gradient Styles for Different Nav Items */
+  .gradient-dashboard span {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+  }
+  
+  .gradient-search span {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+  }
+  
+  .gradient-settings {
+    transition: all 0.3s ease;
+  }
+  
+  .gradient-settings:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+  }
+  
+  .gradient-logout:hover {
+    background: linear-gradient(135deg, #f5576c 0%, #ef4444 100%);
+    color: white !important;
+  }
+  
+  /* Enhanced User Button */
+  #login-btn {
+    position: relative;
+    padding: 0.3rem 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  #login-btn::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    border-radius: 50%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    filter: blur(8px);
+  }
+  
+  #login-btn:hover::after {
+    opacity: 0.6;
+  }
+  
+  #login-btn:hover .nav-user-icon {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
   }
   header .nav-text {
     display: inline-block;
@@ -83,7 +174,31 @@ style.
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid #667eea;
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #667eea, #764ba2) border-box;
+    transition: all 0.3s ease;
+  }
+  
+  /* Active state for nav links */
+  header .nav-link.on {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .nav-text {
+      display: none;
+    }
+    
+    header .nav-link {
+      padding: 0.5rem;
+    }
+    
+    header .nav-link x-icon {
+      font-size: 20px;
+    }
   }
   header .popup-body {
     background: rgba(15, 15, 35, 0.98);
@@ -128,12 +243,75 @@ style.
     transform: translateY(-2px);
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
   }
-  #search.modal-body, #language .modal-body, #login .modal-body {
+  #language .modal-body, #login .modal-body {
     background: rgba(15, 15, 35, 0.98);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 90%;
+  }
+  
+  #search .modal-body {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #search .form-field {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 45px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  #search .form-field input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    flex: 1;
+    font-size: 1rem;
+    padding: 0 1rem 0 3rem;
+    height: 100%;
+    width: 100%;
+  }
+  
+  #search .form-field input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  #search .form-field x-icon {
+    position: absolute;
+    left: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+  }
+  
+  #search .search-body {
+    width: 100%;
+    max-width: 700px;
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 0 1rem;
   }
   body.has-header {
     padding-top: 80px;
@@ -172,15 +350,23 @@ header
   nav
     for link in config.header.links
       .nav-item
-        a.nav-link(href=link.url)
+        a.nav-link.glow-hover(href=link.url)
           x-icon(name=link.icon)
           span.nav-text= __(link.title)
+    
+    //- Dashboard Link (only for logged in users)
+    if user
+      .nav-item
+        a.nav-link.glow-hover.gradient-dashboard(href='/dashboard' class=(url && url.startsWith('/dashboard') ? 'on' : ''))
+          x-icon(name='dashboard')
+          span.nav-text Dashboard
 
-    //- TODO Support search for non-English languages
+    //- Smart Search
     if config.search.enabled && locale.id === 'en'
       .nav-item
-        button.nav-link.narrow(title=__('Smart Search') data-modal="search")
+        button.nav-link.glow-hover.gradient-search(title=__('Smart Search') data-modal="search")
           x-icon(name="search")
+          span.nav-text Smart Search
 
     x-popup(animation="fade").nav-item
       block nav-user-btn
@@ -194,24 +380,31 @@ header
         block nav-user-body
           if config.accounts.enabled
             if user
-              a.nav-link(href="/dashboard") #[x-icon(name='dashboard')] #{__('Dashboard')}
-              a.nav-link(href="/profile") #[x-icon(name='settings')] #{__('Account Settings')}
+              a.nav-link.gradient-settings(href="/profile") 
+                x-icon(name='settings')
+                | #{__('Account Settings')}
             else
-              button.nav-link(data-modal="login") #[x-icon(name="login")] #{__('Sign in')}
-              a.nav-link(href="/signup") #[x-icon(name='user')] #{__('Create New Account')}
+              button.nav-link(data-modal="login") 
+                x-icon(name="login")
+                | #{__('Sign in')}
+              a.nav-link(href="/signup") 
+                x-icon(name='user')
+                | #{__('Create New Account')}
           if availableLocales.length > 1
             button.nav-link(data-modal="language")
               x-icon(name="language")
               | #{__('Change Language')}
               img(src=`/images/flags/${locale.flag}.png` width=24 height=24 alt="")
           if user
-            a.nav-link(href="/logout") #[x-icon(name='logout')] #{__('Sign out $0', user.fullName)}
+            a.nav-link.gradient-logout(href="/logout") 
+              x-icon(name='logout')
+              | #{__('Sign out')}
 
 if config.search.enabled && locale.id === 'en'
   x-modal#search(class=(req.query.search ? 'open' : undefined))
     .modal-body
-      label.form-field
-        x-icon(name="search" size=28)
+      .form-field
+        x-icon(name="search" size=20)
         input(type="text" placeholder=__("Search…") inputmode="search" autocomplete="off" maxlength=50 value=(req.query.search || req.cookies.search || ''))
       .search-body
         include ./search

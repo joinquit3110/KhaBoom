@@ -54,7 +54,7 @@ interface ProgressModel extends Model<ProgressDocument> {
   lookup: (req: express.Request, courseId: string, createNew?: boolean) => Promise<ProgressDocument|undefined>;
   delete: (req: express.Request, courseId: string) => Promise<boolean>;
   getUserData: (userId: string) => Promise<UserProgress>;
-  getRecentCourses: (userId: string) => Promise<string>;
+  getRecentCourses: (userId: string) => Promise<string[]>;
 }
 
 
@@ -206,7 +206,7 @@ ProgressSchema.statics.getUserData = async function(userId: string) {
 ProgressSchema.statics.getRecentCourses = async function(userId: string) {
   const courses = Array.from((await Progress.getUserData(userId)).values());
   return courses
-      .filter(data => data.progress > 0 && data.progress < 100)
+      .filter(data => data.progress > 0)  // Include all courses with any progress, including completed ones
       .sort((p, q) => (+q.updatedAt) - (+p.updatedAt))
       .map(p => p.courseId);
 };

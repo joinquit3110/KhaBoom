@@ -15,6 +15,9 @@
     "mgon-screenshots": "tests/screenshots.js"
   },
   "scripts": {
+    "build": "node build/index.js --assets --search --thumbnails --minify",
+    "build:dev": "node build/index.js --assets --search",
+    "build:watch": "node build/index.js --assets --watch",
     "lint": "eslint . --ext .ts,.js",
     "lint-fix": "eslint . --ext .ts,.js --fix",
     "test": "node tests/markdown/test.js",
@@ -72,6 +75,8 @@
     "pug": "3.0.3",
     "rtlcss": "4.2.0",
     "sass": "1.77.8",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "tslib": "2.6.3",
     "typescript": "5.5.4",
     "validator": "13.12.0",

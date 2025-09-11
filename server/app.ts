@@ -98,6 +98,11 @@ export class MathigonStudioApp {
     this.app.listen(port, () => console.log(`Running on port ${port} in ${ENV} mode.`));
   }
 
+  // Get the Express app instance for extending with custom routes
+  getApp(): express.Application {
+    return this.app;
+  }
+
 
   // ---------------------------------------------------------------------------
   // Server Configuration
@@ -272,10 +277,40 @@ export class MathigonStudioApp {
 
       const progress = await Progress.getUserData(req.user.id);
       const stats = await CourseAnalytics.getLastWeekStats(req.user.id);
-      const recent = (await Progress.getRecentCourses(req.user.id)).slice(0, 6);
+      
+      // Get recent course IDs and map them to course objects with progress
+      const recentIds = (await Progress.getRecentCourses(req.user.id)).slice(0, 12);
+      const recent = recentIds.map(id => {
+        const course = getCourse(id, req.locale.id);
+        if (!course) return null;
+        const courseProgress = progress.get(id);
+        return {
+          id,
+          name: course.title,
+          hero: course.hero || course.icon || '/images/placeholder.jpg',
+          icon: course.icon,
+          url: course.sections[0].url,
+          progress: courseProgress ? courseProgress.progress : 0,
+          description: course.description || `Discover the exciting world of ${course.title.toLowerCase()}`,
+          color: course.color
+        };
+      }).filter(Boolean);
 
-      const items = Math.min(4, 6 - recent.length);
-      const recommended = COURSES.filter(x => !progress.has(x)).slice(0, items);
+      // Show more recommended courses if user has few recent courses
+      const items = Math.max(4, 12 - recent.length);
+      const recommended = COURSES.filter(x => !progress.has(x)).slice(0, items).map(id => {
+        const course = getCourse(id, req.locale.id);
+        if (!course) return null;
+        return {
+          id,
+          name: course.title,
+          hero: course.hero || course.icon || '/images/placeholder.jpg',
+          icon: course.icon,
+          url: course.sections[0].url,
+          description: course.description || `Discover the exciting world of ${course.title.toLowerCase()}`,
+          color: course.color
+        };
+      }).filter(Boolean);
       
       // Fetch leaderboard data - top 10 users by points
       const leaderboard = await CourseAnalytics.getLeaderboard();
@@ -350,8 +385,19 @@ export class MathigonStudioApp {
     this.post('/course/:course/reset', async (req, res, next) => {
       const course = getCourse(req.params.course, req.locale.id);
       if (!course) return next();
-      if (CONFIG.accounts.enabled) await Progress.delete(req, course.id);
-      res.redirect(`/course/${req.params.course}`);
+      
+      try {
+        // Delete the progress data
+        if (CONFIG.accounts.enabled) {
+          await Progress.delete(req, course.id);
+        }
+        
+        // Redirect to the first section of the course with success parameter
+        res.redirect(`/course/${req.params.course}/${course.sections[0].id}?reset=success`);
+      } catch (error) {
+        console.error('Error resetting progress:', error);
+        res.redirect(`/course/${req.params.course}`);
+      }
     });
 
     this.post('/course/:course/feedback', async (req, res, next) => {

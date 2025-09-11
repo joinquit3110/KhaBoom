@@ -11,7 +11,8 @@ mixin linkBlock(active, className, href)
       block
 
 x-course-sidebar(style=`background-color: ${course.color}`)
-  .sidebar-hero(style=`background-image: url(${course.hero})`)
+  - var heroPath = course.hero ? course.hero.replace(/\\/g, '/') : ''
+  .sidebar-hero(style=`background-image: url(${heroPath})`)
     if !course.hideTitle
       .sidebar-hero-gradient
       .sidebar-title
@@ -37,10 +38,6 @@ x-course-sidebar(style=`background-color: ${course.color}`)
         .connection
 
   .sidebar-footer
-    if config.social
-      button.footer-link(data-modal="share")
-        x-icon(name="share")
-        .tooltip= __('Share')
     if config.courses.feedback
       button.footer-link(data-modal="feedback")
         x-icon(name="feedback")
@@ -51,8 +48,6 @@ x-course-sidebar(style=`background-color: ${course.color}`)
     button.footer-link(data-modal="reset")
       x-icon(name="reset")
       .tooltip=__('Reset Progress')
-  if config.siteName !== 'Mathigon'
-    a.sidebar-banner(href="https://mathigon.org" target="_blank")= __('Powered by Mathigon')
 
 .sidebar-shadow
 .sidebar-toggle: x-icon(name="progress")
@@ -62,11 +57,6 @@ if course.trailer
     button.close: x-icon(name="close" size=24)
     .video-wrap
       iframe(width="560" height="315" data-src=`https://www.youtube.com/embed/${course.trailer}?autoplay=1&rel=0` frameborder="0" allow="autoplay; encrypted-media" allowfullscreen)
-
-if config.social
-  +modal('share')
-    h2 #[x-icon(name="share" size=32)] #{__('Share')}
-    include ./share
 
 if config.courses.feedback
   x-modal#feedback
@@ -97,11 +87,29 @@ if config.courses.feedback
 x-modal#reset
   button.close: x-icon(name="close" size=24)
   .modal-body
-    h2 #[x-icon(name="reset" size=32)] #{__('Reset Progress')}
-    p(style="margin: 0")= __('This will delete your progress and chat data for all chapters in this course, and cannot be undone!')
-    form(action=`/course/${course.id}/reset` method="POST")
+    h2 #[x-icon(name="reset" size=32)] #{__("Reset Course Progress")}
+    .reset-info(style="background: linear-gradient(135deg, rgba(239,21,121,0.1), rgba(139,92,246,0.1)); border-radius: 12px; padding: 16px; margin: 20px 0; border-left: 4px solid #ef1579;")
+      p(style="margin: 0 0 12px; font-weight: 600; color: #ef1579;") ⚠️ #{__("Warning: This action cannot be undone!")}
+      p(style="margin: 0 0 8px; color: #666;") #{__("This will permanently delete:")}
+      ul(style="margin: 8px 0 0 20px; color: #666;")
+        li #{__("All your progress in this course")}
+        li #{__("Your completed goals and scores")}
+        li #{__("Any saved answers and solutions")}
+        li #{__("Chat history with the tutor")}
+    p(style="color: #888; font-size: 14px; margin: 16px 0;")= __("You will start fresh from the beginning of the course.")
+    form#reset-form(action=`/course/${course.id}/reset` method="POST")
       input(type='hidden' name='_csrf' value=_csrf)
-      p.btn-row: button.btn.btn-red(type='submit')= __('Reset Now')
+      .btn-row(style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;")
+        button.btn.btn-grey(type='button' onclick="document.querySelector('#reset').classList.remove('on')" style="background: #656073;")= __("Cancel")
+        button.btn.btn-red(type='submit' style="background: linear-gradient(135deg, #cd0e66, #ef1579);")= __("Reset Progress")
+
+x-modal#reset-success
+  button.close: x-icon(name="close" size=24)
+  .modal-body(style="text-align: center; padding: 40px;")
+    x-icon(name="form-check" size=80 style="color: #22ab24; margin-bottom: 20px;")
+    h2(style="color: #22ab24; margin-bottom: 16px;")= __("Progress Reset Successfully!")
+    p(style="color: #666; margin-bottom: 24px;")= __("Your course progress has been cleared. You can now start fresh from the beginning.")
+    button.btn.btn-green(onclick="document.querySelector('#reset-success').classList.remove('on')" style="background: linear-gradient(135deg, #22ab24, #29cd2b);")= __("Start Learning")
 
 x-modal#glossary-search(data-display="flex")
   button.close: x-icon(name="close" size=24)

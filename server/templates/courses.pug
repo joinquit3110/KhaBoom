@@ -262,8 +262,17 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
         for c in courses || []
           - var course = getCourse(c, locale.id)
           - var difficulty = course.difficulty || 'beginner'
+          - var courseProgress = user && progress ? progress[c] : undefined
+          - var progressPercent = courseProgress ? courseProgress.progress : 0
           .course-card(data-course-id=c data-difficulty=difficulty data-name=course.title.toLowerCase())
             img.course-image(src=(course.hero || course.icon || '/images/placeholder.jpg') alt=course.title)
+            
+            if user && progressPercent > 0
+              .progress-badge(style=`position: absolute; top: 12px; right: 12px; background: ${progressPercent === 100 ? 'linear-gradient(135deg, #22ab24, #29cd2b)' : 'linear-gradient(135deg, #667eea, #764ba2)'}; padding: 6px 12px; border-radius: 20px; color: white; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);`)
+                if progressPercent === 100
+                  | ✓ Completed
+                else
+                  | #{progressPercent}% Complete
             
             .course-content
               h3= course.title
@@ -273,12 +282,22 @@ html(lang=locale.id dir=(locale.dir || 'ltr') theme=theme)
                 span(style="display: inline-block; margin-top: 0.5rem;")
                   img(src="/images/flags/gb.png" width=20 height=20 style="vertical-align: middle;")
                   span(style="margin-left: 0.5rem; font-size: 0.9rem;") English
+              
+              if user && progressPercent > 0 && progressPercent < 100
+                .progress-bar-container(style="margin-top: 12px;")
+                  .progress-bar-bg(style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;")
+                    .progress-bar-fill(style=`width: ${progressPercent}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 3px; transition: width 0.3s ease;`)
             
             .course-footer
               span.difficulty(class=difficulty)= difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
               
               if user
-                a.btn-gradient(href=`/${c}`) Start Learning
+                if progressPercent > 0 && progressPercent < 100
+                  a.btn-gradient(href=`/${c}`) Continue Learning
+                else if progressPercent === 100
+                  a.btn-gradient(href=`/${c}` style="background: linear-gradient(135deg, #22ab24, #29cd2b);") Review Course
+                else
+                  a.btn-gradient(href=`/${c}`) Start Learning
               else
                 button.btn-gradient(onclick=`showLoginPrompt('${c}', '${course.title}')`) Start Learning
     
