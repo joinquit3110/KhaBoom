@@ -13,6 +13,10 @@ html(lang="en" theme=theme)
     link(href=cacheBust('/main.css') rel='stylesheet')
     
     style.
+      * {
+        scroll-behavior: smooth;
+      }
+      
       .about-nav {
         position: fixed;
         top: 0;
@@ -23,6 +27,13 @@ html(lang="en" theme=theme)
         background: rgba(15, 15, 35, 0.95);
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+      }
+      
+      .about-nav.scrolled {
+        background: rgba(5, 5, 15, 0.98);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
       }
       .nav-container {
         max-width: 1200px;
@@ -175,6 +186,844 @@ html(lang="en" theme=theme)
         font-size: 1.8rem;
         font-weight: 700;
       }
+      
+      // Artistic section styles with scroll animations
+      .about-section {
+        padding: 8rem 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      
+      .about-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        min-height: 800px;
+        position: relative;
+        z-index: 2;
+        width: 100%;
+      }
+      
+      .about-content {
+        padding: 3rem 0 3rem 2rem;
+        position: relative;
+        opacity: 0;
+        transform: translateX(-100px);
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .about-content.animate {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      
+      .about-content.story-content::before {
+        content: '';
+        position: absolute;
+        left: -4rem;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+        border-radius: 2px;
+        opacity: 0.6;
+      }
+      
+      .about-content.story-content {
+        padding: 3rem 0 3rem 2rem;
+      }
+      
+      .about-content.approach-content::before {
+        content: '';
+        position: absolute;
+        right: -4rem;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+        border-radius: 2px;
+        opacity: 0.6;
+      }
+      
+      .about-content.approach-content {
+        padding: 3rem 2rem 3rem 0;
+      }
+      
+      .about-content h2 {
+        font-size: 3.5rem;
+        margin-bottom: 3rem;
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        position: relative;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 3s ease-in-out infinite;
+      }
+      
+      .about-content h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+      
+      .about-content p {
+        font-size: 1.4rem;
+        line-height: 1.9;
+        margin-bottom: 2.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        position: relative;
+        padding-left: 1rem;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .about-content p.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .about-content p::before {
+        content: '✦';
+        position: absolute;
+        left: -1rem;
+        top: 0.5rem;
+        color: #667eea;
+        font-size: 1rem;
+        opacity: 0.7;
+      }
+      
+      .about-image.story-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        opacity: 0;
+        transform: translateX(-100px) rotateY(-15deg);
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .about-image.story-image.animate {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+      }
+      
+      .about-image.story-image:hover {
+        transform: translateY(-20px) rotateX(5deg) rotateY(-5deg);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+      }
+      
+      .about-image.story-image {
+        width: 100%;
+        height: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 30px;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        margin-top: 12rem;
+      }
+      
+      .about-image.story-image img {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 900px !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+        border-radius: 0 !important;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: brightness(1.1) contrast(1.1);
+        display: block;
+      }
+      
+      .about-image.story-image:hover img {
+        transform: scale(1.08);
+        filter: brightness(1.2) contrast(1.2) saturate(1.1);
+      }
+      
+      .about-image.approach-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        opacity: 0;
+        transform: translateX(100px) rotateY(15deg);
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .about-image.approach-image.animate {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+      }
+      
+      .about-image.approach-image:hover {
+        transform: translateY(-20px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+      }
+      
+      .about-image.approach-image {
+        margin-top: 12rem;
+      }
+      
+      .about-image.approach-image img {
+        width: 100% !important;
+        height: 900px !important;
+        object-fit: cover !important;
+        border-radius: 30px !important;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: brightness(1.1) contrast(1.1);
+        object-position: left center;
+      }
+      
+      .about-image.approach-image:hover img {
+        animation: panImage 4s ease-in-out infinite;
+        filter: brightness(1.2) contrast(1.2) saturate(1.1);
+      }
+      
+      @keyframes panImage {
+        0% {
+          object-position: left center;
+        }
+        25% {
+          object-position: center center;
+        }
+        50% {
+          object-position: right center;
+        }
+        75% {
+          object-position: center center;
+        }
+        100% {
+          object-position: left center;
+        }
+      }
+      
+      .team-section {
+        padding: 6rem 2rem;
+        background: linear-gradient(135deg, 
+                    rgba(102, 126, 234, 0.15) 0%, 
+                    rgba(118, 75, 162, 0.15) 50%,
+                    rgba(240, 147, 251, 0.15) 100%);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      
+      .team-header {
+        text-align: center;
+        margin-bottom: 5rem;
+        position: relative;
+        z-index: 3;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .team-header.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .team-header h2 {
+        font-size: 3.5rem;
+        margin-bottom: 2rem;
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        position: relative;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 3s ease-in-out infinite;
+      }
+      
+      .team-header h2::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+      
+      .team-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #764ba2, #667eea);
+        border-radius: 2px;
+      }
+      
+      .team-header p {
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.85);
+        max-width: 700px;
+        margin: 0 auto;
+        font-weight: 400;
+        line-height: 1.6;
+      }
+      
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 4rem;
+        max-width: 1600px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 3;
+      }
+      
+      .team-member {
+        background: linear-gradient(135deg, 
+                    rgba(255, 255, 255, 0.1) 0%, 
+                    rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 24px;
+        padding: 2.5rem;
+        text-align: center;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: visible;
+        opacity: 0;
+        transform: translateY(30px);
+        cursor: pointer;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .team-member.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .team-member::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+                    rgba(102, 126, 234, 0.1) 0%, 
+                    rgba(118, 75, 162, 0.1) 50%,
+                    rgba(240, 147, 251, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        border-radius: 24px;
+        z-index: 1;
+      }
+      
+      .team-member:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(102, 126, 234, 0.3);
+        border-color: rgba(102, 126, 234, 0.4);
+      }
+      
+      .team-member:hover::before {
+        opacity: 1;
+      }
+      
+      .crown-icon {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        font-size: 5rem;
+        opacity: 0;
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 99999;
+        pointer-events: none;
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+      }
+      
+      .team-member:hover .crown-icon {
+        opacity: 1;
+        animation: crownFloat 2s ease-in-out infinite;
+      }
+      
+      @keyframes crownFloat {
+        0%, 100% {
+          transform: translateX(-50%) translateY(-20px) rotate(-5deg);
+        }
+        50% {
+          transform: translateX(-50%) translateY(-35px) rotate(5deg);
+        }
+      }
+      
+      
+      .team-member.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .team-member:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      .team-member.popup-active {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.1);
+        width: 90vw;
+        height: 90vh;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        animation: popupExplode 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        overflow: visible;
+      }
+      
+      .team-member.popup-active .member-image {
+        width: 300px;
+        height: 300px;
+        border-radius: 20px;
+        margin: 2rem auto;
+        border: 8px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+        animation: imageFloat 2s ease-in-out infinite;
+      }
+      
+      .team-member.popup-active .member-content {
+        padding: 2rem;
+        color: white;
+      }
+      
+      .team-member.popup-active .member-content h3 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 3s ease-in-out infinite;
+      }
+      
+      .team-member.popup-active .member-content .role {
+        font-size: 1.5rem;
+        color: #667eea;
+        margin-bottom: 2rem;
+      }
+      
+      .team-member.popup-active .member-content .bio {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 9998;
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+      }
+      
+      .explosion-particles {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10000;
+      }
+      
+      .particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 50%;
+        animation: particleExplode 1.5s ease-out forwards;
+      }
+      
+      .particle:nth-child(1) { animation-delay: 0.1s; }
+      .particle:nth-child(2) { animation-delay: 0.2s; }
+      .particle:nth-child(3) { animation-delay: 0.3s; }
+      .particle:nth-child(4) { animation-delay: 0.4s; }
+      .particle:nth-child(5) { animation-delay: 0.5s; }
+      .particle:nth-child(6) { animation-delay: 0.6s; }
+      .particle:nth-child(7) { animation-delay: 0.7s; }
+      .particle:nth-child(8) { animation-delay: 0.8s; }
+      
+      .close-popup {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10001;
+      }
+      
+      .close-popup:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+      
+      @keyframes popupExplode {
+        0% {
+          transform: translate(-50%, -50%) scale(0.1);
+          opacity: 0;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes imageFloat {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      
+      @keyframes particleExplode {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1) translate(var(--dx, 200px), var(--dy, -200px));
+          opacity: 0;
+        }
+      }
+      
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      
+      .member-image {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+      }
+      
+      .member-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+                    rgba(102, 126, 234, 0.2) 0%, 
+                    rgba(118, 75, 162, 0.2) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        border-radius: 50%;
+      }
+      
+      .team-member:hover .member-image {
+        transform: scale(1.05);
+        border-color: rgba(102, 126, 234, 0.6);
+        box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
+      }
+      
+      .team-member:hover .member-image::before {
+        opacity: 1;
+      }
+      
+      .member-content {
+        position: relative;
+        z-index: 10;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      
+      .member-content h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+        transition: all 0.4s ease;
+        line-height: 1.2;
+      }
+      
+      .team-member:hover .member-content h3 {
+        transform: translateY(-2px);
+      }
+      
+      .member-content .role {
+        font-size: 1rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 1rem;
+        transition: all 0.4s ease;
+      }
+      
+      .team-member:hover .member-content .role {
+        color: #ff6b6b;
+        transform: translateY(-1px);
+        text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+      }
+      
+      
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      
+      .team-member:hover .member-image {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+      }
+      
+      .member-content {
+        position: relative;
+      }
+      
+      .member-content h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      
+      .member-content .role {
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+        position: relative;
+      }
+      
+      .member-content .role::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 1px;
+      }
+      
+      .member-content .bio {
+        font-size: 1rem;
+        line-height: 1.7;
+        opacity: 0.8;
+      }
+      
+      // Enhanced animation keyframes
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes fadeInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+        }
+      }
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 0.5;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
+      }
+      @keyframes gradientShift {
+        0%, 100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+      @keyframes glow {
+        0%, 100% {
+          box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .about-section {
+          padding: 4rem 1.5rem;
+        }
+        .about-grid {
+          grid-template-columns: 1fr;
+          gap: 3rem;
+        }
+        .about-content h2 {
+          font-size: 2.2rem;
+        }
+        .about-content p {
+          font-size: 1.1rem;
+        }
+        .about-image.story-image img {
+          max-height: 700px !important;
+        }
+        .team-grid {
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 2rem;
+        }
+        .member-image {
+          width: 150px;
+          height: 150px;
+          border-radius: 15px;
+        }
+        .team-member {
+          padding: 2rem;
+        }
+      }
   
   body
     // Navigation Header
@@ -217,117 +1066,85 @@ html(lang="en" theme=theme)
       p(style="font-size: 1.4rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto;")
         | We're on a mission to make learning explosive, engaging, and accessible to everyone
     
-    // Mission Section
-    section.mission-section
-      .glass-panel
-        h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 2rem; text-align: center;") Our Mission
-        p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 2rem;")
-          | At Kha-Boom!, we believe that education should be an adventure, not a chore. Our platform combines 
-          | cutting-edge technology with innovative pedagogy to create learning experiences that are as entertaining 
-          | as they are educational.
-        p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8;")
-          | Through interactive content, personalized learning paths, and gamified experiences, we're transforming 
-          | how people learn and grow in the digital age.
+    // Our Story Section
+    section.about-section
+      .container
+        .about-grid
+          .about-content.story-content
+            h2.gradient-text Our Story
+            p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 1.5rem;")
+              | The starting year of Kha-Boom! was 2025, and with reason made: to make getting a little math and science fun, interactive, and accessible to all. We believe the educational aspect is an exciting exploration- rather than dying by memorization.
+            p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8;")
+              | Our team, forming from the Ho Chi Minh City University of Education, consists of educators, designers, and developers united in their passion for working with immersive learning environments and visualization techniques that expedite the grasping of difficult concepts through interaction. The combination of current educational research with advanced technology makes for a progressive approach to how learning is facilitated.
+          .about-image.story-image
+            img(src="/images/teammember/team1.png" alt="Team collaboration")
     
-    // Values Section
-    section(style="padding: 4rem 2rem;")
-      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Our Values
-      
-      .values-grid
-        .glass-card.value-card
-          .value-icon(style="background: linear-gradient(135deg, #667eea, #764ba2);")
-            span(style="color: white;") 🎯
-          h3(style="margin-bottom: 1rem; color: white;") Innovation
-          p(style="color: rgba(255, 255, 255, 0.8);")
-            | We constantly push boundaries to create the most engaging and effective learning experiences.
-        
-        .glass-card.value-card
-          .value-icon(style="background: linear-gradient(135deg, #f093fb, #f5576c);")
-            span(style="color: white;") 🌍
-          h3(style="margin-bottom: 1rem; color: white;") Accessibility
-          p(style="color: rgba(255, 255, 255, 0.8);")
-            | Education should be available to everyone, regardless of background or location.
-        
-        .glass-card.value-card
-          .value-icon(style="background: linear-gradient(135deg, #4facfe, #00f2fe);")
-            span(style="color: white;") 🤝
-          h3(style="margin-bottom: 1rem; color: white;") Community
-          p(style="color: rgba(255, 255, 255, 0.8);")
-            | Learning is better together. We foster a supportive community of curious minds.
-        
-        .glass-card.value-card
-          .value-icon(style="background: linear-gradient(135deg, #fa709a, #fee140);")
-            span(style="color: white;") ✨
-          h3(style="margin-bottom: 1rem; color: white;") Excellence
-          p(style="color: rgba(255, 255, 255, 0.8);")
-            | We maintain the highest standards in content quality and user experience.
+    // Our Approach Section
+    section.about-section
+      .container
+        .about-grid
+          .about-image.approach-image
+            img(src="/images/teammember/team2.png" alt="Our Approach Illustration")
+          .about-content.approach-content
+            h2.gradient-text Our Approach
+            p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 1.5rem;")
+              | Studying at Kha-Boom! means they understand that the best learning happens through direct experience. Hence, all courses are designed to offer interactive experiences such as manipulating ideas, exploring concepts, testing ideas, and watching the consequences.
+            p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 1.5rem;")
+              | Created by a group of enthusiastic members from Ho Chi Minh City University of Education, the courses are flexible and adaptable as they try to meet students where they are and support them in learning at their own pace. This means it offers special help to you if you are a visual learner, someone who learns best through practice, or a problem-solving person.
+            p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); line-height: 1.8;")
+              | By making education interesting and interactive, we help students build their confidence, ignite their curiosity, and develop an enduring interest in learning.
+    
     
     // Team Section
-    section(style="padding: 4rem 2rem; background: rgba(0, 0, 0, 0.2);")
-      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Meet Our Team
+    section.team-section
+      .container
+        .team-header
+          h2.gradient-text Meet Our Team
+          p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); text-align: center; margin-bottom: 3rem;") The passionate individuals behind Kha-Boom!
       
       .team-grid
-        .glass-card.team-card
-          .team-avatar
-            span(style="color: white;") 👨‍💼
-          h3(style="color: white; margin-bottom: 0.5rem;") Alex Johnson
-          p(style="color: #667eea; margin-bottom: 1rem;") CEO & Founder
-          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
-            | Passionate about making education accessible and fun for everyone.
-        
-        .glass-card.team-card
-          .team-avatar
-            span(style="color: white;") 👩‍💻
-          h3(style="color: white; margin-bottom: 0.5rem;") Sarah Chen
-          p(style="color: #f093fb; margin-bottom: 1rem;") CTO
-          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
-            | Leading our tech innovation with 15+ years of experience.
-        
-        .glass-card.team-card
-          .team-avatar
-            span(style="color: white;") 👨‍🎨
-          h3(style="color: white; margin-bottom: 0.5rem;") Mike Rodriguez
-          p(style="color: #4facfe; margin-bottom: 1rem;") Head of Design
-          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
-            | Creating beautiful and intuitive learning experiences.
-        
-        .glass-card.team-card
-          .team-avatar
-            span(style="color: white;") 👩‍🏫
-          h3(style="color: white; margin-bottom: 0.5rem;") Dr. Emily Watson
-          p(style="color: #fa709a; margin-bottom: 1rem;") Head of Education
-          p(style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;")
-            | Ensuring our content meets the highest educational standards.
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Hung.png')")
+            .member-content
+              h3(style="color: #667eea;") Nguyễn Hưng
+              p.role 48.01.101.022
+            .crown-icon 👑
+          
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Hao.png')")
+            .member-content
+              h3(style="color: #f093fb;") Nguyễn Đình<br>Anh Hào
+              p.role 48.01.101.016
+            .crown-icon 👑
+
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Quan.png')")
+            .member-content
+              h3(style="color: #4facfe;") Nguyễn Minh Quân
+              p.role 48.01.101.063
+            .crown-icon 👑
+          
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Vi.png')")
+            .member-content
+              h3(style="color: #fa709a;") Huỳnh Văn Vĩ
+              p.role 48.01.101.104
+            .crown-icon 👑
+
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Phuc.png')")
+            .member-content
+              h3(style="color: #30cfd0;") Trương Nguyễn<br>Gia Phúc
+              p.role 48.01.101.059
+            .crown-icon 👑
+          
+          .team-member
+            .member-image(style="background-image: url('/images/teammember/Long.png')")
+            .member-content
+              h3(style="color: #fee140;") Nguyễn Phi<br>Hoàng Long
+              p.role 48.01.101.039
+            .crown-icon 👑
     
-    // Journey Timeline
-    section(style="padding: 4rem 2rem;")
-      h2.gradient-text(style="font-size: 2.5rem; margin-bottom: 3rem; text-align: center;") Our Journey
-      
-      .timeline
-        .glass-card.timeline-item
-          .timeline-dot
-          h3(style="color: #667eea; margin-bottom: 0.5rem;") 2020
-          p(style="color: rgba(255, 255, 255, 0.8);") Founded with a vision to revolutionize online learning
-        
-        .glass-card.timeline-item
-          .timeline-dot
-          h3(style="color: #f093fb; margin-bottom: 0.5rem;") 2021
-          p(style="color: rgba(255, 255, 255, 0.8);") Launched our first interactive courses
-        
-        .glass-card.timeline-item
-          .timeline-dot
-          h3(style="color: #4facfe; margin-bottom: 0.5rem;") 2022
-          p(style="color: rgba(255, 255, 255, 0.8);") Reached 5,000+ active learners
-        
-        .glass-card.timeline-item
-          .timeline-dot
-          h3(style="color: #fa709a; margin-bottom: 0.5rem;") 2023
-          p(style="color: rgba(255, 255, 255, 0.8);") Introduced AI-powered personalized learning
-        
-        .glass-card.timeline-item
-          .timeline-dot
-          h3(style="color: #30cfd0; margin-bottom: 0.5rem;") 2024
-          p(style="color: rgba(255, 255, 255, 0.8);") Expanding globally with 50+ courses
     
     // Footer
     footer(style="padding: 3rem 0; background: rgba(0, 0, 0, 0.3); margin-top: 5rem;")
@@ -349,5 +1166,139 @@ html(lang="en" theme=theme)
         if (dropdown && profileContainer && !profileContainer.contains(event.target)) {
           dropdown.classList.remove('active');
         }
+      });
+      
+      // Scroll animations and effects
+      let ticking = false;
+      
+      function updateScrollEffects() {
+        const scrolled = window.pageYOffset;
+        const nav = document.querySelector('.about-nav');
+        
+        // Navbar scroll effect
+        if (scrolled > 100) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+        
+        // Scroll-triggered animations
+        const animatedElements = document.querySelectorAll('.about-content, .about-image, .team-header, .team-member');
+        
+        animatedElements.forEach((element, index) => {
+          const elementTop = element.getBoundingClientRect().top;
+          const elementVisible = 150;
+          
+          if (elementTop < window.innerHeight - elementVisible) {
+            setTimeout(() => {
+              element.classList.add('animate');
+              
+              // Animate paragraphs with delay
+              if (element.classList.contains('about-content')) {
+                const paragraphs = element.querySelectorAll('p');
+                paragraphs.forEach((p, pIndex) => {
+                  setTimeout(() => {
+                    p.classList.add('animate');
+                  }, pIndex * 200);
+                });
+              }
+            }, index * 100);
+          }
+        });
+        
+        ticking = false;
+      }
+      
+      function requestTick() {
+        if (!ticking) {
+          requestAnimationFrame(updateScrollEffects);
+          ticking = true;
+        }
+      }
+      
+      // Parallax effect for background elements
+      function updateParallax() {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('.about-section::before, .team-section::before');
+        
+        parallaxElements.forEach(element => {
+          const speed = 0.5;
+          element.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+      }
+      
+      // Mouse movement effects
+      function handleMouseMove(e) {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        // Subtle parallax for team members
+        const teamMembers = document.querySelectorAll('.team-member');
+        teamMembers.forEach((member, index) => {
+          const speed = (index + 1) * 0.02;
+          const x = (mouseX - 0.5) * speed;
+          const y = (mouseY - 0.5) * speed;
+          
+          member.style.transform = `translate(${x}px, ${y}px)`;
+        });
+      }
+      
+      // Initialize scroll effects
+      window.addEventListener('scroll', requestTick);
+      window.addEventListener('mousemove', handleMouseMove);
+      
+      // Initial animation trigger
+      setTimeout(() => {
+        updateScrollEffects();
+      }, 100);
+      
+      // Add floating particles effect
+      function createParticle() {
+        const particle = document.createElement('div');
+        particle.style.position = 'fixed';
+        particle.style.width = '4px';
+        particle.style.height = '4px';
+        particle.style.background = 'rgba(102, 126, 234, 0.6)';
+        particle.style.borderRadius = '50%';
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '1';
+        particle.style.left = Math.random() * window.innerWidth + 'px';
+        particle.style.top = window.innerHeight + 'px';
+        
+        document.body.appendChild(particle);
+        
+        const animation = particle.animate([
+          { transform: 'translateY(0px) scale(1)', opacity: 1 },
+          { transform: `translateY(-${window.innerHeight + 100}px) scale(0)`, opacity: 0 }
+        ], {
+          duration: Math.random() * 3000 + 2000,
+          easing: 'linear'
+        });
+        
+        animation.onfinish = () => {
+          particle.remove();
+        };
+      }
+      
+      // Create particles periodically
+      setInterval(createParticle, 300);
+      
+      // Modern team member interactions with crown effect
+      document.addEventListener('DOMContentLoaded', function() {
+        const teamMembers = document.querySelectorAll('.team-member');
+        
+        teamMembers.forEach((member, index) => {
+          // Add stagger animation delay
+          member.style.animationDelay = `${index * 0.1}s`;
+          
+          // Add smooth hover effects
+          member.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+          });
+          
+          member.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+          });
+        });
       });
       
