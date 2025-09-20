@@ -12,7 +12,7 @@ cantChangeEmail: You have to set a password for your account, before changing yo
 
 # Authentication Errors
 invalidToken: This password reset link is invalid or has expired.
-invalidLogin: Some of the details you entered (email, username or password) were incorrect.
+invalidLogin: Some of the details you entered were incorrect.
 accountNotFound: Unfortunately, we couldn’t find an account with this email address or username.
 verifyError: Unfortunately, we couldn’t verify your account.
 wrongPassword: Your current password is incorrect.

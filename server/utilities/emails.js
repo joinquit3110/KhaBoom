@@ -3,15 +3,6 @@
 // Email Helper Functions
 // (c) Kha-Boom!
 // =============================================================================
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -33,26 +24,24 @@ function loadEmailTemplate(name) {
     const text = (0, pug_1.compileFile)(`${prefix}/${name}-simple.pug`);
     return [html, text];
 }
-function sendEmail(options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        if (!utilities_1.CONFIG.accounts.sendgridKey) {
-            console.warn('SendGrid API key not configured. Email not sent to:', options.to || ((_a = options.user) === null || _a === void 0 ? void 0 : _a.email));
-            return;
-        }
-        // Use verified sender email from environment or default
-        if (!options.from) {
-            options.from = process.env.SENDER_EMAIL || 'nghung.star@gmail.com';
-        }
-        if (options.user && !options.to)
-            options.to = `${options.user.fullName} <${options.user.email}>`;
-        try {
-            return yield mail_1.default.send(options);
-        }
-        catch (error) {
-            console.error(`Failed to send email to`, options.to, error);
-        }
-    });
+async function sendEmail(options) {
+    var _a;
+    if (!utilities_1.CONFIG.accounts.sendgridKey) {
+        console.warn('SendGrid API key not configured. Email not sent to:', options.to || ((_a = options.user) === null || _a === void 0 ? void 0 : _a.email));
+        return;
+    }
+    // Use verified sender email from environment or default
+    if (!options.from) {
+        options.from = process.env.SENDER_EMAIL || 'nghung.star@gmail.com';
+    }
+    if (options.user && !options.to)
+        options.to = `${options.user.fullName} <${options.user.email}>`;
+    try {
+        return await mail_1.default.send(options);
+    }
+    catch (error) {
+        console.error(`Failed to send email to`, options.to, error);
+    }
 }
 // -----------------------------------------------------------------------------
 const WELCOME = loadEmailTemplate('welcome');

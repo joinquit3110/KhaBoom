@@ -1,12 +1,13 @@
 # ==============================================================================
-# Kha-Boom! HINTS
+# KHA-BOOM! HINTS
 # ==============================================================================
 
 
-welcome: "Welcome to Kha-Boom! I'm Stewie, your personal tutor. :graduation-cap:"
+welcome: "Welcome to Kha-Boom! I'm Stewie, your personal tutor:graduation-cap:."
+account: "We will save all your progress, so you can come back later and continue right where you left off."
 tutorial1: Our content is divided into small steps. You have to complete the activities to reveal what's next.
 tutorial2: We will save all your progress, so you can come back later and continue right where you left off.
-
+tutorial3: You can always review previous steps if you need to refresh your memory.
 correct:
   - "Well done :smiling-face:"
   - "Great Work! :relieved-face:"

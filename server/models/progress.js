@@ -3,15 +3,6 @@
 // Course Progress Model
 // (c) Kha-Boom!
 // =============================================================================
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Progress = void 0;
 const xss_1 = require("xss");
@@ -62,18 +53,16 @@ ProgressSchema.virtual('activeSection').get(function () {
     const p = Math.max(0, lastStarted, lastAfterCompleted);
     return course.sections[p];
 });
-ProgressSchema.methods.getSectionData = function (sectionId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
-        const steps = {};
-        // TODO Only return data for steps in the requested section.
-        for (const [key, step] of ((_a = this.steps) === null || _a === void 0 ? void 0 : _a.entries()) || []) {
-            steps[key] = { scores: step.scores, data: step.data ? JSON.parse(step.data) : undefined };
-        }
-        const section = sectionId ? (_b = this.sections) === null || _b === void 0 ? void 0 : _b.get(sectionId) : undefined;
-        const messages = (_c = this.messages) === null || _c === void 0 ? void 0 : _c.map(m => ({ content: m.content, type: m.kind }));
-        return { completed: section === null || section === void 0 ? void 0 : section.completed, activeStep: section === null || section === void 0 ? void 0 : section.activeStep, messages, steps };
-    });
+ProgressSchema.methods.getSectionData = async function (sectionId) {
+    var _a, _b, _c;
+    const steps = {};
+    // TODO Only return data for steps in the requested section.
+    for (const [key, step] of ((_a = this.steps) === null || _a === void 0 ? void 0 : _a.entries()) || []) {
+        steps[key] = { scores: step.scores, data: step.data ? JSON.parse(step.data) : undefined };
+    }
+    const section = sectionId ? (_b = this.sections) === null || _b === void 0 ? void 0 : _b.get(sectionId) : undefined;
+    const messages = (_c = this.messages) === null || _c === void 0 ? void 0 : _c.map(m => ({ content: m.content, type: m.kind }));
+    return { completed: section === null || section === void 0 ? void 0 : section.completed, activeStep: section === null || section === void 0 ? void 0 : section.activeStep, messages, steps };
 };
 ProgressSchema.methods.getSectionProgress = function (section) {
     var _a, _b;
@@ -130,42 +119,34 @@ ProgressSchema.methods.getJSON = function (sectionId) {
         steps
     });
 };
-ProgressSchema.statics.lookup = function (req_1, courseId_1) {
-    return __awaiter(this, arguments, void 0, function* (req, courseId, createNew = false) {
-        var _a;
-        const userId = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) || req.tmpUser || '';
-        if (!userId)
-            return undefined;
-        const progress = yield exports.Progress.findOne({ userId, courseId }).exec();
-        return createNew ? progress || new exports.Progress({ userId, courseId }) : progress;
-    });
+ProgressSchema.statics.lookup = async function (req, courseId, createNew = false) {
+    var _a;
+    const userId = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) || req.tmpUser || '';
+    if (!userId)
+        return undefined;
+    const progress = await exports.Progress.findOne({ userId, courseId }).exec();
+    return createNew ? progress || new exports.Progress({ userId, courseId }) : progress;
 };
-ProgressSchema.statics.delete = function (req, courseId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const userId = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) || req.tmpUser || '';
-        const response = yield exports.Progress.deleteOne({ userId, courseId }).exec();
-        return response.deletedCount >= 0;
-    });
+ProgressSchema.statics.delete = async function (req, courseId) {
+    var _a;
+    const userId = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) || req.tmpUser || '';
+    const response = await exports.Progress.deleteOne({ userId, courseId }).exec();
+    return response.deletedCount >= 0;
 };
-ProgressSchema.statics.getUserData = function (userId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const data = new Map();
-        const courses = yield exports.Progress.find({ userId }, '-steps -messages').exec();
-        for (const c of courses)
-            data.set(c.courseId, c);
-        return data;
-    });
+ProgressSchema.statics.getUserData = async function (userId) {
+    const data = new Map();
+    const courses = await exports.Progress.find({ userId }, '-steps -messages').exec();
+    for (const c of courses)
+        data.set(c.courseId, c);
+    return data;
 };
 /** Returns all course IDs which a student has attempted, in order of recency. */
-ProgressSchema.statics.getRecentCourses = function (userId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const courses = Array.from((yield exports.Progress.getUserData(userId)).values());
-        return courses
-            .filter(data => data.progress > 0) // Include all courses with any progress, including completed ones
-            .sort((p, q) => (+q.updatedAt) - (+p.updatedAt))
-            .map(p => p.courseId);
-    });
+ProgressSchema.statics.getRecentCourses = async function (userId) {
+    const courses = Array.from((await exports.Progress.getUserData(userId)).values());
+    return courses
+        .filter(data => data.progress > 0) // Include all courses with any progress, including completed ones
+        .sort((p, q) => (+q.updatedAt) - (+p.updatedAt))
+        .map(p => p.courseId);
 };
 // -----------------------------------------------------------------------------
 exports.Progress = (0, mongoose_1.model)('Progress', ProgressSchema);

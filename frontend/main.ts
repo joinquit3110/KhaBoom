@@ -8,6 +8,7 @@ import {$, $$, $body, $html, bindAccessibilityEvents, Browser, InputView, Modal,
 
 import '@mathigon/boost/components';
 import './components/progress/progress';
+import './components/tutor/tutor';
 
 // See https://github.com/googleanalytics/autotrack
 import 'autotrack/lib/plugins/page-visibility-tracker';

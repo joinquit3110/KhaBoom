@@ -1,5 +1,5 @@
 // =============================================================================
-// Mathigon Studio Express App
+// KHA-BOOM! Express App
 // (c) Kha-Boom!
 // =============================================================================
 
@@ -20,7 +20,7 @@ import {CourseRequestOptions, ServerOptions} from './interfaces';
 import setupAuthEndpoints from './accounts';
 import {getMongoStore} from './utilities/mongodb';
 import {OAUTHPROVIDERS} from './utilities/oauth';
-import {cacheBust, CONFIG, CONTENT_DIR, COURSES, ENV, findNextSection, getCourse, href, include, IS_PROD, lighten, ONE_YEAR, OUT_DIR, PROJECT_DIR, promisify, removeCacheBust} from './utilities/utilities';
+import {cacheBust, CONFIG, CONTENT_DIR, COURSES, ENV, findNextSection, getCourse, href, include, IS_PROD, lighten, loadYAML, ONE_YEAR, OUT_DIR, PROJECT_DIR, promisify, removeCacheBust} from './utilities/utilities';
 import {AVAILABLE_LOCALES, getCountry, getLocale, isInEU, Locale, LOCALES, translate} from './utilities/i18n';
 import {User, UserDocument} from './models/user';
 import {CourseAnalytics, LoginAnalytics} from './models/analytics';
@@ -273,7 +273,49 @@ export class MathigonStudioApp {
     setupAuthEndpoints(this);
 
     this.get('/dashboard', async (req, res) => {
-      if (!req.user) return res.redirect('/login');
+      // Temporarily allow access without login for testing
+      if (!req.user) {
+        // Create a dummy user for testing
+        const dummyProgress = null;
+        const dummyStats = { streak: 0, points: 0, hours: 0 };
+        const recent: any[] = [];
+        const recommended: any[] = [];
+        const leaderboard: any[] = [];
+
+        // Load glossary data from shared glossary.yaml
+        let glossaryData: {[key: string]: {title: string, text: string}} = {};
+        try {
+          const glossaryPath = path.join(CONTENT_DIR, 'shared', 'glossary.yaml');
+          console.log('Loading glossary from path:', glossaryPath);
+          const sharedGlossary = await loadYAML(glossaryPath) || {};
+          console.log('Raw glossary loaded:', Object.keys(sharedGlossary).length, 'keys');
+          
+          // For dashboard, include ALL glossary terms from shared
+          glossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
+          
+          // Add dashboard-specific terms
+          glossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
+          glossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
+          glossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
+          glossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
+          glossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
+          
+          console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+          console.log('Sample terms:', Object.keys(glossaryData).slice(0, 5));
+        } catch (error) {
+          console.warn('Could not load glossary data:', error);
+          // Fallback glossary data
+          glossaryData = {
+            dashboard: {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'},
+            learning: {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'},
+            progress: {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'},
+            ai: {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'},
+            mentor: {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'}
+          };
+        }
+
+        return res.render('dashboard', {progress: dummyProgress, recent, recommended, stats: dummyStats, leaderboard, glossaryData});
+      }
 
       const progress = await Progress.getUserData(req.user.id);
       const stats = await CourseAnalytics.getLastWeekStats(req.user.id);
@@ -315,7 +357,36 @@ export class MathigonStudioApp {
       // Fetch leaderboard data - top 10 users by points
       const leaderboard = await CourseAnalytics.getLeaderboard();
 
-      res.render('dashboard', {progress, recent, recommended, stats, leaderboard});
+      // Load glossary data from shared glossary.yaml
+      let glossaryData: {[key: string]: {title: string, text: string}} = {};
+      try {
+        const glossaryPath = path.join(CONTENT_DIR, 'shared', 'glossary.yaml');
+        const sharedGlossary = await loadYAML(glossaryPath) || {};
+        
+        // For dashboard, include ALL glossary terms from shared
+        glossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
+        
+        // Add dashboard-specific terms
+        glossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
+        glossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
+        glossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
+        glossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
+        glossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
+        
+        console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+      } catch (error) {
+        console.warn('Could not load glossary data:', error);
+        // Fallback glossary data
+        glossaryData = {
+          dashboard: {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'},
+          learning: {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'},
+          progress: {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'},
+          ai: {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'},
+          mentor: {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'}
+        };
+      }
+
+      res.render('dashboard', {progress, recent, recommended, stats, leaderboard, glossaryData});
     });
 
     return this;

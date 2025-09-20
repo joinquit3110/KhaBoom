@@ -8,7 +8,7 @@ import {isOneOf, loop, Obj, wait} from '@mathigon/core';
 import {Random} from '@mathigon/fermat';
 import {Expression} from '@mathigon/hilbert';
 import {$N, animate, Browser, CustomElementView, ElementView, post, register} from '@mathigon/boost';
-import {Course} from '../../course';
+import {Course} from '../../course.d';
 import template from './tutor.pug';
 
 
@@ -60,18 +60,36 @@ export class Tutor extends CustomElementView {
   private $chat!: ElementView;
   private $chatBody!: ElementView;
   private $query!: ElementView;
+  private $glossaryBtn!: ElementView;
 
   private recentMessages: string[] = [];
   private isOpen = false;
   private queuePromise = Promise.resolve();
+  private currentCourseId = '';
 
   hints!: Record<string, string|string[]>;
   correct!: () => string;
   incorrect!: () => string;
 
   ready() {
-    this.$course = this.parents('x-course')[0] as Course|undefined;
-    this.hints = this.$course ? JSON.parse(this.$course.$('#hints')!.text) : {};
+    this.$course = this.parents('x-course')[0] as any;
+    // For dashboard, get course ID from data-course attribute
+    this.currentCourseId = this.$course?.id || this.attr('data-course') || '';
+    
+    // Handle hints - only load if we have a course with hints
+    if (this.$course && this.$course.$('#hints')) {
+      this.hints = JSON.parse(this.$course.$('#hints')!.text);
+    } else {
+      // Default hints for dashboard or when no course
+      this.hints = {
+        tutorial1: 'Our content is divided into small steps. You have to complete the activities to reveal what\'s next.',
+        tutorial2: 'You can also ask me questions about the current section, or about your progress.',
+        account: 'Log in to save your progress and get personalised recommendations.',
+        correct: ['Great job!', 'Excellent!', 'Well done!'],
+        incorrect: ['Not quite right.', 'Try again.', 'Keep practicing!']
+      };
+    }
+    
     const user = window.user;
 
     this.correct = loop(Random.shuffle(this.hints.correct as string[] || []));
@@ -80,12 +98,14 @@ export class Tutor extends CustomElementView {
     this.$toasts = this.$('.toasts')!;
     this.$chat = this.$('.chat')!;
     this.$chatBody = this.$('.chat-body')!;
+    this.$glossaryBtn = this.$('.glossary-btn')!;
 
     // Open the chat panel when a message is clicked
     this.$toasts.on('click', e => {
       if (!e.handled) this.open();
     });
     this.$('.close')!.on('click', () => this.close());
+    this.$glossaryBtn.on('click', () => this.openGlossary());
 
     // Custom query input box
     const $footer = this.$('.chat-footer')!;
@@ -98,12 +118,10 @@ export class Tutor extends CustomElementView {
     this.$query.on('focus', () => $footer.addClass('focus'));
     this.$query.on('blur', () => $footer.removeClass('focus'));
 
-    // Hint and Tutorial Button
-    this.$('.hint')!.on('click', () => {
-      // TODO Show tailored hints for current section
-      this.queue(this.hints.tutorial1 as string);
-      this.queue(user ? this.hints.tutorial2 as string : this.hints.account as string);
-    });
+    // Load chat history if user is logged in
+    if (user && this.currentCourseId) {
+      this.loadChatHistory();
+    }
 
     // Restore previous messages for user
     if (this.$course && this.$course.userData?.messages) {
@@ -116,22 +134,31 @@ export class Tutor extends CustomElementView {
     // Show a welcome message or account creation prompt. Note that the
     // corresponding messages (e.g. welcomeMorningNamed) have to be defined
     // in the shared/hints.yaml configuration file (and its translations).
-    const showWelcome = (ENV === 'MOBILE') ? window.showWelcomeMessage : !Browser.getCookie('sessionWelcome');
-    if (showWelcome && this.$course) {
-      if (ENV === 'WEB') Browser.setCookie('sessionWelcome', 1, 60 * 60 * 4);  // 4 hours
+    // Make welcome messages appear more frequently by reducing cookie dependency
+    const lastWelcome = Browser.getCookie('lastWelcome');
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+    
+    const showWelcome = (ENV === 'MOBILE') ? window.showWelcomeMessage : 
+      (!lastWelcome || (now - parseInt(lastWelcome)) > oneHour);
+    
+    if (showWelcome && (this.$course || this.currentCourseId === 'dashboard')) {
+      if (ENV === 'WEB') Browser.setCookie('lastWelcome', now.toString(), 60 * 60 * 2);  // 2 hours
 
       const t = new Date().getHours();
       const time = (t < 12) ? 'Morning' : (t < 18) ? 'Afternoon' : 'Evening';
 
       if (user) {
         setTimeout(() => this.showHint(`welcome${time}Named`, {variables: {name: user.shortName}}), 3000);
-      } else if (Browser.getCookie('welcome')) {
-        setTimeout(() => this.showHint(`welcome${time}`), 3000);
-        if (ENV === 'WEB') setTimeout(() => this.queue(this.hints.account as string), 4500);
       } else {
-        Browser.setCookie('welcome', 1);
-        setTimeout(() => this.queue(this.hints.welcome as string), 3000);
-        if (ENV === 'WEB') setTimeout(() => this.queue(this.hints.tutorial1 as string), 4500);
+        // Always show welcome message regardless of welcome cookie
+        if (this.currentCourseId === 'dashboard') {
+          setTimeout(() => this.queue('Welcome to Kha-Boom! I\'m Stewie, your personal tutor🎓.\n\n'), 3000);
+          if (ENV === 'WEB') setTimeout(() => this.queue(this.hints.tutorial1 as string), 4500);
+        } else {
+          setTimeout(() => this.queue(this.hints.welcome as string), 3000);
+          if (ENV === 'WEB') setTimeout(() => this.queue(this.hints.tutorial1 as string), 4500);
+        }
       }
     }
   }
@@ -152,6 +179,18 @@ export class Tutor extends CustomElementView {
     this.$query.blur();
     this.trigger('close');
     this.$chat.exit('slide-down', 200);
+  }
+
+  openGlossary() {
+    // Use the same modal system as sidebar
+    const glossaryModal = document.getElementById('glossary-search');
+    if (glossaryModal) {
+      // Show modal by setting display style
+      glossaryModal.style.display = 'flex';
+    } else {
+      // Fallback: show a message
+      this.queue('Glossary feature will be available soon!', 'hint');
+    }
   }
 
   queue(content: string, kind = 'hint', options: HintOptions = {}) {
@@ -219,17 +258,48 @@ export class Tutor extends CustomElementView {
 
     // Store the message, unless options.store is explicitly set to false.
     if (options.store !== false && this.$course) {
-      this.$course.saveProgress({hints: [{content, kind: 'hint'}]});
+      if (this.$course && this.$course.saveProgress) {
+        this.$course.saveProgress({hints: [{content, kind: 'hint'}]});
+      }
     }
 
     this.queue(content, 'hint', {class: options.class});
     return {text: content};
   }
 
+  // ---------------------------------------------------------------------------
+  // Chat Management Methods
+
+
+  async loadChatHistory() {
+    if (!window.user || !this.currentCourseId) return;
+
+    try {
+      const response = await fetch(`/api/chat/history/${this.currentCourseId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.history && data.history.length > 0) {
+          // Load chat history into the display
+          for (const msg of data.history) {
+            this.$chatBody.append(createMsgElement(msg.content, msg.role === 'user' ? 'question' : 'hint', {visible: true}));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  }
+
+
+
+
+
   askQuestion(query: string) {
     if (!query) return;
     this.queue(query, 'question');
-    if (this.$course) this.$course.log('Tutor', 'ask', query);
+    if (this.$course && this.$course.log) {
+      this.$course.log('Tutor', 'ask', query);
+    }
 
     // Evaluate inline equations directly
     const equation = (query.match(MATHS_REGEX) || [])

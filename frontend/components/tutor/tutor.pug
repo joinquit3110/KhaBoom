@@ -3,8 +3,10 @@
 .chat(data-display="flex")
   .chat-header
     slot(name="header")
+    .chat-controls
+      button.glossary-btn(title=__("Glossary") data-modal="glossary-search")
+        x-icon(name="glossary" size=20)
     button.close: x-icon(name="close" size=24)
   .chat-body
   .chat-footer
     .input(contenteditable)
-    button.hint: x-icon(name="lightbulb" size=24)

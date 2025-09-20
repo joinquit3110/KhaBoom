@@ -26,15 +26,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginAnalytics = exports.CourseAnalytics = void 0;
 const date = __importStar(require("date-fns"));
@@ -50,70 +41,62 @@ const CourseAnalyticsSchema = new mongoose_1.Schema({
     lastTime: { type: Date, default: new Date(0) }
 }, { timestamps: true });
 CourseAnalyticsSchema.index({ user: 1, date: 1 }, { unique: true });
-CourseAnalyticsSchema.statics.track = function (userId_1) {
-    return __awaiter(this, arguments, void 0, function* (userId, points = 0) {
-        // TODO Ensure requests are always handled in the correct order (index?).
-        // TODO Use client timestamps rather than server timestamps.
-        const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
-        let analytics = yield exports.CourseAnalytics.findOne({ date: today, user: userId });
-        if (!analytics)
-            analytics = new exports.CourseAnalytics({ date: today, user: userId });
-        const dt = (+today) - (+analytics.lastTime);
-        if (dt > 0) {
-            analytics.seconds += (dt < TIMEOUT) ? Math.round(dt / 1000) : TRAILING_TIME;
-            analytics.lastTime = today;
-        }
-        analytics.points += points;
-        yield analytics.save();
-    });
+CourseAnalyticsSchema.statics.track = async function (userId, points = 0) {
+    // TODO Ensure requests are always handled in the correct order (index?).
+    // TODO Use client timestamps rather than server timestamps.
+    const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
+    let analytics = await exports.CourseAnalytics.findOne({ date: today, user: userId });
+    if (!analytics)
+        analytics = new exports.CourseAnalytics({ date: today, user: userId });
+    const dt = (+today) - (+analytics.lastTime);
+    if (dt > 0) {
+        analytics.seconds += (dt < TIMEOUT) ? Math.round(dt / 1000) : TRAILING_TIME;
+        analytics.lastTime = today;
+    }
+    analytics.points += points;
+    await analytics.save();
 };
-CourseAnalyticsSchema.statics.getLastWeekStats = function (userId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return exports.CourseAnalytics.getStats(userId, date.subDays(new Date(), 7), new Date());
-    });
+CourseAnalyticsSchema.statics.getLastWeekStats = async function (userId) {
+    return exports.CourseAnalytics.getStats(userId, date.subDays(new Date(), 7), new Date());
 };
-CourseAnalyticsSchema.statics.getStats = function (user, start, end) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const items = yield exports.CourseAnalytics.find({ user, date: { $gte: start, $lte: end } }).exec();
-        const points = (0, core_1.total)(items.map(a => a.points));
-        const minutes = Math.ceil((0, core_1.total)(items.map(a => a.seconds)) / 60);
-        return { points, minutes };
-    });
+CourseAnalyticsSchema.statics.getStats = async function (user, start, end) {
+    const items = await exports.CourseAnalytics.find({ user, date: { $gte: start, $lte: end } }).exec();
+    const points = (0, core_1.total)(items.map(a => a.points));
+    const minutes = Math.ceil((0, core_1.total)(items.map(a => a.seconds)) / 60);
+    return { points, minutes };
 };
-CourseAnalyticsSchema.statics.getLeaderboard = function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Import User model here to avoid circular dependency
-        const { User } = yield Promise.resolve().then(() => __importStar(require('./user')));
-        // Get stats for the last 30 days for all users
-        const thirtyDaysAgo = date.subDays(new Date(), 30);
-        const pipeline = [
-            { $match: { date: { $gte: thirtyDaysAgo } } },
-            {
-                $group: {
-                    _id: '$user',
-                    totalPoints: { $sum: '$points' },
-                    totalSeconds: { $sum: '$seconds' }
-                }
-            },
-            { $sort: { totalPoints: -1 } },
-            { $limit: 10 }
-        ];
-        const results = yield exports.CourseAnalytics.aggregate(pipeline);
-        // Get user details and format the leaderboard
-        const leaderboard = [];
-        for (const result of results) {
-            const user = yield User.findById(result._id);
-            if (user) {
-                leaderboard.push({
-                    name: user.fullName,
-                    avatar: user.avatar(56),
-                    points: result.totalPoints,
-                    minutes: Math.ceil(result.totalSeconds / 60)
-                });
+CourseAnalyticsSchema.statics.getLeaderboard = async function () {
+    // Import User model here to avoid circular dependency
+    const { User } = await Promise.resolve().then(() => __importStar(require('./user')));
+    // Get stats for the last 30 days for all users
+    const thirtyDaysAgo = date.subDays(new Date(), 30);
+    const pipeline = [
+        { $match: { date: { $gte: thirtyDaysAgo } } },
+        {
+            $group: {
+                _id: '$user',
+                totalPoints: { $sum: '$points' },
+                totalSeconds: { $sum: '$seconds' }
             }
+        },
+        { $sort: { totalPoints: -1 } },
+        { $limit: 10 }
+    ];
+    const results = await exports.CourseAnalytics.aggregate(pipeline);
+    // Get user details and format the leaderboard
+    const leaderboard = [];
+    for (const result of results) {
+        const user = await User.findById(result._id);
+        if (user) {
+            leaderboard.push({
+                name: user.fullName,
+                avatar: user.avatar(56),
+                points: result.totalPoints,
+                minutes: Math.ceil(result.totalSeconds / 60)
+            });
         }
-        return leaderboard;
-    });
+    }
+    return leaderboard;
 };
 exports.CourseAnalytics = (0, mongoose_1.model)('CourseAnalytics', CourseAnalyticsSchema);
 const LoginAnalyticsSchema = new mongoose_1.Schema({
@@ -121,16 +104,14 @@ const LoginAnalyticsSchema = new mongoose_1.Schema({
     date: { type: Date, required: true }
 }, { timestamps: true });
 LoginAnalyticsSchema.index({ user: 1, date: 1 }, { unique: true });
-LoginAnalyticsSchema.statics.ping = function (user) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
-        if (today <= (user.lastOnline || 0))
-            return;
-        const query = { user: user.id, date: today };
-        user.lastOnline = today;
-        const p1 = exports.LoginAnalytics.findOneAndUpdate(query, {}, { upsert: true });
-        const p2 = user.save();
-        yield Promise.all([p1, p2]);
-    });
+LoginAnalyticsSchema.statics.ping = async function (user) {
+    const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
+    if (today <= (user.lastOnline || 0))
+        return;
+    const query = { user: user.id, date: today };
+    user.lastOnline = today;
+    const p1 = exports.LoginAnalytics.findOneAndUpdate(query, {}, { upsert: true });
+    const p2 = user.save();
+    await Promise.all([p1, p2]);
 };
 exports.LoginAnalytics = (0, mongoose_1.model)('LoginAnalytics', LoginAnalyticsSchema);

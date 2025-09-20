@@ -5816,7 +5816,7 @@ x-tutor .chat {
     max-height: calc(100vh - 44px);
     position: fixed;
     right: 0;
-    width: 280px;
+    width: 380px;
     z-index: 301
 }
 
@@ -5834,7 +5834,10 @@ x-tutor .chat-header {
     font-weight: 600;
     height: 44px;
     line-height: 44px;
-    padding: 0 12px
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 x-tutor .chat-header x-icon[name=fox] {
@@ -5845,6 +5848,34 @@ x-tutor .chat-header x-icon[name=fox] {
     x-tutor .chat-header {
         border-radius: 0
     }
+}
+
+x-tutor .chat-controls {
+    display: flex;
+    gap: 8px;
+}
+
+x-tutor .chat-controls button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+x-tutor .chat-controls button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+x-tutor .chat-controls button:active {
+    transform: scale(0.95);
+}
+
+x-tutor .chat-controls button x-icon {
+    display: block;
 }
 
 x-tutor .close {
@@ -5933,7 +5964,7 @@ x-tutor .chat-footer .input {
 
 x-tutor .chat-footer .input:empty:before {
     color: #aaa;
-    content: "Type a question… (beta)"
+    content: "Ask me anything..."
 }
 
 x-tutor .msg-wrap {

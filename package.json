@@ -59,6 +59,7 @@
     "express-flash": "0.0.2",
     "express-session": "1.18.0",
     "glob": "10.4.5",
+    "groq-sdk": "^0.32.0",
     "html-entities": "2.5.2",
     "html-minifier": "4.0.0",
     "js-yaml": "4.1.0",

@@ -76,7 +76,7 @@ export interface APIResponse<T> {
 
 export interface CourseRequestOptions {
   sendFeedback?: (req: express.Request, course: Course) => APIResponse<void>|undefined;
-  askTutor?: (req: express.Request, course: Course) => APIResponse<undefined>|undefined;
+  askTutor?: (req: express.Request, course: Course) => Promise<APIResponse<any>>|undefined;
 }
 
 export interface ServerOptions {
