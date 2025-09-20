@@ -26,6 +26,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -42,7 +51,7 @@ const INDEX = { index: true, unique: true, sparse: true };
 // -----------------------------------------------------------------------------
 // Schema
 const UserSchema = new mongoose_1.Schema({
-    email: { type: String, required: true, lowercase: true, ...INDEX, maxLength: 64 },
+    email: Object.assign(Object.assign({ type: String, required: true, lowercase: true }, INDEX), { maxLength: 64 }),
     previousEmails: { type: [String], default: [] },
     firstName: { type: String, default: '', maxLength: 32 },
     lastName: { type: String, default: '', maxLength: 32 },
@@ -52,7 +61,7 @@ const UserSchema = new mongoose_1.Schema({
     picture: String,
     lastOnline: Date,
     password: { type: String, maxLength: 64 },
-    passwordResetToken: { type: String, ...INDEX },
+    passwordResetToken: Object.assign({ type: String }, INDEX),
     passwordResetExpires: Number,
     emailVerificationToken: String,
     oAuthTokens: { type: [String], default: [] },
@@ -74,12 +83,14 @@ UserSchema.virtual('birthdayString').get(function () {
 UserSchema.virtual('age').get(function () {
     return this.birthday ? (0, utilities_1.age)(this.birthday) : NaN;
 });
-UserSchema.pre('save', async function (next) {
-    if (this.password && this.isModified('password')) {
-        const salt = bcryptjs_1.default.genSaltSync(10);
-        this.password = bcryptjs_1.default.hashSync(this.password, salt);
-    }
-    next();
+UserSchema.pre('save', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (this.password && this.isModified('password')) {
+            const salt = bcryptjs_1.default.genSaltSync(10);
+            this.password = bcryptjs_1.default.hashSync(this.password, salt);
+        }
+        next();
+    });
 });
 UserSchema.methods.checkPassword = function (candidate) {
     candidate = candidate.trim();
@@ -101,9 +112,11 @@ UserSchema.methods.getJSON = function (...keys) {
         data[k] = this[k];
     return data;
 };
-UserSchema.statics.lookup = async function (email) {
-    const cleanEmail = (0, validate_1.normalizeEmail)(email);
-    return cleanEmail ? exports.User.findOne({ email }) : undefined;
+UserSchema.statics.lookup = function (email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cleanEmail = (0, validate_1.normalizeEmail)(email);
+        return cleanEmail ? exports.User.findOne({ email }) : undefined;
+    });
 };
 // -----------------------------------------------------------------------------
 exports.User = (0, mongoose_1.model)('User', UserSchema);

@@ -11,7 +11,7 @@ import {getCourse} from '../utilities/utilities';
 import {UserDocument} from '../models/user';
 import {ProgressDocument} from '../models/progress';
 import {ChatSession, ChatSessionDocument} from '../models/chat-session';
-import {search} from '../search';
+import {search, SEARCH_DOCS} from '../search';
 
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -159,6 +159,24 @@ export class AIService {
     }
   }
 
+  // Estimate token count (rough approximation: 1 token ≈ 4 characters)
+  private estimateTokenCount(text: string): number {
+    return Math.ceil(text.length / 4);
+  }
+
+  // Check if request would exceed token limit
+  private checkTokenLimit(messages: ChatMessage[]): boolean {
+    const totalText = messages.map(m => m.content).join(' ');
+    const estimatedTokens = this.estimateTokenCount(totalText);
+    
+    if (estimatedTokens > 5500) { // Leave buffer under 6000 limit
+      console.warn(`Token estimate: ${estimatedTokens} (near limit of 6000)`);
+      return false;
+    }
+    
+    return true;
+  }
+
   // Generate AI response
   public async generateResponse(
     query: string,
@@ -236,7 +254,12 @@ Feel free to ask me any questions about the course material!`;
     // Add recent conversation history if session is available
     if (session) {
       session.addMessage('user', query);
-      messages.push(...session.messages.slice(-6).map(msg => ({
+      
+      // Check if we need to summarize before processing
+      await this.checkAndSummarizeChat(session);
+      
+      // Reduced from 6 to 4 messages to save tokens
+      messages.push(...session.messages.slice(-4).map(msg => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content
       })));
@@ -245,12 +268,21 @@ Feel free to ask me any questions about the course material!`;
       messages.push({role: 'user', content: query});
     }
     
+    // Check token limit before API call
+    if (!this.checkTokenLimit(messages)) {
+      // If too large, remove older messages and try again
+      if (session && messages.length > 2) {
+        messages.splice(1, Math.floor(messages.length / 2)); // Remove middle messages
+        console.warn('Reduced message count due to token limit');
+      }
+    }
+    
     try {
       const completion = await this.groq.chat.completions.create({
         messages: messages,
         model: 'llama-3.1-8b-instant', // Updated to current model
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.3, // Reduced from 0.7 to reduce hallucination
+        max_tokens: 500, // Reduced from 600 to save tokens
         stream: false
       });
       
@@ -265,11 +297,19 @@ Feel free to ask me any questions about the course material!`;
         enhancedResponse = response + relevantContent;
       }
       
+      // Filter out any fake URLs from the response
+      enhancedResponse = this.filterFakeLinks(enhancedResponse);
+      
       // Add assistant response to session if available
       if (session) {
         session.addMessage('assistant', enhancedResponse);
         try {
           await session.save();
+          
+          // Check if we need to summarize after adding the new message
+          if (session.needsSummarization()) {
+            await this.checkAndSummarizeChat(session);
+          }
         } catch (error) {
           console.warn('Could not save session:', error);
         }
@@ -288,89 +328,107 @@ Feel free to ask me any questions about the course material!`;
     }
   }
 
+  // Validate URL exists in SEARCH_DOCS
+  private isValidCourseUrl(url: string): boolean {
+    return Object.values(SEARCH_DOCS).some((doc: any) => doc.url === url);
+  }
+
+  // Get valid course links from SEARCH_DOCS instead of hardcoding
+  private getValidCourseLinks(): string {
+    const validCourses = Object.values(SEARCH_DOCS)
+      .filter((doc: any) => doc.type === 'course' && doc.url.startsWith('/course/'))
+      .reduce((acc: Record<string, any>, doc: any) => {
+        const courseId = doc.url.split('/')[2];
+        if (!acc[courseId] || doc.url.includes('introduction')) {
+          acc[courseId] = doc;
+        }
+        return acc;
+      }, {} as Record<string, any>);
+    
+    const links = Object.values(validCourses)
+      .slice(0, 5)
+      .map((doc: any) => `• <a href="${doc.url}" style="color: #667eea; text-decoration: none;">${doc.title}</a> - ${doc.subtitle}`)
+      .join('<br>');
+    
+    return links;
+  }
+
+  // Filter out fake URLs from response
+  private filterFakeLinks(response: string): string {
+    const urlPattern = /href="([^"]*?)"/g;
+    return response.replace(urlPattern, (match, url) => {
+      if (url === '#' || url.startsWith('http') || this.isValidCourseUrl(url)) {
+        return match;
+      } else {
+        console.warn(`Filtered fake URL: ${url}`);
+        return 'href="#"';
+      }
+    });
+  }
+
   // Build comprehensive system prompt
   private buildSystemPrompt(course: Course, user: UserDocument | null, progress?: ProgressDocument): string {
     const courseKnowledge = this.courseKnowledge.get(course.id) || '';
     
-    // Limit course knowledge to prevent token overflow (max 800 chars)
-    const limitedKnowledge = courseKnowledge.length > 800 
-      ? courseKnowledge.substring(0, 800) + '...' 
+    // Limit course knowledge to prevent token overflow (max 400 chars)
+    const limitedKnowledge = courseKnowledge.length > 400 
+      ? courseKnowledge.substring(0, 400) + '...' 
       : courseKnowledge;
-    
-    let prompt = `You are Stewie, an AI Learning Guide for Kha-Boom! educational platform. You are NOT a teacher - you are a learning mentor who guides students on their educational journey.
+
+    let prompt = `You are Stewie, AI Learning Guide for Kha-Boom! You guide students on their educational journey.
 
 COURSE: ${course.title}
 ${course.description || 'Interactive mathematics course'}
 
-COURSE CONTENT OVERVIEW:
-${limitedKnowledge}
+CONTENT: ${limitedKnowledge}
 
-YOUR ROLE AS A LEARNING GUIDE:
-- Understand what students want to learn and guide them to the right course content
-- Guide students on WHAT to learn next based on their progress
-- Suggest WHERE to find information and resources
-- Recommend learning paths and study strategies
-- Track progress and adapt guidance accordingly
-- Encourage and motivate students
-- Help students understand their learning journey
-- Provide personalized learning recommendations
-- Help students find specific courses and sections that match their learning goals
+ROLE:
+- Guide students on WHAT to learn next
+- Suggest WHERE to find resources
+- Recommend learning paths
+- Provide encouragement and motivation
+- Help find courses matching their goals
 
-GUIDANCE APPROACH:
-- When students express learning intent (e.g., "I want to learn X", "Tell me about Y"), guide them to relevant course content
-- Analyze student's current progress and learning level
-- Suggest specific next learning objectives
-- Recommend where to focus their study time
-- Guide them to appropriate course sections or resources
-- Provide encouragement based on their progress
-- Suggest study strategies that work for their level
-- Help them understand what they should prioritize
-- Acknowledge their learning interests and direct them to relevant courses
+APPROACH:
+- Analyze progress and suggest next objectives
+- Recommend specific study areas
+- Guide to appropriate course sections
+- Provide study strategies for their level
 
-RESPONSE STYLE:
-- Be encouraging and supportive
-- Give clear, actionable guidance on what to learn next
-- Suggest specific areas to focus on
-- Recommend study approaches
-- Provide motivation and encouragement
-- When students want to learn something specific, acknowledge their interest and guide them to relevant courses
-- NEVER teach content directly
-- NEVER ask questions
-- NEVER include HTML, Pug, or code snippets
-- Focus on LEARNING GUIDANCE and directing students to appropriate course content
-- Keep responses concise and actionable`;
+STRICT RULES:
+- NEVER create URLs that don't exist
+- ONLY use validated course links
+- Focus on guidance over teaching
+- NO HTML/code in responses
+- Keep responses concise and actionable
+
+STYLE: Encouraging, supportive, actionable guidance`;
 
         // Add minimal user context
         if (user) {
-          prompt += `\n\nSTUDENT PROFILE:
-Name: ${user.fullName || user.firstName || 'Student'}
-Age: ${user.age || 'Not specified'}
-Type: ${user.type || 'Not specified'}
-
-Use this information to personalize your mentoring approach.`;
+          prompt += `\n\nSTUDENT: ${user.fullName || user.firstName || 'Student'}`;
+          if (user.age) prompt += `, ${user.age}yrs`;
         }
 
-    // Add detailed progress context for better mentoring
+    // Add compact progress context
     if (progress) {
       const progressPercent = Math.round(progress.progress);
       const sections = progress.sections || new Map();
       const completedSections = Array.from(sections.values()).filter(s => s.completed).length;
       const totalSections = sections.size;
       
-      prompt += `\n\nLEARNING PROGRESS:
-Course Progress: ${progressPercent}% complete
-Current Section: ${progress.activeSection || 'Beginning'}
-Completed Sections: ${completedSections}/${totalSections}
-Last Activity: ${progress.updatedAt ? new Date(progress.updatedAt).toLocaleDateString() : 'Unknown'}
+      prompt += `\n\nPROGRESS: ${progressPercent}% (${completedSections}/${totalSections} sections)
+Current: ${progress.activeSection || 'Beginning'}
 
-LEARNING GUIDANCE:
-Based on this progress, provide personalized guidance:
-- If progress is low (0-30%): Guide them to foundational concepts and suggest where to start learning
-- If progress is medium (31-70%): Recommend intermediate topics and suggest study approaches
-- If progress is high (71-100%): Guide them to advanced applications and mastery-level resources
-- Suggest specific learning objectives based on their current section
-- Recommend study strategies and learning approaches
-- Guide them to appropriate course sections and resources`;
+GUIDANCE FOCUS:`;
+      
+      if (progressPercent < 30) {
+        prompt += ' Guide to foundational concepts and starting points';
+      } else if (progressPercent < 70) {
+        prompt += ' Recommend intermediate topics and study approaches';
+      } else {
+        prompt += ' Guide to advanced applications and mastery resources';
+      }
     }
 
     return prompt;
@@ -541,6 +599,8 @@ Based on this progress, provide personalized guidance:
     
     // Check if user is asking for something not available
     if (lowerQuery.includes('learn') || lowerQuery.includes('study') || lowerQuery.includes('course')) {
+      const validLinks = this.getValidCourseLinks();
+      
       return `
         <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.1);">
           <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; text-align: center;">💡 Available Courses</div>
@@ -548,12 +608,8 @@ Based on this progress, provide personalized guidance:
             While we don't have a specific course for "${query}", here are the courses we currently offer:
             <br><br>
             <strong>Available Courses:</strong><br>
-            • <a href="/course/circles/introduction" style="color: #667eea; text-decoration: none;">Circles and Pi</a> - Intermediate mathematics<br>
-            • <a href="/course/divisibility/primes" style="color: #667eea; text-decoration: none;">Divisibility and Primes</a> - Foundations of number theory<br>
-            • <a href="/course/polyhedra/polygons" style="color: #667eea; text-decoration: none;">Polygons</a> - Intermediate geometry<br>
-            • <a href="/course/probability/introduction" style="color: #667eea; text-decoration: none;">Probability</a> - Intermediate probability theory<br>
-            • <a href="/course/quadratics/introduction" style="color: #667eea; text-decoration: none;">Quadratic Equations</a> - Intermediate algebra<br>
-            <br>
+            ${validLinks}
+            <br><br>
             Feel free to ask me about any of these topics!
           </div>
         </div>
@@ -603,6 +659,82 @@ Based on this progress, provide personalized guidance:
     } catch (error) {
       console.warn('Database not available, returning empty sessions:', error);
       return [];
+    }
+  }
+
+  // Create summary of chat messages
+  private async createChatSummary(messages: ChatMessage[]): Promise<string> {
+    try {
+      // Prepare compact conversation text for summarization
+      const conversationText = messages
+        .filter(msg => msg.role !== 'system')
+        .map(msg => `${msg.role}: ${msg.content}`)
+        .join('\n')
+        .substring(0, 1000); // Limit input to save tokens
+
+      const summaryPrompt = `Summarize this conversation in 1-2 sentences focusing on main topics:
+
+${conversationText}
+
+Summary:`;
+
+      const completion = await this.groq.chat.completions.create({
+        messages: [{role: 'user', content: summaryPrompt}],
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.3,
+        max_tokens: 100, // Reduced from 200
+        stream: false
+      });
+
+      return completion.choices[0]?.message?.content || 'Previous conversation summary unavailable.';
+    } catch (error) {
+      console.warn('Failed to create chat summary:', error);
+      return 'Previous conversation covered various topics (summary unavailable).';
+    }
+  }
+
+  // Check and summarize chat if needed
+  private async checkAndSummarizeChat(session: ChatSessionDocument): Promise<void> {
+    if (session.needsSummarization()) {
+      console.log(`Summarizing chat session ${session.sessionId} - ${session.messages.length} messages`);
+      
+      // Get messages to summarize (exclude the last 3 for context)
+      const nonSystemMessages = session.messages.filter(msg => msg.role !== 'system');
+      const messagesToSummarize = nonSystemMessages.slice(0, -3);
+      
+      if (messagesToSummarize.length > 0) {
+        const summary = await this.createChatSummary(messagesToSummarize);
+        session.summarizeOldMessages(summary);
+        
+        try {
+          await session.save();
+          console.log(`Successfully summarized and compressed ${messagesToSummarize.length} messages`);
+        } catch (error) {
+          console.error('Failed to save summarized session:', error);
+        }
+      }
+    }
+  }
+
+  // Manual summarization for specific session
+  public async manualSummarizeSession(userId: string, sessionId: string): Promise<boolean> {
+    try {
+      const session = await ChatSession.findOne({userId, sessionId, isActive: true});
+      if (!session) {
+        console.warn(`Session ${sessionId} not found for user ${userId}`);
+        return false;
+      }
+
+      if (session.needsSummarization()) {
+        await this.checkAndSummarizeChat(session);
+        return true;
+      }
+
+      console.log(`Session ${sessionId} does not need summarization`);
+      return false;
+    } catch (error) {
+      console.error('Manual summarization error:', error);
+      return false;
     }
   }
 

@@ -206,7 +206,7 @@ ProgressSchema.statics.getUserData = async function(userId: string) {
 ProgressSchema.statics.getRecentCourses = async function(userId: string) {
   const courses = Array.from((await Progress.getUserData(userId)).values());
   return courses
-      .filter(data => data.progress > 0)  // Include all courses with any progress, including completed ones
+      .filter(data => data.progress >= 0)  // Include all courses with any progress record, even 0%
       .sort((p, q) => (+q.updatedAt) - (+p.updatedAt))
       .map(p => p.courseId);
 };

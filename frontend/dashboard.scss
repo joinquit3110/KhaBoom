@@ -5,6 +5,9 @@
 
 @import "./main";
 
+// Import math styles for MathJax/MathML rendering
+@import "./styles/maths";
+
 // Dashboard header styles with gradient
 .dashboard-header { 
   margin-bottom: 2rem;
@@ -310,6 +313,79 @@ form + p.caption { margin-top: 16px; }
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.1));
       z-index: -1;
+    }
+  }
+}
+
+// Math rendering styles for glossary
+.gloss-body {
+  .math, math {
+    display: inline-block;
+    font-style: normal;
+    font-weight: normal;
+    margin: 0 0.1em;
+    color: inherit;
+  }
+  
+  // MathJax SVG styles
+  svg.mathjax {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  svg.mathjax g,
+  svg.mathjax path,
+  svg.mathjax use {
+    transform-box: initial;
+    transform-origin: 0 0;
+    fill: currentColor;
+  }
+  
+  // MathML element styles
+  mi, mn, mo, ms, mtext, mrow, mfrac, msqrt, mroot, msub, msup, mfenced {
+    display: inline-block;
+    font-family: 'Mathigon Symbol', 'Source Sans Pro', sans-serif;
+    font-size: inherit;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  
+  mi[mathvariant="normal"] { 
+    font-family: 'Source Sans Pro', sans-serif; 
+  }
+  
+  mi { 
+    line-height: 0.9; 
+  }
+  
+  mo { 
+    margin: 0 0.25em; 
+  }
+  
+  mn + mi, mn + .cursor + mi { 
+    margin-left: 0.1em; 
+  }
+  
+  mi + mi { 
+    margin-left: 0.05em; 
+  }
+  
+  mo[value="−"]:first-child { 
+    margin: 0 0.1em; 
+  }
+  
+  mo[value="="], mo[value="≈"] { 
+    margin: 0 0.4em; 
+  }
+  
+  // Display math styles
+  .math-display {
+    text-align: center;
+    margin: 1em 0;
+    
+    .math {
+      font-size: 1.1em;
     }
   }
 }

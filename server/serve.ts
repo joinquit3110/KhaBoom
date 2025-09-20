@@ -104,6 +104,21 @@ const studioApp = new MathigonStudioApp()
             console.error('Get sessions error:', error);
             res.status(500).json({error: 'Failed to get chat sessions'});
         }
+    })
+    
+    .post('/api/chat/summarize/:sessionId', async (req: any, res: any) => {
+        if (!req.user) {
+            return res.status(401).json({error: 'Authentication required'});
+        }
+        
+        try {
+            const {sessionId} = req.params;
+            const success = await aiService.manualSummarizeSession(req.user.id, sessionId);
+            res.json({success, message: success ? 'Session summarized successfully' : 'No summarization needed'});
+        } catch (error) {
+            console.error('Manual summarization error:', error);
+            res.status(500).json({error: 'Failed to summarize session'});
+        }
     });
 
     // Dashboard tutor endpoint

@@ -3,6 +3,15 @@
 // OAuth API
 // (c) Kha-Boom!
 // =============================================================================
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -41,53 +50,55 @@ function normalizeProfile(data, provider) {
     profile.email = (0, validate_1.normalizeEmail)(profile.email) || '';
     return (profile.email && profile.id) ? profile : undefined;
 }
-async function findOrCreateUser(req, provider, profile) {
-    const token = `${provider}:${profile.id}`;
-    const p1 = user_1.User.findOne({ oAuthTokens: token });
-    const p2 = user_1.User.lookup(profile.email);
-    const [sameProviderUser, sameEmailUser] = await Promise.all([p1, p2]);
-    if (sameProviderUser) {
-        // If the user has two accounts and they switched their provider email
-        // address from one to the other, we have to disable one of their accounts
-        // to ensure the `email` key is unique.
-        if (sameEmailUser && sameEmailUser.id !== sameProviderUser.id) {
-            sameEmailUser.email += '__duplicate';
-            sameEmailUser.deletionRequested = Date.now();
-            await sameEmailUser.save();
+function findOrCreateUser(req, provider, profile) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = `${provider}:${profile.id}`;
+        const p1 = user_1.User.findOne({ oAuthTokens: token });
+        const p2 = user_1.User.lookup(profile.email);
+        const [sameProviderUser, sameEmailUser] = yield Promise.all([p1, p2]);
+        if (sameProviderUser) {
+            // If the user has two accounts and they switched their provider email
+            // address from one to the other, we have to disable one of their accounts
+            // to ensure the `email` key is unique.
+            if (sameEmailUser && sameEmailUser.id !== sameProviderUser.id) {
+                sameEmailUser.email += '__duplicate';
+                sameEmailUser.deletionRequested = Date.now();
+                yield sameEmailUser.save();
+            }
+            sameProviderUser.email = profile.email;
+            yield sameProviderUser.save();
+            return sameProviderUser;
         }
-        sameProviderUser.email = profile.email;
-        await sameProviderUser.save();
-        return sameProviderUser;
-    }
-    if (sameEmailUser && !sameEmailUser.emailVerificationToken) {
-        // Link this OAuth provider to an existing account.
-        sameEmailUser.oAuthTokens.push(token);
-        // TODO req.flash('info', req.__(MESSAGES['socialLoginLink'], toTitleCase(provider)));
-        await sameEmailUser.save();
-        return sameEmailUser;
-    }
-    if (sameEmailUser) {
-        // If there already is an account with the same email address, but the
-        // email address has not been verified, we have to remove it.
-        sameEmailUser.email += '__removed';
-        sameEmailUser.deletionRequested = Date.now();
-        await sameEmailUser.save();
-    }
-    const user = new user_1.User({
-        email: profile.email,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        picture: profile.picture,
-        type: 'student',
-        country: req.country,
-        oAuthTokens: [token]
+        if (sameEmailUser && !sameEmailUser.emailVerificationToken) {
+            // Link this OAuth provider to an existing account.
+            sameEmailUser.oAuthTokens.push(token);
+            // TODO req.flash('info', req.__(MESSAGES['socialLoginLink'], toTitleCase(provider)));
+            yield sameEmailUser.save();
+            return sameEmailUser;
+        }
+        if (sameEmailUser) {
+            // If there already is an account with the same email address, but the
+            // email address has not been verified, we have to remove it.
+            sameEmailUser.email += '__removed';
+            sameEmailUser.deletionRequested = Date.now();
+            yield sameEmailUser.save();
+        }
+        const user = new user_1.User({
+            email: profile.email,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            picture: profile.picture,
+            type: 'student',
+            country: req.country,
+            oAuthTokens: [token]
+        });
+        yield user.save();
+        // Copy course data from temporary user to new user account.
+        if (req.tmpUser)
+            yield progress_1.Progress.updateMany({ userId: req.tmpUser }, { userId: user.id }).exec();
+        (0, emails_1.sendWelcomeEmail)(user); // async
+        return user;
     });
-    await user.save();
-    // Copy course data from temporary user to new user account.
-    if (req.tmpUser)
-        await progress_1.Progress.updateMany({ userId: req.tmpUser }, { userId: user.id }).exec();
-    (0, emails_1.sendWelcomeEmail)(user); // async
-    return user;
 }
 // -----------------------------------------------------------------------------
 // OAuth Flow
@@ -105,47 +116,55 @@ function login(req, provider) {
     });
     return `${config.authorizeUrl}?${query.toString()}`;
 }
-async function getToken(req, provider) {
-    var _a;
-    const config = PROVIDERS[provider];
-    const body = new url_1.URLSearchParams({
-        grant_type: 'authorization_code',
-        code: (0, utilities_1.q)(req, 'code'),
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        redirect_uri: `${host(req)}/auth/${provider}/callback`
+function getToken(req, provider) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const config = PROVIDERS[provider];
+        const body = new url_1.URLSearchParams({
+            grant_type: 'authorization_code',
+            code: (0, utilities_1.q)(req, 'code'),
+            client_id: config.clientId,
+            client_secret: config.clientSecret,
+            redirect_uri: `${host(req)}/auth/${provider}/callback`
+        });
+        const response = yield (0, node_fetch_1.default)(config.accessUrl, { method: 'POST', body });
+        if (!response.ok)
+            return;
+        return (_a = (yield response.json())) === null || _a === void 0 ? void 0 : _a.access_token;
     });
-    const response = await (0, node_fetch_1.default)(config.accessUrl, { method: 'POST', body });
-    if (!response.ok)
-        return;
-    return (_a = (await response.json())) === null || _a === void 0 ? void 0 : _a.access_token;
 }
-async function getProfile(req, provider, accessToken) {
-    const config = PROVIDERS[provider];
-    if (!accessToken)
-        accessToken = await getToken(req, provider);
-    const headers = { Authorization: `Bearer ${accessToken}` };
-    const response = await (0, node_fetch_1.default)(config.profileUrl, { method: config.profileMethod, headers });
-    if (!response.ok)
-        return;
-    return normalizeProfile(await response.json(), provider);
+function getProfile(req, provider, accessToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const config = PROVIDERS[provider];
+        if (!accessToken)
+            accessToken = yield getToken(req, provider);
+        const headers = { Authorization: `Bearer ${accessToken}` };
+        const response = yield (0, node_fetch_1.default)(config.profileUrl, { method: config.profileMethod, headers });
+        if (!response.ok)
+            return;
+        return normalizeProfile(yield response.json(), provider);
+    });
 }
 // -----------------------------------------------------------------------------
 // Server Endpoints
-async function oAuthLogin(req) {
-    var _a;
-    if (!((_a = utilities_1.CONFIG.accounts.oAuth) === null || _a === void 0 ? void 0 : _a[req.params.provider]))
-        return;
-    const provider = req.params.provider;
-    const redirect = login(req, provider);
-    return redirect ? { redirect } : { error: 'socialLoginError', params: [PROVIDERS[provider].title] };
+function oAuthLogin(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        if (!((_a = utilities_1.CONFIG.accounts.oAuth) === null || _a === void 0 ? void 0 : _a[req.params.provider]))
+            return;
+        const provider = req.params.provider;
+        const redirect = login(req, provider);
+        return redirect ? { redirect } : { error: 'socialLoginError', params: [PROVIDERS[provider].title] };
+    });
 }
-async function oAuthCallback(req) {
-    var _a;
-    if (!((_a = utilities_1.CONFIG.accounts.oAuth) === null || _a === void 0 ? void 0 : _a[req.params.provider]))
-        return;
-    const provider = req.params.provider;
-    const profile = await getProfile(req, provider);
-    const user = profile ? await findOrCreateUser(req, provider, profile) : undefined;
-    return user ? { user } : { error: 'socialLoginError', params: [PROVIDERS[provider].title] };
+function oAuthCallback(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        if (!((_a = utilities_1.CONFIG.accounts.oAuth) === null || _a === void 0 ? void 0 : _a[req.params.provider]))
+            return;
+        const provider = req.params.provider;
+        const profile = yield getProfile(req, provider);
+        const user = profile ? yield findOrCreateUser(req, provider, profile) : undefined;
+        return user ? { user } : { error: 'socialLoginError', params: [PROVIDERS[provider].title] };
+    });
 }

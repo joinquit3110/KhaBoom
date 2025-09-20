@@ -3,6 +3,15 @@
 // KHA-BOOM! Express App
 // (c) Kha-Boom!
 // =============================================================================
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,6 +36,30 @@ const i18n_1 = require("./utilities/i18n");
 const user_1 = require("./models/user");
 const analytics_1 = require("./models/analytics");
 const progress_1 = require("./models/progress");
+// Import parseSimple for glossary processing
+const { parseSimple } = require('../build/markdown/parser');
+// Helper function to parse glossary data like course does
+function parseGlossaryData(rawData) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const parsed = {};
+        for (const [key, value] of Object.entries(rawData)) {
+            try {
+                // Parse the text field with markdown/LaTeX support
+                const parsedText = yield parseSimple(value.text || '');
+                parsed[key] = {
+                    title: value.title,
+                    text: parsedText
+                };
+            }
+            catch (error) {
+                console.warn(`Failed to parse glossary entry ${key}:`, error);
+                // Fallback to original text if parsing fails
+                parsed[key] = value;
+            }
+        }
+        return parsed;
+    });
+}
 const STATUS_CODES = {
     401: 'You don’t have access to this page,',
     404: 'This page doesn’t exist.',
@@ -201,11 +234,11 @@ class MathigonStudioApp {
     // ---------------------------------------------------------------------------
     // Setup Authentication and Dashboard Routes
     accounts() {
-        this.app.use(async (req, res, next) => {
+        this.app.use((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             if (!req.session.auth)
                 req.session.auth = {};
             if (req.session.auth.user) {
-                req.user = await user_1.User.findById(req.session.auth.user) || undefined;
+                req.user = (yield user_1.User.findById(req.session.auth.user)) || undefined;
             }
             else if (req.cookies.tmp_user) {
                 req.tmpUser = req.cookies.tmp_user;
@@ -215,12 +248,12 @@ class MathigonStudioApp {
                 res.cookie('tmp_user', req.tmpUser, SESSION_COOKIE);
             }
             if (req.user)
-                await analytics_1.LoginAnalytics.ping(req.user);
+                yield analytics_1.LoginAnalytics.ping(req.user);
             res.locals.user = req.user;
             next();
-        });
+        }));
         (0, accounts_1.default)(this);
-        this.get('/dashboard', async (req, res) => {
+        this.get('/dashboard', (req, res) => __awaiter(this, void 0, void 0, function* () {
             // Temporarily allow access without login for testing
             if (!req.user) {
                 // Create a dummy user for testing
@@ -234,17 +267,18 @@ class MathigonStudioApp {
                 try {
                     const glossaryPath = path_1.default.join(utilities_1.CONTENT_DIR, 'shared', 'glossary.yaml');
                     console.log('Loading glossary from path:', glossaryPath);
-                    const sharedGlossary = await (0, utilities_1.loadYAML)(glossaryPath) || {};
+                    const sharedGlossary = (yield (0, utilities_1.loadYAML)(glossaryPath)) || {};
                     console.log('Raw glossary loaded:', Object.keys(sharedGlossary).length, 'keys');
                     // For dashboard, include ALL glossary terms from shared
-                    glossaryData = sharedGlossary;
+                    const rawGlossaryData = sharedGlossary;
                     // Add dashboard-specific terms
-                    glossaryData.dashboard = { title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.' };
-                    glossaryData.learning = { title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.' };
-                    glossaryData.progress = { title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.' };
-                    glossaryData.ai = { title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.' };
-                    glossaryData.mentor = { title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.' };
-                    console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+                    rawGlossaryData.dashboard = { title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.' };
+                    rawGlossaryData.learning = { title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.' };
+                    rawGlossaryData.progress = { title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.' };
+                    rawGlossaryData.ai = { title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.' };
+                    rawGlossaryData.mentor = { title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.' };
+                    // Parse markdown/LaTeX in glossary text like course does
+                    glossaryData = yield parseGlossaryData(rawGlossaryData);
                     console.log('Sample terms:', Object.keys(glossaryData).slice(0, 5));
                 }
                 catch (error) {
@@ -260,29 +294,36 @@ class MathigonStudioApp {
                 }
                 return res.render('dashboard', { progress: dummyProgress, recent, recommended, stats: dummyStats, leaderboard, glossaryData });
             }
-            const progress = await progress_1.Progress.getUserData(req.user.id);
-            const stats = await analytics_1.CourseAnalytics.getLastWeekStats(req.user.id);
+            const progress = yield progress_1.Progress.getUserData(req.user.id);
+            const stats = yield analytics_1.CourseAnalytics.getLastWeekStats(req.user.id);
             // Get recent course IDs and map them to course objects with progress
-            const recentIds = (await progress_1.Progress.getRecentCourses(req.user.id)).slice(0, 12);
+            const recentIds = (yield progress_1.Progress.getRecentCourses(req.user.id)).slice(0, 12);
             const recent = recentIds.map(id => {
                 const course = (0, utilities_1.getCourse)(id, req.locale.id);
                 if (!course)
                     return null;
                 const courseProgress = progress.get(id);
+                const progressValue = courseProgress ? courseProgress.progress : 0;
                 return {
                     id,
                     name: course.title,
                     hero: course.hero || course.icon || '/images/placeholder.jpg',
                     icon: course.icon,
                     url: course.sections[0].url,
-                    progress: courseProgress ? courseProgress.progress : 0,
+                    progress: progressValue,
                     description: course.description || `Discover the exciting world of ${course.title.toLowerCase()}`,
-                    color: course.color
+                    color: course.color,
+                    // Add flag to indicate if this is a newly accessed course
+                    isNewlyAccessed: progressValue === 0 && courseProgress
                 };
             }).filter(Boolean);
             // Show more recommended courses if user has few recent courses
             const items = Math.max(4, 12 - recent.length);
-            const recommended = utilities_1.COURSES.filter(x => !progress.has(x)).slice(0, items).map(id => {
+            const recommended = utilities_1.COURSES.filter(x => {
+                const courseProgress = progress.get(x);
+                // Show course if no progress record OR progress is 0% (clicked but not started)
+                return !courseProgress || courseProgress.progress === 0;
+            }).slice(0, items).map(id => {
                 const course = (0, utilities_1.getCourse)(id, req.locale.id);
                 if (!course)
                     return null;
@@ -297,21 +338,22 @@ class MathigonStudioApp {
                 };
             }).filter(Boolean);
             // Fetch leaderboard data - top 10 users by points
-            const leaderboard = await analytics_1.CourseAnalytics.getLeaderboard();
+            const leaderboard = yield analytics_1.CourseAnalytics.getLeaderboard();
             // Load glossary data from shared glossary.yaml
             let glossaryData = {};
             try {
                 const glossaryPath = path_1.default.join(utilities_1.CONTENT_DIR, 'shared', 'glossary.yaml');
-                const sharedGlossary = await (0, utilities_1.loadYAML)(glossaryPath) || {};
+                const sharedGlossary = (yield (0, utilities_1.loadYAML)(glossaryPath)) || {};
                 // For dashboard, include ALL glossary terms from shared
-                glossaryData = sharedGlossary;
+                const rawGlossaryData = sharedGlossary;
                 // Add dashboard-specific terms
-                glossaryData.dashboard = { title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.' };
-                glossaryData.learning = { title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.' };
-                glossaryData.progress = { title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.' };
-                glossaryData.ai = { title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.' };
-                glossaryData.mentor = { title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.' };
-                console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+                rawGlossaryData.dashboard = { title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.' };
+                rawGlossaryData.learning = { title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.' };
+                rawGlossaryData.progress = { title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.' };
+                rawGlossaryData.ai = { title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.' };
+                rawGlossaryData.mentor = { title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.' };
+                // Parse markdown/LaTeX in glossary text like course does
+                glossaryData = yield parseGlossaryData(rawGlossaryData);
             }
             catch (error) {
                 console.warn('Could not load glossary data:', error);
@@ -325,7 +367,7 @@ class MathigonStudioApp {
                 };
             }
             res.render('dashboard', { progress, recent, recommended, stats, leaderboard, glossaryData });
-        });
+        }));
         return this;
     }
     // ---------------------------------------------------------------------------
@@ -351,12 +393,12 @@ class MathigonStudioApp {
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
             return course ? res.redirect(course.sections[0].url) : next();
         }));
-        this.get('/course/:course/:section', requireAuth(async (req, res, next) => {
+        this.get('/course/:course/:section', requireAuth((req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
             const section = course === null || course === void 0 ? void 0 : course.sections.find(s => s.id === req.params.section);
             if (!course || !section)
                 return next();
-            const progressData = await progress_1.Progress.lookup(req, course.id);
+            const progressData = yield progress_1.Progress.lookup(req, course.id);
             const nextSection = (0, utilities_1.findNextSection)(course, section);
             const prevSection = (0, utilities_1.findNextSection)(course, section, -1);
             if (req.user)
@@ -364,8 +406,8 @@ class MathigonStudioApp {
             res.locals.availableLocales = course.availableLocales.map(l => i18n_1.LOCALES[l]);
             // Note: nextUp is provided as a legacy fallback for previous versions.
             res.render('course', { course, section, lighten: utilities_1.lighten, progressData, nextSection, prevSection, nextUp: nextSection });
-        }));
-        this.post('/course/:course/:section', async (req, res, next) => {
+        })));
+        this.post('/course/:course/:section', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             if (!utilities_1.CONFIG.accounts.enabled)
                 return res.status(200).send('ok');
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
@@ -375,21 +417,21 @@ class MathigonStudioApp {
             const changes = (0, core_1.safeToJSON)(req.body.data, {});
             if (!changes)
                 return res.status(400).send(STATUS_CODES[400]);
-            const progress = (await progress_1.Progress.lookup(req, course.id, true));
+            const progress = (yield progress_1.Progress.lookup(req, course.id, true));
             const newScoreCount = progress.updateData(section.id, changes);
-            await progress.save();
+            yield progress.save();
             if (req.user)
                 analytics_1.CourseAnalytics.track(req.user.id, newScoreCount); // async
             res.status(200).send('ok');
-        });
-        this.post('/course/:course/reset', async (req, res, next) => {
+        }));
+        this.post('/course/:course/reset', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
             if (!course)
                 return next();
             try {
                 // Delete the progress data
                 if (utilities_1.CONFIG.accounts.enabled) {
-                    await progress_1.Progress.delete(req, course.id);
+                    yield progress_1.Progress.delete(req, course.id);
                 }
                 // Redirect to the first section of the course with success parameter
                 res.redirect(`/course/${req.params.course}/${course.sections[0].id}?reset=success`);
@@ -398,25 +440,25 @@ class MathigonStudioApp {
                 console.error('Error resetting progress:', error);
                 res.redirect(`/course/${req.params.course}`);
             }
-        });
-        this.post('/course/:course/feedback', async (req, res, next) => {
+        }));
+        this.post('/course/:course/feedback', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             if (!utilities_1.CONFIG.courses.feedback)
                 return next();
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
             if (!course)
                 return next();
-            const response = await ((_a = options.sendFeedback) === null || _a === void 0 ? void 0 : _a.call(options, req, course));
+            const response = yield ((_a = options.sendFeedback) === null || _a === void 0 ? void 0 : _a.call(options, req, course));
             res.status((response === null || response === void 0 ? void 0 : response.status) || 200).end();
-        });
-        this.post('/course/:course/ask', async (req, res, next) => {
+        }));
+        this.post('/course/:course/ask', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             const course = (0, utilities_1.getCourse)(req.params.course, req.locale.id);
             if (!course)
                 return next();
-            const response = await ((_a = options.askTutor) === null || _a === void 0 ? void 0 : _a.call(options, req, course));
+            const response = yield ((_a = options.askTutor) === null || _a === void 0 ? void 0 : _a.call(options, req, course));
             res.status((response === null || response === void 0 ? void 0 : response.status) || 200).json((response === null || response === void 0 ? void 0 : response.data) || {}).end();
-        });
+        }));
         return this;
     }
 }

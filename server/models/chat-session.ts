@@ -27,6 +27,8 @@ export interface ChatSessionDocument extends ChatSessionBase, Document {
   // Methods
   addMessage: (role: 'user' | 'assistant', content: string) => void;
   getRecentMessages: (limit?: number) => ChatMessage[];
+  needsSummarization: () => boolean;
+  summarizeOldMessages: (summary: string) => void;
   toJSON: () => any;
 }
 
@@ -66,6 +68,32 @@ ChatSessionSchema.methods.getRecentMessages = function(limit = 10) {
   return this.messages
     .filter((msg: ChatMessage) => msg.role !== 'system')
     .slice(-limit);
+};
+
+ChatSessionSchema.methods.needsSummarization = function() {
+  const nonSystemMessages = this.messages.filter((msg: ChatMessage) => msg.role !== 'system');
+  return nonSystemMessages.length > 10;
+};
+
+ChatSessionSchema.methods.summarizeOldMessages = function(summary: string) {
+  const nonSystemMessages = this.messages.filter((msg: ChatMessage) => msg.role !== 'system');
+  const systemMessages = this.messages.filter((msg: ChatMessage) => msg.role === 'system');
+  
+  if (nonSystemMessages.length > 10) {
+    // Keep the last 3 messages for context
+    const messagesToKeep = nonSystemMessages.slice(-3);
+    
+    // Add summary as a system message
+    const summaryMessage: ChatMessage = {
+      role: 'system',
+      content: `[CONVERSATION SUMMARY] ${summary}`,
+      timestamp: new Date()
+    };
+    
+    // Reconstruct messages array with summary + kept messages
+    this.messages = [summaryMessage, ...messagesToKeep];
+    this.updatedAt = new Date();
+  }
 };
 
 ChatSessionSchema.methods.toJSON = function() {

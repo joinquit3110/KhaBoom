@@ -26,6 +26,31 @@ import {User, UserDocument} from './models/user';
 import {CourseAnalytics, LoginAnalytics} from './models/analytics';
 import {ChangeData, Progress} from './models/progress';
 
+// Import parseSimple for glossary processing
+const {parseSimple} = require('../build/markdown/parser');
+
+// Helper function to parse glossary data like course does
+async function parseGlossaryData(rawData: {[key: string]: {title: string, text: string}}) {
+  const parsed: {[key: string]: {title: string, text: string}} = {};
+  
+  for (const [key, value] of Object.entries(rawData)) {
+    try {
+      // Parse the text field with markdown/LaTeX support
+      const parsedText = await parseSimple(value.text || '');
+      parsed[key] = {
+        title: value.title,
+        text: parsedText
+      };
+    } catch (error) {
+      console.warn(`Failed to parse glossary entry ${key}:`, error);
+      // Fallback to original text if parsing fails
+      parsed[key] = value;
+    }
+  }
+  
+  return parsed;
+}
+
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -291,16 +316,18 @@ export class MathigonStudioApp {
           console.log('Raw glossary loaded:', Object.keys(sharedGlossary).length, 'keys');
           
           // For dashboard, include ALL glossary terms from shared
-          glossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
+          const rawGlossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
           
           // Add dashboard-specific terms
-          glossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
-          glossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
-          glossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
-          glossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
-          glossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
+          rawGlossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
+          rawGlossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
+          rawGlossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
+          rawGlossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
+          rawGlossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
           
-          console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+        // Parse markdown/LaTeX in glossary text like course does
+        glossaryData = await parseGlossaryData(rawGlossaryData);
+          
           console.log('Sample terms:', Object.keys(glossaryData).slice(0, 5));
         } catch (error) {
           console.warn('Could not load glossary data:', error);
@@ -326,21 +353,28 @@ export class MathigonStudioApp {
         const course = getCourse(id, req.locale.id);
         if (!course) return null;
         const courseProgress = progress.get(id);
+        const progressValue = courseProgress ? courseProgress.progress : 0;
         return {
           id,
           name: course.title,
           hero: course.hero || course.icon || '/images/placeholder.jpg',
           icon: course.icon,
           url: course.sections[0].url,
-          progress: courseProgress ? courseProgress.progress : 0,
+          progress: progressValue,
           description: course.description || `Discover the exciting world of ${course.title.toLowerCase()}`,
-          color: course.color
+          color: course.color,
+          // Add flag to indicate if this is a newly accessed course
+          isNewlyAccessed: progressValue === 0 && courseProgress
         };
       }).filter(Boolean);
 
       // Show more recommended courses if user has few recent courses
       const items = Math.max(4, 12 - recent.length);
-      const recommended = COURSES.filter(x => !progress.has(x)).slice(0, items).map(id => {
+      const recommended = COURSES.filter(x => {
+        const courseProgress = progress.get(x);
+        // Show course if no progress record OR progress is 0% (clicked but not started)
+        return !courseProgress || courseProgress.progress === 0;
+      }).slice(0, items).map(id => {
         const course = getCourse(id, req.locale.id);
         if (!course) return null;
         return {
@@ -364,16 +398,17 @@ export class MathigonStudioApp {
         const sharedGlossary = await loadYAML(glossaryPath) || {};
         
         // For dashboard, include ALL glossary terms from shared
-        glossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
-        
+        const rawGlossaryData = sharedGlossary as {[key: string]: {title: string, text: string}};
         // Add dashboard-specific terms
-        glossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
-        glossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
-        glossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
-        glossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
-        glossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
+        rawGlossaryData.dashboard = {title: 'Dashboard', text: 'Your personal learning dashboard where you can track progress, view statistics, and interact with the AI learning guide.'};
+        rawGlossaryData.learning = {title: 'Learning', text: 'The process of acquiring knowledge, skills, or understanding through study, experience, or teaching.'};
+        rawGlossaryData.progress = {title: 'Progress', text: 'Forward movement toward a goal or destination. In education, it refers to advancement through course material.'};
+        rawGlossaryData.ai = {title: 'AI', text: 'Artificial Intelligence - computer systems that can perform tasks typically requiring human intelligence.'};
+        rawGlossaryData.mentor = {title: 'Mentor', text: 'An experienced and trusted advisor who provides guidance and support in learning and development.'};
         
-        console.log(`Loaded ${Object.keys(glossaryData).length} glossary terms for dashboard`);
+        // Parse markdown/LaTeX in glossary text like course does
+        glossaryData = await parseGlossaryData(rawGlossaryData);
+        
       } catch (error) {
         console.warn('Could not load glossary data:', error);
         // Fallback glossary data
