@@ -46,16 +46,8 @@ const progress_1 = require("./models/progress");
 const ai_service_1 = require("./services/ai-service");
 const studioApp = new app_1.MathigonStudioApp()
     .secure()
-    .setup({ sessionSecret: process.env.SESSION_SECRET || 'khaboom-secret-2024' })
+    .setup({ sessionSecret: 'khaboom-secret-2024' })
     .accounts() // Enable accounts system
-    // Health check endpoint for deployment platforms
-    .get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-})
     // Landing page (new home) - redirect to dashboard if logged in
     .get('/', (req, res) => {
     if (req.user)
@@ -90,20 +82,6 @@ const studioApp = new app_1.MathigonStudioApp()
         user: req.user,
         theme: req.cookies.theme || 'dark',
         cacheBust: (path) => path + '?v=' + Date.now()
-    });
-})
-    // Privacy Policy page
-    .get('/privacy', (req, res) => {
-    res.render('privacy.pug', {
-        user: req.user,
-        theme: req.cookies.theme || 'dark'
-    });
-})
-    // Terms of Service page  
-    .get('/terms', (req, res) => {
-    res.render('terms.pug', {
-        user: req.user,
-        theme: req.cookies.theme || 'dark'
     });
 })
     // AI Chat Management Endpoints

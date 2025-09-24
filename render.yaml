@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: khaboom
+    env: node
+    plan: free
+    buildCommand: |
+      npm ci --production=false && 
+      npm run build && 
+      npm prune --production &&
+      node build/image-optimizer.js
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: false
+    disk:
+      name: khaboom-disk
+      mountPath: /opt/render/project/src/cache
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=512
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
+      - key: ENABLE_GZIP
+        value: true
+      - key: ENABLE_BROTLI
+        value: true
+      - key: CACHE_MAX_AGE
+        value: 3600
+    headers:
+      - source: "*.css"
+        headers:
+          - key: "cache-control"
+            value: "public, max-age=31536000, immutable"
+          - key: "content-encoding"
+            value: "gzip"
+      - source: "*.js"
+        headers:
+          - key: "cache-control" 
+            value: "public, max-age=31536000, immutable"
+          - key: "content-encoding"
+            value: "gzip"
+      - source: "*.woff2"
+        headers:
+          - key: "cache-control"
+            value: "public, max-age=31536000, immutable"
+      - source: "*.webp"
+        headers:
+          - key: "cache-control"
+            value: "public, max-age=31536000, immutable"
+      - source: "*.svg"
+        headers:
+          - key: "cache-control"
+            value: "public, max-age=31536000, immutable"

@@ -1,5 +1,5 @@
 // =============================================================================
-// KHA-BOOM! Express App
+// KHA-BOOM! Express App with Performance Optimizations
 // (c) Kha-Boom!
 // =============================================================================
 
@@ -29,8 +29,32 @@ import {ChangeData, Progress} from './models/progress';
 // Import parseSimple for glossary processing
 const {parseSimple} = require('../build/markdown/parser');
 
-// Helper function to parse glossary data like course does
+// Performance cache for frequently accessed data
+const memoryCache = new Map();
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+function setCache(key: string, value: any, ttl: number = CACHE_TTL) {
+  memoryCache.set(key, {
+    value,
+    expires: Date.now() + ttl
+  });
+}
+
+function getCache(key: string) {
+  const cached = memoryCache.get(key);
+  if (cached && cached.expires > Date.now()) {
+    return cached.value;
+  }
+  memoryCache.delete(key);
+  return null;
+}
+
+// Helper function to parse glossary data like course does with caching
 async function parseGlossaryData(rawData: {[key: string]: {title: string, text: string}}) {
+  const cacheKey = `glossary_${crypto.createHash('md5').update(JSON.stringify(rawData)).digest('hex')}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const parsed: {[key: string]: {title: string, text: string}} = {};
   
   for (const [key, value] of Object.entries(rawData)) {
@@ -48,6 +72,7 @@ async function parseGlossaryData(rawData: {[key: string]: {title: string, text: 
     }
   }
   
+  setCache(cacheKey, parsed);
   return parsed;
 }
 
