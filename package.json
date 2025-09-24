@@ -29,7 +29,7 @@
     "test": "node tests/markdown/test.js",
     "example": "cd docs/example && npm run dev",
     "translate": "node build/index.js --translate --all --key google-service-account.json",
-    "compress": "npm run build && gzip -k public/*.css public/*.js && brotli -k public/*.css public/*.js",
+    "compress": "npm run build && gzip -kf public/*.css public/*.js; if command -v brotli >/dev/null 2>&1; then brotli -kf public/*.css public/*.js; else echo 'brotli not found, skipping brotli compression'; fi",
     "prestart": "npm run compress",
     "optimize-images": "node -e \"require('./build/image-optimizer').optimizeImages()\"",
     "analyze-bundle": "webpack-bundle-analyzer public/stats.json"
