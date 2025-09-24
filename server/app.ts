@@ -162,32 +162,11 @@ export class MathigonStudioApp {
       xssProtection: true                        // X-XSS-Protection
     }));
 
-    // Advanced caching and performance headers
     this.app.use((req, res, next) => {
       req.url = removeCacheBust(req.url);
       req.country = getCountry(req);
       req.locale = getLocale(req);
       req.__ = (str: string, ...args: string[]) => translate(req.locale.id, str, args);
-
-      // Performance optimizations
-      if (req.path.startsWith('/api/') || req.path.startsWith('/course/')) {
-        res.set({
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        });
-      } else {
-        // Static content caching
-        res.set({
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'X-XSS-Protection': '1; mode=block'
-        });
-      }
-
-      // Gzip compression for all text content
-      res.set('Vary', 'Accept-Encoding');
 
       // These keys are required by the error page, so they need to be added
       // before any static files routing (which might throw an error).
@@ -204,49 +183,12 @@ export class MathigonStudioApp {
       next();
     });
 
-    // Enhanced compression with high quality settings
-    this.app.use(compression({
-      filter: (req, res) => {
-        // Compress everything except images and videos
-        if (req.headers['x-no-compression']) return false;
-        return compression.filter(req, res);
-      },
-      level: 6, // High compression level
-      threshold: 1024, // Only compress files > 1KB
-      windowBits: 15,
-      memLevel: 8
-    }));
-
-    // Static asset directories with optimized caching
-    this.app.use(express.static(PROJECT_DIR + '/frontend/assets', {
-      maxAge: ONE_YEAR,
-      etag: true,
-      lastModified: true,
-      setHeaders: (res, path) => {
-        // More aggressive caching for immutable assets
-        if (path.includes('main.') || path.includes('course.')) {
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        }
-      }
-    }));
-    
-    this.app.use(express.static(path.join(__dirname, '../frontend/assets'), {
-      maxAge: ONE_YEAR,
-      etag: true,
-      lastModified: true
-    }));
-    
-    this.app.use(express.static(OUT_DIR, {
-      maxAge: ONE_YEAR,
-      etag: true,
-      lastModified: true
-    }));
-    
-    this.app.use('/content', express.static(CONTENT_DIR, {
-      maxAge: ONE_YEAR,
-      etag: true,
-      lastModified: true
-    }));
+    // Static asset directories
+    this.app.use(compression());
+    this.app.use(express.static(PROJECT_DIR + '/frontend/assets', {maxAge: ONE_YEAR}));
+    this.app.use(express.static(path.join(__dirname, '../frontend/assets'), {maxAge: ONE_YEAR}));
+    this.app.use(express.static(OUT_DIR, {maxAge: ONE_YEAR}));
+    this.app.use('/content', express.static(CONTENT_DIR, {maxAge: ONE_YEAR}));
 
     // Search Endpoint
     if (CONFIG.search.enabled) {

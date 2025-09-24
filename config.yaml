@@ -4,8 +4,8 @@
 # ==============================================================================
 
 siteName: Kha-Boom!
-domain: kha-boom.onrender.com
-privacyURL: https://kha-boom.onrender.com/privacy
+domain: kha-boom.zeabur.app
+privacyURL: https://kha-boom.zeabur.app/privacy
 banner: (c) Kha-Boom! 2025
 locales: [en]
 
@@ -24,7 +24,7 @@ header:
 
 social:
   facebook:
-    page: "kha-boom.onrender.com"
+    page: "kha-boom.zeabur.app"
   twitter:
     handle: "khaboom"
 
@@ -38,10 +38,10 @@ courses:
 
 accounts:
   enabled: true
-  mongoServer: mongodb+srv://riptid3110:01667849897@khaboomdb.q0mfgdv.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB
+  mongoServer: mongodb://localhost:27017/khaboom
   minAge: 13
-  privacyPolicy: https://kha-boom.onrender.com/privacy
-  termsOfUse: https://kha-boom.onrender.com/terms
+  privacyPolicy: https://kha-boom.zeabur.app/privacy
+  termsOfUse: https://kha-boom.zeabur.app/terms
   address: 1 Main Street, London, United Kingdom
   supportEmail: support@khaboom.edu.vn
 

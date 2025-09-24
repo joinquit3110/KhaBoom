@@ -85,7 +85,7 @@ export const CONFIG = loadCombinedYAML('config.yaml', true) as Config;
 
 // Ensure CONFIG has required properties with fallbacks
 if (!CONFIG.siteName) CONFIG.siteName = 'Kha-Boom!';
-if (!CONFIG.domain) CONFIG.domain = 'kha-boom.onrender.com';
+if (!CONFIG.domain) CONFIG.domain = 'kha-boom.zeabur.app';
 if (!CONFIG.accounts) CONFIG.accounts = {} as any;
 
 // Override domain from environment variable if present
