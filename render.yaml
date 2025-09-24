@@ -6,7 +6,6 @@ services:
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /health
-    # Tăng hiệu suất trên Render
     autoDeploy: false
     disk:
       name: khaboom-disk
@@ -16,6 +15,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: --max-old-space-size=1024 --optimize-for-size
+        value: --max-old-space-size=1024
       - key: NPM_CONFIG_PRODUCTION
         value: false

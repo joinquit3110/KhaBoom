@@ -15,7 +15,7 @@
     "mgon-screenshots": "tests/screenshots.js"
   },
   "scripts": {
-    "start": "node --max-old-space-size=1024 --optimize-for-size server/serve.js",
+    "start": "node --max-old-space-size=1024 server/serve.js",
     "start:dev": "npx ts-node server/serve.ts",
     "build": "node build/index.js --assets --search --thumbnails --minify",
     "build:dev": "node build/index.js --assets --search",

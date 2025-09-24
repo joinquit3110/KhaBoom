@@ -31,7 +31,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=1024 --optimize-for-size"
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs

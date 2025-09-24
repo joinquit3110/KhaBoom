@@ -21,7 +21,10 @@ import os from 'os';
 const numCPUs = os.cpus().length;
 const isProduction = process.env.NODE_ENV === 'production';
 
-if (isProduction && cluster.isPrimary && numCPUs > 1) {
+// Disable clustering for Render free plan to avoid memory issues
+const enableClustering = false; // Set to true for paid plans with more memory
+
+if (isProduction && enableClustering && cluster.isPrimary && numCPUs > 1) {
   console.log(`Master ${process.pid} is running`);
   
   // Fork workers equal to CPU cores
