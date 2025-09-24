@@ -61,10 +61,11 @@ class PerformanceMiddleware {
       
       // Override res.json to cache the response
       const originalJson = res.json;
+      const self = this;
       res.json = function(data: any) {
         const etag = crypto.createHash('md5').update(JSON.stringify(data)).digest('hex');
         
-        this.cache.set(key, {
+        self.cache.set(key, {
           data,
           expires: Date.now() + ttl,
           etag
@@ -72,8 +73,8 @@ class PerformanceMiddleware {
         
         res.setHeader('etag', etag);
         res.setHeader('cache-control', 'public, max-age=3600');
-        return originalJson.call(this, data);
-      }.bind(this);
+        return originalJson.call(res, data);
+      } as any;
       
       next();
     };
