@@ -21,7 +21,7 @@
     "build:dev": "node build/index.js --assets --search",
     "build:watch": "node build/index.js --assets --watch",
     "build:server": "npx tsc --project server/tsconfig.json",
-    "build:optimized": "npm run build && node build/image-optimizer.js && npm run compress",
+    "build:optimized": "npm run build && node -e \"const fs=require('fs'); if(fs.existsSync('./build/image-optimizer.js')){ require('./build/image-optimizer').optimizeImages().then(()=>process.exit(0)).catch(e=>{console.error(e); process.exit(1)});} else { console.log('Image optimizer not found, skipping.'); }\" && npm run compress",
     "prebuild": "npm run build:server",
     "postinstall": "npm run build:optimized && npm prune --production",
     "lint": "eslint . --ext .ts,.js",
@@ -31,7 +31,7 @@
     "translate": "node build/index.js --translate --all --key google-service-account.json",
     "compress": "npm run build && gzip -k public/*.css public/*.js && brotli -k public/*.css public/*.js",
     "prestart": "npm run compress",
-    "optimize-images": "node build/image-optimizer.js",
+    "optimize-images": "node -e \"require('./build/image-optimizer').optimizeImages()\"",
     "analyze-bundle": "webpack-bundle-analyzer public/stats.json"
   },
   "dependencies": {
