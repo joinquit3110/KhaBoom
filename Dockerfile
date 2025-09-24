@@ -3,7 +3,7 @@
 FROM node:20-bullseye AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM node:20-bullseye AS build
 WORKDIR /app
