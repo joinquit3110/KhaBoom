@@ -9,6 +9,7 @@ FROM node:20-bullseye AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx puppeteer browsers install chrome
 RUN npm run build
 
 FROM node:20-bullseye AS runner

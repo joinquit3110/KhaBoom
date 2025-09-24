@@ -20,7 +20,11 @@ const {buildSearch} = require('./tools/search');
   if (argv.search && CONFIG.search.enabled) await buildSearch();
 
   // Build course thumbnails
-  if (argv.thumbnails) await require('./tools/thumbnails').buildCourseThumbnails();
+  if (argv.thumbnails && !process.env.SKIP_THUMBNAILS) {
+    await require('./tools/thumbnails').buildCourseThumbnails();
+  } else if (argv.thumbnails) {
+    console.log('Skipping course thumbnails (SKIP_THUMBNAILS set).');
+  }
 
   // Translate content using `mgon-build --translate --key service-account.json`
   if (argv.translate) await require('./tools/translate').translate(argv.key, argv.all || false);
@@ -30,3 +34,4 @@ const {buildSearch} = require('./tools/search');
 
   console.log('\x1b[32m  DONE!\x1b[0m');
 })();
+
