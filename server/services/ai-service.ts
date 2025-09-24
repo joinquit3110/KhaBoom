@@ -32,7 +32,7 @@ export class AIService {
 
   constructor() {
     this.groq = new Groq({
-      apiKey: ''
+      apiKey: process.env.GROQ_API_KEY || ''
     });
     this.loadCourseKnowledge();
   }

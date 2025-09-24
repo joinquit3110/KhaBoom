@@ -15,9 +15,14 @@
     "mgon-screenshots": "tests/screenshots.js"
   },
   "scripts": {
+    "start": "node server/serve.js",
+    "start:dev": "npx ts-node server/serve.ts",
     "build": "node build/index.js --assets --search --thumbnails --minify",
     "build:dev": "node build/index.js --assets --search",
     "build:watch": "node build/index.js --assets --watch",
+    "build:server": "npx tsc --project server/tsconfig.json",
+    "prebuild": "npm run build:server",
+    "postinstall": "npm run build",
     "lint": "eslint . --ext .ts,.js",
     "lint-fix": "eslint . --ext .ts,.js --fix",
     "test": "node tests/markdown/test.js",

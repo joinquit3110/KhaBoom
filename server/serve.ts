@@ -16,8 +16,17 @@ import {aiService} from './services/ai-service';
 
 const studioApp = new MathigonStudioApp()
     .secure()
-    .setup({sessionSecret: 'khaboom-secret-2024'})
+    .setup({sessionSecret: process.env.SESSION_SECRET || 'khaboom-secret-2024'})
     .accounts()  // Enable accounts system
+    
+    // Health check endpoint for deployment platforms
+    .get('/health', (req, res) => {
+        res.status(200).json({ 
+            status: 'OK', 
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
+        });
+    })
     
     // Landing page (new home) - redirect to dashboard if logged in
     .get('/', (req, res) => {
