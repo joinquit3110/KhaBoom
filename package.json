@@ -15,19 +15,21 @@
     "mgon-screenshots": "tests/screenshots.js"
   },
   "scripts": {
-    "start": "node server/serve.js",
+    "start": "node --max-old-space-size=1024 --optimize-for-size server/serve.js",
     "start:dev": "npx ts-node server/serve.ts",
     "build": "node build/index.js --assets --search --thumbnails --minify",
     "build:dev": "node build/index.js --assets --search",
     "build:watch": "node build/index.js --assets --watch",
     "build:server": "npx tsc --project server/tsconfig.json",
     "prebuild": "npm run build:server",
-    "postinstall": "npm run build",
+    "postinstall": "npm run build && npm prune --production",
     "lint": "eslint . --ext .ts,.js",
     "lint-fix": "eslint . --ext .ts,.js --fix",
     "test": "node tests/markdown/test.js",
     "example": "cd docs/example && npm run dev",
-    "translate": "node build/index.js --translate --all --key google-service-account.json"
+    "translate": "node build/index.js --translate --all --key google-service-account.json",
+    "compress": "npm run build && gzip -k public/*.css public/*.js",
+    "prestart": "npm run compress"
   },
   "dependencies": {
     "@mathigon/boost": "1.2.27",

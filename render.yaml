@@ -3,9 +3,19 @@ services:
     name: khaboom
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /health
+    # Tăng hiệu suất trên Render
+    autoDeploy: false
+    disk:
+      name: khaboom-disk
+      mountPath: /opt/render/project/src/cache
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=1024 --optimize-for-size
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
