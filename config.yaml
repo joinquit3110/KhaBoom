@@ -3,9 +3,9 @@
 # (c) Kha-Boom!
 # ==============================================================================
 
-
 siteName: Kha-Boom!
-privacyURL: https://khaboom.edu.vn/privacy
+domain: kha-boom.onrender.com
+privacyURL: https://kha-boom.onrender.com/privacy
 banner: (c) Kha-Boom! 2025
 locales: [en]
 
@@ -24,7 +24,7 @@ header:
 
 social:
   facebook:
-    page: "khaboom.edu.vn"
+    page: "kha-boom.onrender.com"
   twitter:
     handle: "khaboom"
 
@@ -40,11 +40,10 @@ accounts:
   enabled: true
   mongoServer: mongodb+srv://riptid3110:01667849897@khaboomdb.q0mfgdv.mongodb.net/?retryWrites=true&w=majority&appName=KhaBoomDB
   minAge: 13
-  privacyPolicy: https://amplify.com/customer-privacy
-  termsOfUse: https://amplify.com/acceptable-use-policy
+  privacyPolicy: https://kha-boom.onrender.com/privacy
+  termsOfUse: https://kha-boom.onrender.com/terms
   address: 1 Main Street, London, United Kingdom
   supportEmail: support@khaboom.edu.vn
-  # sendgridKey: YOUR_SENDGRID_API_KEY_HERE
 
 tutor:
   enabled: true

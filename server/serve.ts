@@ -66,6 +66,22 @@ const studioApp = new MathigonStudioApp()
         });
     })
     
+    // Privacy Policy page
+    .get('/privacy', (req, res) => {
+        res.render('privacy.pug', {
+            user: req.user,
+            theme: req.cookies.theme || 'dark'
+        });
+    })
+    
+    // Terms of Service page  
+    .get('/terms', (req, res) => {
+        res.render('terms.pug', {
+            user: req.user,
+            theme: req.cookies.theme || 'dark'
+        });
+    })
+    
     // AI Chat Management Endpoints
     .post('/api/chat/new', async (req, res) => {
         if (!req.user) {

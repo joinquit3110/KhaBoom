@@ -82,19 +82,42 @@ export function loadCombinedYAML(file: string, deep = false) {
 
 // Configuration files
 export const CONFIG = loadCombinedYAML('config.yaml', true) as Config;
+
+// Ensure CONFIG has required properties with fallbacks
+if (!CONFIG.siteName) CONFIG.siteName = 'Kha-Boom!';
+if (!CONFIG.domain) CONFIG.domain = 'kha-boom.onrender.com';
+if (!CONFIG.accounts) CONFIG.accounts = {} as any;
+
+// Override domain from environment variable if present
+if (process.env.DOMAIN) {
+  CONFIG.domain = process.env.DOMAIN;
+}
+
 // Override SendGrid key from environment variable if present
 if (process.env.SENDGRID_API_KEY) {
   CONFIG.accounts.sendgridKey = process.env.SENDGRID_API_KEY;
 }
-// Ensure domain is set
-if (!CONFIG.domain) {
-  CONFIG.domain = 'khaboom.edu.vn';
-}
-export const CONTENT_DIR = path.join(PROJECT_DIR, CONFIG.contentDir);
 
-// List of all courses
-export const COURSES = fs.readdirSync(CONTENT_DIR)
-    .filter(id => id !== 'shared' && !id.includes('.') && !id.startsWith('_'));
+// Override MongoDB URI from environment variable if present
+if (process.env.MONGODB_URI) {
+  CONFIG.accounts.mongoServer = process.env.MONGODB_URI;
+}
+
+export const CONTENT_DIR = path.join(PROJECT_DIR, CONFIG.contentDir || 'content');
+
+// List of all courses - with fallback if directory doesn't exist
+export const COURSES = (() => {
+  try {
+    if (fs.existsSync(CONTENT_DIR)) {
+      return fs.readdirSync(CONTENT_DIR)
+          .filter(id => id !== 'shared' && !id.includes('.') && !id.startsWith('_'));
+    }
+    return [];
+  } catch (error) {
+    console.warn('Could not read courses directory:', error);
+    return [];
+  }
+})();
 
 
 // -----------------------------------------------------------------------------
