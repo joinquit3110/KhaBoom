@@ -139,7 +139,11 @@ async function updatePassword(req: express.Request) {
 
   req.user.password = newPassword;
   await req.user.save();
-  return {success: 'passwordChanged'};
+  
+  // Send password changed notification email
+  sendPasswordChangedEmail(req.user);  // async
+  
+  return {success: 'passwordChanged', redirect: '/profile'};
 }
 
 async function deleteAccount(req: express.Request, toDelete = true) {
@@ -286,7 +290,7 @@ export default function setupAuthEndpoints(app: MathigonStudioApp) {
 
   app.get('/logout', (req, res) => {
     delete req.session.auth!.user;
-    req.session.save(() => res.redirect('back'));
+    req.session.save(() => res.redirect('/'));
   });
 
   app.get('/signup', (req, res) => {

@@ -145,7 +145,9 @@ function updatePassword(req) {
             return { error: 'passwordLength' };
         req.user.password = newPassword;
         yield req.user.save();
-        return { success: 'passwordChanged' };
+        // Send password changed notification email
+        (0, emails_1.sendPasswordChangedEmail)(req.user); // async
+        return { success: 'passwordChanged', redirect: '/profile' };
     });
 }
 function deleteAccount(req_1) {
@@ -278,7 +280,7 @@ function setupAuthEndpoints(app) {
     }));
     app.get('/logout', (req, res) => {
         delete req.session.auth.user;
-        req.session.save(() => res.redirect('back'));
+        req.session.save(() => res.redirect('/'));
     });
     app.get('/signup', (req, res) => {
         if (req.user)

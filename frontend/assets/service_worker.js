@@ -50,6 +50,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
+  // Skip chrome-extension and other unsupported schemes
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -69,7 +75,14 @@ self.addEventListener('fetch', (event) => {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME)
               .then((cache) => {
-                cache.put(event.request, responseToCache);
+                // Only cache if the request URL is a supported scheme
+                if (event.request.url.startsWith('http')) {
+                  cache.put(event.request, responseToCache);
+                }
+              })
+              .catch((err) => {
+                // Silently ignore cache errors
+                console.debug('Cache error:', err);
               });
             
             return response;
