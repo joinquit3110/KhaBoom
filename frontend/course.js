@@ -6315,9 +6315,8 @@
         body() {
             let t = Fm[this.xid];
             if (!t) return console.warn("missing bio:", this.xid);
-            let e = `<img class="bio-img" alt="" src="/content/shared/bios/${this.xid}.jpg"/>`,
-                i = t.born ? `<p><a href="/timeline/${this.xid}" class="btn btn-white btn-small" target="_blank">Timeline</a></p>` : "";
-            return (t.image === !1 ? "" : e) + t.bio + i
+            let e = `<img class="bio-img" alt="" src="/content/shared/bios/${this.xid}.jpg"/>`;
+            return (t.image === !1 ? "" : e) + t.bio
         }
     };
     Bn = T([S("x-bio", {

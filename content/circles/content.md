@@ -9,14 +9,9 @@
 
 ::: column.grow
 
-For as long as humans have existed, we have looked to the sky and tried to explain life on Earth
-using the motion of stars, planets and the moon.
+For as long as humans have been on earth, we have looked up to the sky and tried to determine life on earth by how well the stars, planets, and moon move.
 
-Ancient Greek astronomers were the first to discover that all celestial objects
-move on regular paths, called __orbits__. They believed that these orbits are
-always circular. After all, circles are the “most perfect” of all shapes:
-symmetric in every direction, and thus a fitting choice for the underlying
-order of our universe.
+The ancient Greeks were first to discover that every star and every planet is in regular motion, or __orbits__. They presume that these orbits are always circular. A circle is the "most perfect" figure of all: evenly balanced in all directions, and thus a suitable choice for our universe's underlying order.
 
 ::: column(width=320)
 
@@ -75,9 +70,7 @@ be matched up using simply [translations](gloss:translation) and
 > id: pi-definition
 > goals: digits
 
-You might remember that, for similar polygons, the ratio between corresponding
-sides is always constant. Something similar works for circles: the ratio between
-the [circumference](gloss:circle-circumference) and the
+We know that similar polygons have the corresponding sides in constant ratio. And the same thing goes with circles: the ratio between the [circumference](gloss:circle-circumference) and the
 [diameter](gloss:circle-diameter) is equal for _all circles_. It is always
 3.14159… – a mysterious number called [__Pi__](gloss:pi), which is often written
 as the Greek letter _π_ for “p”. Pi has infinitely many decimal digits that go
@@ -106,9 +99,7 @@ for a circle with [radius](gloss:circle-radius) _r_, the circumference is
 ---
 > id: nature
 
-Circles are perfectly symmetric, and they don’t have any “weak points” like the
-corners of a polygon. This is one of the reasons why they can be found
-everywhere in nature:
+Because of their extremely symmetrical nature, a circle is considered to have no weak points (unlike a polygon which has corners). For this logistical reason, there is an element of nature with circles almost everywhere:
 
 ::: column(width=130 parent="padded-thin")
 
@@ -142,8 +133,8 @@ everywhere in nature:
 
 :::
 
-{.r} And there are so many other examples: from rainbows to water ripples. Can
-you think of anything else? [Continue](btn:next)
+{.r} And what about rainbows and ripples in the water? Can
+you name anything else? [Continue](btn:next)
 
 ---
 > id: max-area
@@ -179,7 +170,7 @@ spherical, and minimising their surface area for a given volume.
 
 ### The Area of a Circle
 
-But how do we actually calculate the area of a circle? Let’s try the same technique we used for
+But how do we actually find the area of a circle? Let’s try the same technique we used for
 [finding the area of quadrilaterals](/course/polyhedra/quadrilaterals): we cut the shape into
 multiple different parts, and then rearrange them into a different shape we already know the area
 of (e.g. a rectangle or a triangle).
@@ -451,8 +442,7 @@ __{.m-red}full circle__ rotation is [[360]]°, a __{.m-green}half circle__ is
 
 {.r} The number 360 is very convenient because it is divisible by so many other
 numbers: 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, and so on. This means that many
-fractions of one circle are also whole numbers. But have you ever wondered
-where the number 360 comes from? [Continue](btn:next)
+fractions of one circle are also whole numbers. The most intriguing question, however, might be: Where did the number 360 come from? [Continue](btn:next)
 
 ---
 > id: babylon
@@ -481,10 +471,7 @@ future, or to communicate with gods.
 > id: constellations
 > goals: rotate
 
-Astronomers noticed that the constellations visible at a specific time during
-the night shifted a tiny bit every day – until, after approximately 360 days,
-they had rotated back to their starting point. And this might have been the
-reason why they divided the circle into 360 degrees.
+Astronomers observed that the constellations visible at a given time of the night shifted every day by a tiny bit each day until, after nearly 360 days, they returned to their initial position; hence, perhaps they chose to divide the circle into 360 degrees.
 
     figure: .constellations
       .label.md Midnight on day ${day}
@@ -782,102 +769,13 @@ definitions for now – you can always use the
 [glossary](->.footer-link[data-modal=glossarym]).
 
 ---
-
-### Tangents
-
-{.todo} COMING SOON!
-
-    // https://www.mathopenref.com/tangentline.html
-    // https://www.mathopenref.com/consttangents.html
-    // https://www.mathopenref.com/consttangent.html
-
-    // __[CC] Construct a tangent line from a point outside a given circle to the circle.__
-    //
-    // Point of Tangency: The point where a tangent line touches the circle.
-    //
-    // The tangent line and the radius drawn to the point of tangency have a unique
-    // relationship. Let’s investigate it here.
-    //
-    // _Tangent to a Circle Theorem_: A line is tangent to a circle if and only if the
-    // line is perpendicular to the radius drawn to the point of tangency.
-    //
-    // To prove this theorem, the easiest way to do so is indirectly (proof by
-    // contradiction). Also, notice that this theorem uses the words “if and only if,”
-    // making it a biconditional statement. Therefore, the converse of this theorem is
-    // also true. Now let’s look at two tangent segments, drawn from the same external
-    // point. If we were to measure these two segments, we would find that they are equal.
-    //
-    // _Two Tangents Theorem_: If two tangent segments are drawn from the same external
-    // point, then the segments are equal.
-    //
-    // Tangents are actually a much more universal concept,
-    // Tangent Circles: Two or more circles that intersect at one point.
-    // Two circles can be tangent to each other in two different ways, either
-    // internally tangent or externally tangent.
-
----
-
-### Chords
-
-{.todo} COMING SOON!
-
-    // A chord is a line segment whose endpoints are on a circle. A diameter is the
-    // longest chord in a circle. There are several theorems that explore the
-    // properties of chords.
-    //
-    // Chord Theorem #1: In the same circle or congruent circles, minor arcs are
-    // congruent if and only if their corresponding chords are congruent.
-    //
-    // Notice the “if and only if” in the middle of the theorem. This means that Chord
-    // Theorem #1 is a biconditional statement. Taking this theorem one step further,
-    // any time two central angles are congruent, the chords and arcs from the
-    // endpoints of the sides of the central angles are also congruent. In both of
-    // these pictures, BE≅CD and BEˆ≅CDˆ. In the second picture, we have △BAE≅△CAD
-    // because the central angles are congruent and BA≅AC≅AD≅AE because they are all
-    // radii (SAS). By CPCTC, BE≅CD.
-    //
-    // Investigation: Perpendicular Bisector of a Chord
-    // 1. Draw a circle. Label the center A.
-    // 2. Draw a chord in ⨀A. Label it BC.
-    // 3. Find the midpoint of BC by using a ruler. Label it D.
-    // 4. Connect A and D to form a diameter. How does AD relate to the chord, BC?
-    //
-    // Chord Theorem #2: The perpendicular bisector of a chord is also a diameter.
-    // In the picture to the left, AD⊥BC and BD≅DC. From this theorem, we also notice
-    // that AD also bisects the corresponding arc at E, so BEˆ≅ECˆ.
-    //
-    // Chord Theorem #3: If a diameter is perpendicular to a chord, then the diameter
-    // bisects the chord and its corresponding arc.
-    //
-    // Investigation: Properties of Congruent Chords
-    // 1. Draw a circle with a radius of 2 inches and two chords that are both 3
-    //    inches. Label as in the picture to the right. This diagram is drawn to scale.
-    // 2. From the center, draw the perpendicular segment to AB and CD.
-    // 3. Erase the arc marks and lines beyond the points of intersection, leaving FE
-    //    and E. Find the measure of these segments. What do you notice?
-    //
-    // Chord Theorem #4: In the same circle or congruent circles, two chords are
-    // congruent if and only if they are equidistant from the center.
-    //
-    // Recall that two lines are equidistant from the same point if and only if the
-    // shortest distance from the point to the line is congruent. The shortest distance
-    // from any point to a line is the perpendicular line between them. In this
-    // theorem, the fact that FE=EG means that AB and CD are equidistant to the center
-    // and AB≅CD.
-
-    // Concentric Circles: Two or more circles that have the same center, but different radii.
-    // Congruent Circles: Two or more circles with the same radius, but different centers.
-
----
 > id: earth-arc
 
 ### Arcs and Sectors
 
 ::: column.grow
 
-Most scientists in ancient Greece agreed that the Earth is a sphere. There was
-plenty of evidence: from ships disappearing behind the horizon at sea, to the
-circular motion of stars during the night.
+In the view of most ancient Greek scientists, Earth was a spheroid. They gave plenty of evidence to the claim: the disappearance of boats behind the horizon, the circular motion of stars during the nighttime, and so forth.
 
 Unfortunately, no one knew exactly _how big_ Earth was – until around 200 BC,
 when the mathematician [Eratosthenes](bio:eratosthenes) found an ingenious way
@@ -1153,19 +1051,6 @@ between: the Americas.
 
 :::
 
----
-
-### Segments
-
-{.todo} COMING SOON!
-
-    // The last part of a circle that we can find the area of is called a segment, not
-    // to be confused with a line segment. A segment of a circle is the area of a
-    // circle that is bounded by a chord and the arc with the same endpoints as the
-    // chord. The area of a segment is Asegment=Asector−A△ABC
-
-
-
 ---------------------------------------------------------------------------------
 
 ## Spheres, Cones and Cylinders
@@ -1317,14 +1202,6 @@ constant:
 
     x-solid.slide-me(size=280 static style="margin: -20px")
     x-gesture(target=".slide-me" slide="60,0")
-
-:::
-
-    // TODO You must always use the _perpendicular_ height. This is
-    // the vertical line to left in the figure above.
-
-    // TODO Volume of horizontal cylinder segments
-    // https://www.mathopenref.com/cylindervolpartial.html
 
 ---
 > id: cylinder-surface
@@ -1847,27 +1724,6 @@ To find the surface area of a sphere, we can once again approximate it using a
 different shape – for example a polyhedron with lots of faces. As the number of
 faces increases, the polyhedron starts to look more and more like a sphere.
 
-{.todo} COMING SOON: Sphere Surface Area Proof
-
-    // If we connect the small polygons to the center of the sphere, we get
-    // lots of small pyramids pointing inwards. The diagram shows one of these pyramids
-    // in red. The height of each pyramid is the [[radius|diameter]] of the sphere.
-
-    // Here is a
-    // volume = lots of cones = 1/3 * radius * lots of bases = 1/3 * radius * surface area
-
-    // And therefore,
-    // surface area = 3 * volume / radius =
-
-    // In other words, the surface area of a sphere with radius _r_ is `S = 4 π r^2`.
-
-    // ---
-    // > id: earth-surface
-    //
-    // surface of earth
-
-
-
 --------------------------------------------------------------------------------
 
 
@@ -1932,25 +1788,14 @@ now, let’s have a closer look at the ellipse.
 
 ### Ellipses
 
-An ellipse just looks almost like an “elongated circle”. In fact, you could
+For an ellipse just looks as if it were an elongate circle. In fact, you could
 think about it as a circle with _two centers_ – these are called __focal
 points__. Just like every point on a circle has the same distance from its
 center, every point on an ellipse has the same _sum of distances_ to its two
 focal points.
 
 If you have a long string connected to two fixed points, you can draw a perfect
-ellipse by tracing the maximum reach of the strings:
-
-    p.todo Coming soon: Ellipses drawing interactive
-    //- figure: x-ellipse
-      x-geopad(width=600 height=400 x-axis="-6,6,1" y-axis="-4,4,1"): svg.r
-        circle.move(name="a" x="point(-2,0)" project="segment(point(-4,0),point(-0.5,0))")
-        circle.move(name="b" x="point(2,0)" project="segment(point(0.5,0),point(4,0))")
-
-    // You can also move the focal points around. Notice how, if they are further
-    // apart, the ellipse will be [[more|less]] elongated. If they are close together,
-    // it will look almost like a [[circle|parabola|trapezium]].
-
+ellipse by tracing the maximum reach of the strings.
 ---
 > id: ellipses-2
 > goals: v0 v1 v2 v3

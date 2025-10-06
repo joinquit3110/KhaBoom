@@ -98,9 +98,7 @@ export class Bio extends Gloss {
     const data = bios[this.xid];
     if (!data) return console.warn('missing bio:', this.xid);
 
-    // TODO Customise the timeline path, or decide whether it is visible.
     const image = `<img class="bio-img" alt="" src="/content/shared/bios/${this.xid}.jpg"/>`;
-    const btn = data.born ? `<p><a href="/timeline/${this.xid}" class="btn btn-white btn-small" target="_blank">Timeline</a></p>` : '';
-    return ((data.image === false) ? '' : image) + data.bio + btn;
+    return ((data.image === false) ? '' : image) + data.bio;
   }
 }

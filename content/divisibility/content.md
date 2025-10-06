@@ -90,7 +90,6 @@ until we meet in the middle.
 The only special case with this method is for square numbers: in that case, you
 will meet at just a single number in the middle, like 64 = 8 × 8.
 
-    //- TODO Factorisation exercises
 
 ---
 
@@ -284,7 +283,6 @@ divisible by 2 [[and also|or]] divisible by 3. Note that this happens to work
 for 6, but certainly not for _any_ number that is the product of two others.
 More on that later…
 
-    //- TODO Practice exercises
 
 ---
 
@@ -302,7 +300,6 @@ the “atoms of numbers”.
 Note that 1 itself is _not_ a prime number, so the first few prime numbers are
 2, 3, 5, 7, 11, 13, …
 
-    //- TODO Exercises
 
 ---
 > id: primes1
@@ -355,7 +352,6 @@ numbers into their prime factors, we solve the problem for the individual
 primes, which can often be much easier, and then we combine these results to
 solve the initial problem.
 
-    //- TODO Exercises
 
 ---
 > id: eratosthenes
@@ -831,7 +827,6 @@ Prime numbers are a special case: the lcm of two different primes is simply
 their [[product|sum|difference]], because they don’t have any common prime
 factors which would get “canceled”.
 
-    //- TODO Exercises
 
 ---
 > id: cicadas
@@ -876,7 +871,6 @@ Of course, cicadas have no idea what prime numbers are – but over millions of
 years, evolution has worked out that prime cycles are the safest. The predator
 animal seems to have gone extinct over time, but the prime number cycles remain.
 
-    //- TODO Exercises
 
 ---
 
@@ -991,7 +985,6 @@ large integers into primes…
 ---
 > id: crypto1
 
-{.todo} COMING SOON – RSA example with Alice and Bob
 
 This encryption algorithm is called __RSA Cryptography__, after its three
 inventors, Ron Rivest, Adi Shamir and Leonard Adleman who published it in 1977.

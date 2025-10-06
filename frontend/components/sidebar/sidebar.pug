@@ -99,7 +99,7 @@ x-modal#reset
     p(style="color: #888; font-size: 14px; margin: 16px 0;")= __("You will start fresh from the beginning of the course.")
     form#reset-form(action=`/course/${course.id}/reset` method="POST")
       input(type='hidden' name='_csrf' value=_csrf)
-      .btn-row(style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;")
+      .btn-row(style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;")
         button.btn.btn-grey(type='button' onclick="document.querySelector('#reset').classList.remove('on')" style="background: #656073;")= __("Cancel")
         button.btn.btn-red(type='submit' style="background: linear-gradient(135deg, #cd0e66, #ef1579);")= __("Reset Progress")
 

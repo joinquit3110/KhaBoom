@@ -277,9 +277,11 @@ class MathigonStudioApp {
         (0, accounts_1.default)(this);
         this.get('/dashboard', (req, res) => __awaiter(this, void 0, void 0, function* () {
             // Disable caching for dashboard to always show fresh data
-            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
             res.setHeader('Pragma', 'no-cache');
             res.setHeader('Expires', '0');
+            res.setHeader('ETag', '"' + Date.now() + '"');
+            res.setHeader('Last-Modified', new Date().toUTCString());
             // Temporarily allow access without login for testing
             if (!req.user) {
                 // Create a dummy user for testing
@@ -425,9 +427,11 @@ class MathigonStudioApp {
             if (!course || !section)
                 return next();
             // Disable caching for course pages to show fresh progress
-            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
             res.setHeader('Pragma', 'no-cache');
             res.setHeader('Expires', '0');
+            res.setHeader('ETag', '"' + Date.now() + '"');
+            res.setHeader('Last-Modified', new Date().toUTCString());
             const progressData = yield progress_1.Progress.lookup(req, course.id);
             const nextSection = (0, utilities_1.findNextSection)(course, section);
             const prevSection = (0, utilities_1.findNextSection)(course, section, -1);

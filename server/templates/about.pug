@@ -500,6 +500,423 @@ html(lang="en" theme=theme)
         line-height: 1.6;
       }
       
+      /* Instructor Section - Special Styling */
+      .instructor-section {
+        max-width: 1200px;
+        margin: 0 auto 5rem;
+        position: relative;
+        z-index: 10;
+      }
+      
+      .instructor-card {
+        background: linear-gradient(135deg, 
+                    rgba(30, 30, 50, 0.95) 0%, 
+                    rgba(20, 20, 40, 0.98) 100%);
+        border-radius: 40px;
+        padding: 4rem;
+        display: flex;
+        gap: 4rem;
+        align-items: center;
+        backdrop-filter: blur(40px);
+        border: 3px solid transparent;
+        background-image: linear-gradient(135deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 40, 0.98)),
+                          linear-gradient(135deg, #FFD700, #FFA500, #FF6B35, #FFD700);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        position: relative;
+        overflow: visible;
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5),
+                    0 0 0 1px rgba(255, 215, 0, 0.1);
+      }
+      
+      .instructor-card::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 40px;
+        padding: 3px;
+        background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B35, #FFD700);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        animation: borderGradient 3s ease-in-out infinite;
+      }
+      
+      @keyframes borderGradient {
+        0%, 100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+      
+      .instructor-card:hover::before {
+        opacity: 1;
+      }
+      
+      .instructor-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at center, 
+                    rgba(255, 215, 0, 0.15) 0%, 
+                    transparent 50%);
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        pointer-events: none;
+        animation: pulseGlow 4s ease-in-out infinite;
+      }
+      
+      @keyframes pulseGlow {
+        0%, 100% {
+          transform: scale(0.8);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.6;
+        }
+      }
+      
+      .instructor-card:hover::after {
+        opacity: 1;
+      }
+      
+      .instructor-card:hover {
+        transform: translateY(-20px) scale(1.03);
+        box-shadow: 0 40px 120px rgba(255, 215, 0, 0.4),
+                    0 0 100px rgba(255, 165, 0, 0.3),
+                    0 0 0 1px rgba(255, 215, 0, 0.5);
+      }
+      
+      .instructor-image-wrapper {
+        position: relative;
+        flex-shrink: 0;
+      }
+      
+      .instructor-image {
+        width: 380px;
+        height: 380px;
+        border-radius: 30px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        z-index: 2;
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 4px solid transparent;
+        background-image: linear-gradient(white, white),
+                          linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                    0 0 40px rgba(255, 215, 0, 0.2);
+      }
+      
+      .instructor-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 420px;
+        height: 420px;
+        background: radial-gradient(circle, 
+                    rgba(255, 215, 0, 0.6) 0%, 
+                    rgba(255, 165, 0, 0.4) 30%,
+                    rgba(255, 107, 53, 0.2) 60%,
+                    transparent 80%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        z-index: 1;
+        filter: blur(30px);
+      }
+      
+      .instructor-card:hover .instructor-glow {
+        opacity: 1;
+        animation: glowPulse 2s ease-in-out infinite;
+      }
+      
+      .instructor-card:hover .instructor-image {
+        transform: scale(1.15) translateY(-15px) rotate(-2deg);
+        box-shadow: 0 35px 120px rgba(255, 215, 0, 0.8),
+                    0 0 100px rgba(255, 165, 0, 0.7),
+                    0 0 150px rgba(255, 107, 53, 0.5),
+                    inset 0 0 80px rgba(255, 215, 0, 0.3);
+        animation: imageShake 0.5s ease-in-out infinite;
+      }
+      
+      @keyframes imageShake {
+        0%, 100% {
+          transform: scale(1.15) translateY(-15px) rotate(-2deg);
+        }
+        25% {
+          transform: scale(1.16) translateY(-16px) rotate(-3deg);
+        }
+        50% {
+          transform: scale(1.15) translateY(-15px) rotate(-2deg);
+        }
+        75% {
+          transform: scale(1.16) translateY(-16px) rotate(-1deg);
+        }
+      }
+      
+      @keyframes glowPulse {
+        0%, 100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.15);
+          opacity: 1;
+        }
+      }
+      
+      .instructor-content {
+        flex: 1;
+        position: relative;
+        z-index: 2;
+        text-align: center;
+      }
+      
+      .instructor-badge {
+        display: inline-block;
+        padding: 0.7rem 2rem;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
+        color: #000;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5),
+                    0 0 30px rgba(255, 165, 0, 0.3);
+        animation: badgeFloat 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .instructor-badge::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        transform: rotate(45deg);
+        animation: badgeShine 3s ease-in-out infinite;
+      }
+      
+      @keyframes badgeFloat {
+        0%, 100% {
+          transform: translateY(0px) scale(1);
+        }
+        50% {
+          transform: translateY(-8px) scale(1.05);
+        }
+      }
+      
+      @keyframes badgeShine {
+        0% {
+          left: -200%;
+        }
+        50%, 100% {
+          left: 200%;
+        }
+      }
+      
+      .instructor-name {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 0.8rem;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FF6B35 60%, #FFA500 100%);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 4s ease-in-out infinite;
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+        position: relative;
+        text-align: center;
+        line-height: 1.2;
+      }
+      
+      .instructor-name::before {
+        content: '✨';
+        position: absolute;
+        left: -60px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2.5rem;
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .instructor-name::after {
+        content: '✨';
+        position: absolute;
+        right: -60px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2.5rem;
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .instructor-card:hover .instructor-name {
+        transform: scale(1.15);
+        letter-spacing: 3px;
+        filter: drop-shadow(0 0 50px rgba(255, 215, 0, 1)) 
+                drop-shadow(0 0 80px rgba(255, 165, 0, 0.8));
+      }
+      
+      .instructor-card:hover .instructor-name::before {
+        opacity: 1;
+        left: -80px;
+        animation: sparkleRotateLeft 1.5s ease-in-out infinite;
+      }
+      
+      .instructor-card:hover .instructor-name::after {
+        opacity: 1;
+        right: -80px;
+        animation: sparkleRotateRight 1.5s ease-in-out infinite;
+      }
+      
+      @keyframes sparkleRotateLeft {
+        0%, 100% {
+          transform: translateY(-50%) rotate(0deg) scale(1);
+        }
+        50% {
+          transform: translateY(-50%) rotate(-25deg) scale(1.4);
+        }
+      }
+      
+      @keyframes sparkleRotateRight {
+        0%, 100% {
+          transform: translateY(-50%) rotate(0deg) scale(1);
+        }
+        50% {
+          transform: translateY(-50%) rotate(25deg) scale(1.4);
+        }
+      }
+      
+      .instructor-title {
+        font-size: 1.5rem;
+        color: rgba(255, 215, 0, 0.95);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+      
+      .instructor-card:hover .instructor-title {
+        transform: scale(1.1);
+        color: #FFD700;
+        text-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                     0 0 60px rgba(255, 165, 0, 0.6);
+      }
+      
+      .instructor-desc {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.8;
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        font-weight: 400;
+        text-align: center;
+      }
+      
+      .instructor-card:hover .instructor-desc {
+        transform: scale(1.05);
+        color: rgba(255, 255, 255, 1);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      }
+      
+      /* Floating Icons around card */
+      .instructor-card:hover {
+        animation: cardFloat 3s ease-in-out infinite;
+      }
+      
+      @keyframes cardFloat {
+        0%, 100% {
+          transform: translateY(-20px) scale(1.03);
+        }
+        50% {
+          transform: translateY(-30px) scale(1.03);
+        }
+      }
+      
+      .floating-instructor-icon {
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform, opacity;
+      }
+      
+      .floating-instructor-trail {
+        transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform, opacity;
+      }
+      
+      /* Responsive Design for Instructor */
+      @media (max-width: 992px) {
+        .instructor-card {
+          flex-direction: column;
+          text-align: center;
+          padding: 3rem 2rem;
+          gap: 3rem;
+        }
+        
+        .instructor-image {
+          width: 300px;
+          height: 300px;
+        }
+        
+        .instructor-glow {
+          width: 340px;
+          height: 340px;
+        }
+        
+        .instructor-name {
+          font-size: 2.5rem;
+        }
+        
+        .instructor-name::after {
+          position: relative;
+          display: inline-block;
+          right: 0;
+          margin-left: 10px;
+        }
+      }
+      
+      @media (max-width: 576px) {
+        .instructor-image {
+          width: 250px;
+          height: 250px;
+        }
+        
+        .instructor-glow {
+          width: 280px;
+          height: 280px;
+        }
+        
+        .instructor-name {
+          font-size: 2rem;
+        }
+        
+        .instructor-title {
+          font-size: 1.2rem;
+        }
+      }
+      
       .team-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -1102,46 +1519,57 @@ html(lang="en" theme=theme)
           h2.gradient-text Meet Our Team
           p(style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); text-align: center; margin-bottom: 3rem;") The passionate individuals behind Kha-Boom!
       
+        // Instructor Section
+        .instructor-section
+          .instructor-card
+            .instructor-image-wrapper
+              .instructor-image(style="background-image: url('/images/teammember/Pham Viet Duy Kha.jpg')")
+              .instructor-glow
+            .instructor-content
+              .instructor-badge 🎓 Instructor
+              h3.instructor-name Pham Viet<br>Duy Kha
+              p.instructor-desc The driving force and inspiration behind Kha-Boom!
+      
       .team-grid
           .team-member
             .member-image(style="background-image: url('/images/teammember/Hung.png')")
             .member-content
-              h3(style="color: #667eea;") Nguyễn Hưng
+              h3(style="color: #667eea;") Nguyen Hung
               p.role 48.01.101.022
             .crown-icon 👑
           
           .team-member
             .member-image(style="background-image: url('/images/teammember/Hao.png')")
             .member-content
-              h3(style="color: #f093fb;") Nguyễn Đình<br>Anh Hào
+              h3(style="color: #f093fb;") Nguyen Dinh<br>Anh Hao
               p.role 48.01.101.016
             .crown-icon 👑
 
           .team-member
             .member-image(style="background-image: url('/images/teammember/Quan.png')")
             .member-content
-              h3(style="color: #4facfe;") Nguyễn Minh Quân
+              h3(style="color: #4facfe;") Nguyen Minh Quan
               p.role 48.01.101.063
             .crown-icon 👑
           
           .team-member
             .member-image(style="background-image: url('/images/teammember/Vi.png')")
             .member-content
-              h3(style="color: #fa709a;") Huỳnh Văn Vĩ
+              h3(style="color: #fa709a;") Huynh Van Vi
               p.role 48.01.101.104
             .crown-icon 👑
 
           .team-member
             .member-image(style="background-image: url('/images/teammember/Phuc.png')")
             .member-content
-              h3(style="color: #30cfd0;") Trương Nguyễn<br>Gia Phúc
+              h3(style="color: #30cfd0;") Truong Nguyen<br>Gia Phuc
               p.role 48.01.101.059
             .crown-icon 👑
           
           .team-member
             .member-image(style="background-image: url('/images/teammember/Long.png')")
             .member-content
-              h3(style="color: #fee140;") Nguyễn Phi<br>Hoàng Long
+              h3(style="color: #fee140;") Nguyen Phi<br>Hoang Long
               p.role 48.01.101.039
             .crown-icon 👑
     
@@ -1300,5 +1728,287 @@ html(lang="en" theme=theme)
             this.style.transform = '';
           });
         });
+        
+        // Instructor Card Special Animation
+        const instructorCard = document.querySelector('.instructor-card');
+        
+        if (instructorCard) {
+          // Initial state
+          instructorCard.style.opacity = '0';
+          instructorCard.style.transform = 'translateY(50px) scale(0.9)';
+          
+          // Intersection Observer for scroll animation
+          const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+          };
+          
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                instructorCard.style.transition = 'all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                instructorCard.style.opacity = '1';
+                instructorCard.style.transform = 'translateY(0) scale(1)';
+              }
+            });
+          }, observerOptions);
+          
+          observer.observe(instructorCard);
+          
+          // Epic Golden Particle Explosion on Hover
+          let particleInterval;
+          instructorCard.addEventListener('mouseenter', function() {
+            createGoldenExplosion(this);
+            // Continuous particle stream while hovering
+            particleInterval = setInterval(() => {
+              createGoldenParticles(this);
+            }, 400);
+          });
+          
+          instructorCard.addEventListener('mouseleave', function() {
+            clearInterval(particleInterval);
+          });
+          
+          function createGoldenExplosion(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Create burst of 20 particles
+            for (let i = 0; i < 20; i++) {
+              setTimeout(() => {
+                const particle = document.createElement('div');
+                const size = 8 + Math.random() * 8;
+                particle.style.position = 'absolute';
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.background = `linear-gradient(135deg, #FFD700, #FFA500, #FF6B35)`;
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '9999';
+                particle.style.boxShadow = '0 0 20px rgba(255, 215, 0, 1)';
+                
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                document.body.appendChild(particle);
+                
+                const angle = (Math.PI * 2 * i) / 20;
+                const distance = 150 + Math.random() * 100;
+                const endX = centerX + Math.cos(angle) * distance;
+                const endY = centerY + Math.sin(angle) * distance - 50;
+                
+                particle.animate([
+                  {
+                    left: centerX + 'px',
+                    top: centerY + 'px',
+                    opacity: 1,
+                    transform: 'scale(0) rotate(0deg)'
+                  },
+                  {
+                    left: endX + 'px',
+                    top: endY + 'px',
+                    opacity: 0,
+                    transform: 'scale(2) rotate(720deg)'
+                  }
+                ], {
+                  duration: 2000,
+                  easing: 'cubic-bezier(0, 0.5, 0.5, 1)'
+                }).onfinish = () => {
+                  particle.remove();
+                };
+              }, i * 30);
+            }
+          }
+          
+          function createGoldenParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const particle = document.createElement('div');
+            particle.innerHTML = ['✨', '⭐', '💫', '🌟'][Math.floor(Math.random() * 4)];
+            particle.style.position = 'absolute';
+            particle.style.fontSize = (15 + Math.random() * 15) + 'px';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '9999';
+            particle.style.filter = 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.8))';
+            
+            const startX = rect.left + Math.random() * rect.width;
+            const startY = rect.bottom;
+            
+            particle.style.left = startX + 'px';
+            particle.style.top = startY + 'px';
+            
+            document.body.appendChild(particle);
+            
+            particle.animate([
+              { 
+                top: startY + 'px',
+                opacity: 1,
+                transform: 'translateY(0) rotate(0deg) scale(0)'
+              },
+              { 
+                top: (startY - 100 - Math.random() * 100) + 'px',
+                opacity: 0,
+                transform: `translateY(-50px) rotate(${Math.random() * 360}deg) scale(1.5)`
+              }
+            ], {
+              duration: 2000 + Math.random() * 1000,
+              easing: 'cubic-bezier(0, 0.5, 0.5, 1)'
+            }).onfinish = () => {
+              particle.remove();
+            };
+          }
+          
+          // EPIC Magical Aura Effect with Super Icons
+          const instructorImage = instructorCard.querySelector('.instructor-image');
+          if (instructorImage) {
+            // Create super floating icons around instructor
+            const icons = [
+              { emoji: '👑', color: '#FFD700', size: '50px', trail: '✨' },
+              { emoji: '🎓', color: '#4169E1', size: '45px', trail: '📚' },
+              { emoji: '⚡', color: '#FFD700', size: '45px', trail: '💫' },
+              { emoji: '🔥', color: '#FF4500', size: '45px', trail: '🌟' },
+              { emoji: '💎', color: '#00CED1', size: '45px', trail: '✨' },
+              { emoji: '🌟', color: '#FFD700', size: '40px', trail: '⭐' },
+              { emoji: '🚀', color: '#FF6347', size: '40px', trail: '💨' },
+              { emoji: '🏆', color: '#FFD700', size: '45px', trail: '🎉' }
+            ];
+            
+            icons.forEach((iconData, index) => {
+              const floatingIcon = document.createElement('div');
+              floatingIcon.innerHTML = iconData.emoji;
+              floatingIcon.style.position = 'absolute';
+              floatingIcon.style.fontSize = iconData.size;
+              floatingIcon.style.opacity = '0';
+              floatingIcon.style.pointerEvents = 'none';
+              floatingIcon.style.zIndex = '9998';
+              floatingIcon.style.filter = `drop-shadow(0 0 25px ${iconData.color}) drop-shadow(0 0 45px ${iconData.color})`;
+              floatingIcon.className = 'floating-instructor-icon';
+              
+              const angle = (Math.PI * 2 * index) / icons.length;
+              const radius = 280;
+              
+              instructorCard.appendChild(floatingIcon);
+              
+              // Add trail effect
+              const trail = document.createElement('div');
+              trail.innerHTML = iconData.trail;
+              trail.style.position = 'absolute';
+              trail.style.fontSize = '20px';
+              trail.style.opacity = '0';
+              trail.style.pointerEvents = 'none';
+              trail.style.zIndex = '9997';
+              trail.className = 'floating-instructor-trail';
+              instructorCard.appendChild(trail);
+              
+              instructorCard.addEventListener('mouseenter', () => {
+                const rect = instructorImage.getBoundingClientRect();
+                const cardRect = instructorCard.getBoundingClientRect();
+                const centerX = rect.left - cardRect.left + rect.width / 2;
+                const centerY = rect.top - cardRect.top + rect.height / 2;
+                
+                setTimeout(() => {
+                  floatingIcon.style.left = (centerX + Math.cos(angle) * radius) + 'px';
+                  floatingIcon.style.top = (centerY + Math.sin(angle) * radius) + 'px';
+                  floatingIcon.style.opacity = '1';
+                  floatingIcon.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                  floatingIcon.style.animation = `superIconOrbit${index} 5s ease-in-out infinite`;
+                  
+                  trail.style.left = (centerX + Math.cos(angle) * (radius - 40)) + 'px';
+                  trail.style.top = (centerY + Math.sin(angle) * (radius - 40)) + 'px';
+                  trail.style.opacity = '0.7';
+                  trail.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                  trail.style.animation = `trailOrbit${index} 5s ease-in-out infinite`;
+                }, index * 100);
+              });
+              
+              instructorCard.addEventListener('mouseleave', () => {
+                floatingIcon.style.opacity = '0';
+                floatingIcon.style.animation = 'none';
+                trail.style.opacity = '0';
+                trail.style.animation = 'none';
+              });
+              
+              // Add super orbit animation with bounce
+              const style = document.createElement('style');
+              style.textContent = `
+                @keyframes superIconOrbit${index} {
+                  0%, 100% {
+                    transform: rotate(${angle}rad) translateX(${radius}px) rotate(-${angle}rad) scale(1);
+                    filter: drop-shadow(0 0 25px ${iconData.color}) drop-shadow(0 0 45px ${iconData.color});
+                  }
+                  25% {
+                    transform: rotate(${angle + Math.PI/2}rad) translateX(${radius + 30}px) rotate(-${angle + Math.PI/2}rad) scale(1.6);
+                    filter: drop-shadow(0 0 35px ${iconData.color}) drop-shadow(0 0 65px ${iconData.color});
+                  }
+                  50% {
+                    transform: rotate(${angle + Math.PI}rad) translateX(${radius}px) rotate(-${angle + Math.PI}rad) scale(1);
+                    filter: drop-shadow(0 0 25px ${iconData.color}) drop-shadow(0 0 45px ${iconData.color});
+                  }
+                  75% {
+                    transform: rotate(${angle + Math.PI * 1.5}rad) translateX(${radius + 30}px) rotate(-${angle + Math.PI * 1.5}rad) scale(1.6);
+                    filter: drop-shadow(0 0 35px ${iconData.color}) drop-shadow(0 0 65px ${iconData.color});
+                  }
+                }
+                
+                @keyframes trailOrbit${index} {
+                  0%, 100% {
+                    transform: rotate(${angle}rad) translateX(${radius - 40}px) rotate(-${angle}rad) scale(0.8);
+                    opacity: 0.5;
+                  }
+                  50% {
+                    transform: rotate(${angle + Math.PI}rad) translateX(${radius - 40}px) rotate(-${angle + Math.PI}rad) scale(1.2);
+                    opacity: 0.9;
+                  }
+                }
+              `;
+              document.head.appendChild(style);
+            });
+            
+            // Add pulsing ring effect
+            const ring = document.createElement('div');
+            ring.style.position = 'absolute';
+            ring.style.width = '500px';
+            ring.style.height = '500px';
+            ring.style.border = '3px solid rgba(255, 215, 0, 0.4)';
+            ring.style.borderRadius = '50%';
+            ring.style.opacity = '0';
+            ring.style.pointerEvents = 'none';
+            ring.style.zIndex = '9996';
+            ring.style.transition = 'all 0.8s ease';
+            instructorCard.appendChild(ring);
+            
+            instructorCard.addEventListener('mouseenter', () => {
+              const rect = instructorImage.getBoundingClientRect();
+              const cardRect = instructorCard.getBoundingClientRect();
+              const centerX = rect.left - cardRect.left + rect.width / 2;
+              const centerY = rect.top - cardRect.top + rect.height / 2;
+              
+              ring.style.left = (centerX - 250) + 'px';
+              ring.style.top = (centerY - 250) + 'px';
+              ring.style.opacity = '1';
+              ring.style.animation = 'ringPulse 2s ease-in-out infinite';
+            });
+            
+            instructorCard.addEventListener('mouseleave', () => {
+              ring.style.opacity = '0';
+              ring.style.animation = 'none';
+            });
+            
+            const ringStyle = document.createElement('style');
+            ringStyle.textContent = `
+              @keyframes ringPulse {
+                0%, 100% {
+                  transform: scale(1) rotate(0deg);
+                  border-color: rgba(255, 215, 0, 0.4);
+                }
+                50% {
+                  transform: scale(1.1) rotate(180deg);
+                  border-color: rgba(255, 165, 0, 0.8);
+                }
+              }
+            `;
+            document.head.appendChild(ringStyle);
+          }
+        }
       });
       

@@ -141,8 +141,6 @@ Tossing a (fair) coin has two possible outcomes, _heads_ and _tails_, which are
 both equally likely. According to the equation above, the probability of a coin
 landing _heads_ must be `1/2` = 0.5, or 50%.
 
-    // TODO However, the equation is not very helpful if the different outcomes
-    // are not all equally likely, or if there are infinitely many possible outcomes.
 
 Note that this probability is _in between_ 0 and 1, even though only one of the
 outcomes can actually happen. But probabilities have very little to do with
@@ -191,8 +189,6 @@ if we toss the coin _many times_.
 _believe_ that the coin will land heads.
 :::
 
-    // TODO Notice that subjectivist probabilities may be different for
-    // different people – often depending on how much they know.
 
 Remember that while probabilities are great for _estimating and forecasting_, we
 can never tell what _actually_ will happen.
@@ -339,18 +335,6 @@ once, you can also see that the probabilities change from a straight line (one
 die) to a triangle (two dice) and then to a “bell-shaped” curve. This is known
 as the __central limit theorem__, and the bell-shaped curve is called the
 __normal distribution__.
-
-
----
-
-
-## Probability Trees and Venn Diagrams
-
-> section: trees
-
-
-{.todo} TODO
-
 ---
 > id: galton-board
 
@@ -369,15 +353,6 @@ Here is a Galton Board:
 
 The Galton Board has ${rows}{rows|8|2,9,1} rows. The probability the ball bounces to the **right** is ${p}{p|0.5|0,1,0.1}.
 :::
-
----
-
-## Conditional Probability
-
-> section: conditional
-
-
-TODO
 
 ---
 
@@ -485,17 +460,6 @@ This gives a  chance of `6/9 = 2/3` like before.
 ---
 
 
-## The Birthday Problem
-
-> section: birthdays
-
-
-TODO
-
-
----
-
-
 ## True Randomness
 
 > id: quantum
@@ -557,11 +521,6 @@ process is called __Carbon dating__.
 
     p: svg.radioactive(width=300 height=200 viewBox="0 0 300 200")
     p.text-center.btn-row.no-voice: button.btn Start Decay
-
-:::
-
-    // TODO Possible probability distributions of the position of an electron in
-    // a hydrogen atom. Lighter areas represent more likely locations of the electron.
 
 ---
 > id: radioactive-1

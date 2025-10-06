@@ -7,28 +7,25 @@
 > color: "#F6700F"
 > level: Intermediate
 
-    img.text-wrap(src="images/skater-1.jpg" style="shape-outside: url(images/skater-1-mask.png)" width=300 height=393)
+    img.text-wrap(src="images/skater-1.jpg" style="shape-outside: url(images/skater-1-mask.png)" width=400 height=650)
 
-Welcome to SkateSum, a small company that produces skateboards. Engineers have
-been working on a brand new model, the _SquareBoard_, which is finally ready to
-start production. You’ve been put in charge of finding the optimal resale price
-for the skateboards – and it turns out that building them is not cheap:
+Welcome to GlideTech, a small startup specializing in producing electric scooters. After months of research and design, the engineering team has finally completed a new model, the _EcoRide_, and production is ready to begin. You’ve been assigned to determine the best resale price for this new scooter model. However, manufacturing them doesn’t come cheap:
 
-* The tools and machines required to construct skateboards cost \$5,000. This is
+* The tools and machines required to construct scooters cost \$5,000. This is
   often called a __fixed cost__.
-* Every skateboard costs additional \$30 worth of of wood, other materials,
+* Every scooter costs additional \$30 worth of of wood, other materials,
   and salary for the employees. This is often called a __variable cost__.
 
-In other words, the __cost__ of producing _n_ skateboards is
+In other words, the __cost__ of producing _n_ scooters is
 
 {.text-center.no-voice} [cost](pill:orange) = _{x-equation(solution="5000+30×n")}_.
 
 ---
 > id: demand
 
-The new skateboards are highly anticipated, but if the price is too high, fewer
+The new scooters are highly anticipated, but if the price is too high, fewer
 people will actually buy one. We can show this on a chart with the price of a
-skateboard along the _x_-axis, and the corresponding number of people who want
+scooter along the _x_-axis, and the corresponding number of people who want
 buy one (the __demand__) on the _y_-axis.
 
 Which of these charts makes most sense for the relationship between price and
@@ -45,13 +42,13 @@ demand?
 ---
 > id: demand-1
 
-A higher price means that fewer people want to buy a skateboards, so the graph
+A higher price means that fewer people want to buy a scooters, so the graph
 of the function has to move downwards. After doing some market research,
 economists came up with the following equation:
 
 {.text-center} [demand](pill:teal) = 2800 – 15 × [price](pill:purple)
 
-For example, if a skateboard costs \$80, the demand will be [[1600]] units.
+For example, if a scooter costs \$80, the demand will be [[1600]] units.
 
 ---
 > id: intro4
@@ -59,14 +56,14 @@ For example, if a skateboard costs \$80, the demand will be [[1600]] units.
     //- img.text-wrap.s-hide(src="images/skater-3.jpg" style="shape-outside: url(images/skater-3-mask.png)" width=280 height=480)
 
 The __revenue__ of our company is the total income we make. It is the number of
-skateboards sold (the _demand_) times the price of each:
+scooters sold (the _demand_) times the price of each:
 
 {.text-center} [revenue](pill:green) = [demand](pill:teal) × [price](pill:purple)
 
 But the number we are more interested in is our __profit__: the revenue we make
-from selling skateboards, minus the cost of producing them. Can you find an
+from selling scooters, minus the cost of producing them. Can you find an
 equation that expresses our [profit](pill:yellow) in terms of just the
-[price](pill:purple) of every skateboard?
+[price](pill:purple) of every scooter?
 
     x-equation-system(steps="demand*price-(5000 + 30*demand) | (2800-15*price)*price-5000-30*(2800-15*price)" hints="intro-1|intro-2|intro-3")
       table
@@ -113,17 +110,17 @@ function](gloss:quadratic-function) is curved. It even has a specific name: a
 [__Parabola__](gloss:parabola).
 
 If the [price is 0](->.r1), our profit is negative, because we’re just
-giving away expensive skateboards for free. As the price increases, our
-profits rise, too. However, if the skateboards become [too expensive](->.r2),
+giving away expensive scooters for free. As the price increases, our
+profits rise, too. However, if the scooters become [too expensive](->.r2),
 people no longer want to buy them and our profit falls again.
 
-We can maximise our profit by pricing the skateboards at approximately
+We can maximise our profit by pricing the scooters at approximately
 \$[[108 ± 10]].
 
 ---
 > id: intro-final
 
-    figure: x-img(src="images/skater-2.jpg" alt="Skateboarder" width=400 height=352)
+    figure: x-img(src="images/skater-2.jpg" alt="Skateboarder" width=400 height=500)
 
 In the real world, it can be very difficult for companies to determine a precise
 equation for their profit – and it is likely to be much more complicated than
@@ -1074,12 +1071,10 @@ Now we can use a useful property of multiplication: if the product of
 two terms is 0, then one of the two terms must also be zero. There is
 no way you can get 0 by multiplying two numbers which are _both not 0_.
 
-{.todo} Image
 
 In our example, this means that either `x = 0`, or `(x-4) = 0`. Therefore
 the quadratic equation has two solutions: `x=0` and `x=`[[4]].
 
-{.todo} Exercises
 
 Here is another quadratic equation that can be solved using factoring:
 
@@ -1103,9 +1098,6 @@ work backwards:
 | `x^2 - Qx - Px + P*Q` | `= 0` |
 | `x^2 - (P+Q)x + P*Q` | `= 0` |
 
-{.todo} Let's start by revising how to simplify terms with brackets. For example
-The trick is simply to add up all possible pairs of numbers, while taking
-care to respect all minus signs:
 
 Now, if we have a quadratic equation like `x^2-8x+15=0`, we can just compare
 the coefficient to see that we want P+Q=8 and P*Q=15. After a little bit of
@@ -1121,7 +1113,6 @@ solution is P=3 and Q=5. Therefore,
 Finding the numbers P and Q always takes a little bit of guesswork, but in
 all the examples below it should be relatively straightforward.
 
-{.todo} Exercises!
 
 Try to find the missing number in these factorisation examples:
 
@@ -1130,14 +1121,6 @@ x^2 + 3x + 2 = (x+1)(x+[[1]])
 x^2 + 5x + 4 = (x+4)(x+[[1]])
 x^2 - 8x + 15 = (x-3)(x-[[1]])
 x^2 - 5x - 14 = (x+2)(x-[[1]])
-
-{.todo} Some quadratic equations look completely ordinary to start with,
-but when we factorise them, we're only left with a single bracket:
-In these cases there is just a single solution for the quadratic equation.
-
-{.todo} And finally, some quadratic equations actually have a coefficient
-in front of . This makes the factorisation a bit more difficult,
-but it still works the same way:
 
 
 
