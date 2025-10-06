@@ -323,6 +323,13 @@ export class MathigonStudioApp {
     setupAuthEndpoints(this);
 
     this.get('/dashboard', async (req, res) => {
+      // Disable caching for dashboard to always show fresh data
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('ETag', '"' + Date.now() + '"');
+      res.setHeader('Last-Modified', new Date().toUTCString());
+      
       // Temporarily allow access without login for testing
       if (!req.user) {
         // Create a dummy user for testing
@@ -483,6 +490,13 @@ export class MathigonStudioApp {
       const course = getCourse(req.params.course, req.locale.id);
       const section = course?.sections.find(s => s.id === req.params.section);
       if (!course || !section) return next();
+
+      // Disable caching for course pages to show fresh progress
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('ETag', '"' + Date.now() + '"');
+      res.setHeader('Last-Modified', new Date().toUTCString());
 
       const progressData = await Progress.lookup(req, course.id);
       const nextSection = findNextSection(course, section);

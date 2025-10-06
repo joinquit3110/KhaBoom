@@ -339,6 +339,14 @@ export default function setupAuthEndpoints(app: MathigonStudioApp) {
 
   app.get('/profile', (req, res) => {
     if (!req.user) return res.redirect('/login');
+    
+    // Disable caching for profile to always show fresh data
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('ETag', '"' + Date.now() + '"');
+    res.setHeader('Last-Modified', new Date().toUTCString());
+    
     res.render('accounts/profile', {countries: COUNTRY_LIST});
   });
 

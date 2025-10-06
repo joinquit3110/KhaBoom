@@ -54,14 +54,15 @@ CourseAnalyticsSchema.statics.track = function (userId_1) {
     return __awaiter(this, arguments, void 0, function* (userId, points = 0) {
         // TODO Ensure requests are always handled in the correct order (index?).
         // TODO Use client timestamps rather than server timestamps.
-        const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
+        const now = new Date();
+        const today = new Date(date.format(now, 'yyyy-MM-dd'));
         let analytics = yield exports.CourseAnalytics.findOne({ date: today, user: userId });
         if (!analytics)
             analytics = new exports.CourseAnalytics({ date: today, user: userId });
-        const dt = (+today) - (+analytics.lastTime);
+        const dt = (+now) - (+analytics.lastTime);
         if (dt > 0) {
             analytics.seconds += (dt < TIMEOUT) ? Math.round(dt / 1000) : TRAILING_TIME;
-            analytics.lastTime = today;
+            analytics.lastTime = now;
         }
         analytics.points += points;
         yield analytics.save();

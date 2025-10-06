@@ -5812,16 +5812,39 @@ x-tutor .chat {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     display: none;
     flex-direction: column;
-    height: 420px;
-    max-height: calc(100vh - 44px);
+    height: 70vh;
+    max-height: 750px;
     position: fixed;
     right: 0;
-    width: 380px;
+    width: 520px;
     z-index: 301
 }
 
 html.webview x-tutor .chat {
     max-height: 100vh
+}
+
+@media (max-width: 1200px) {
+    x-tutor .chat {
+        width: 460px;
+        height: 65vh;
+    }
+}
+
+@media (max-width: 768px) {
+    x-tutor .chat {
+        width: 90vw;
+        max-width: 450px;
+        height: 70vh;
+    }
+}
+
+@media (max-width: 480px) {
+    x-tutor .chat {
+        width: 100vw;
+        height: 70vh;
+        border-radius: 20px 20px 0 0;
+    }
 }
 
 x-tutor .chat-header {
@@ -5903,11 +5926,17 @@ x-tutor .chat-body {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 2px 8px 44px;
+    padding: 16px 24px 44px;
     position: relative;
     -webkit-user-select: text;
     -moz-user-select: text;
     user-select: text
+}
+
+@media (max-width: 768px) {
+    x-tutor .chat-body {
+        padding: 16px 24px 44px;
+    }
 }
 
 x-tutor .chat-body.loading:after {
@@ -5988,8 +6017,11 @@ x-tutor .toasts .msg {
 
 x-tutor .msg.hint,
 x-tutor .msg.question {
-    line-height: 1.4;
-    padding: 5px 12px
+    line-height: 1.6;
+    padding: 10px 18px;
+    max-width: 90%;
+    word-wrap: break-word;
+    font-size: 15px;
 }
 
 x-tutor .msg.hint {
@@ -6047,8 +6079,23 @@ x-tutor .msg.video {
 x-tutor .msg.video iframe {
     border: none;
     display: block;
-    height: 126px;
-    width: 224px
+    height: 236px;
+    width: 420px
+}
+
+@media (max-width: 768px) {
+    x-tutor .msg.video iframe {
+        width: 360px;
+        height: 202px;
+    }
+}
+
+@media (max-width: 480px) {
+    x-tutor .msg.video iframe {
+        width: calc(100vw - 80px);
+        height: auto;
+        aspect-ratio: 16/9;
+    }
 }
 
 x-tutor .msg p {

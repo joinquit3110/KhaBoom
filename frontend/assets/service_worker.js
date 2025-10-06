@@ -3,7 +3,7 @@
 // (c) Kha-Boom!
 // =============================================================================
 
-const CACHE_NAME = 'khaboom-v1';
+const CACHE_NAME = 'khaboom-v2'; // Increased version to force update
 const STATIC_CACHE_URLS = [
   '/',
   '/main.css',
@@ -53,6 +53,20 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome-extension and other unsupported schemes
   const url = new URL(event.request.url);
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+  
+  // Never cache dynamic pages - always fetch fresh
+  const noCachePaths = ['/dashboard', '/profile', '/course/', '/api/', '/login', '/logout'];
+  const shouldNotCache = noCachePaths.some(path => url.pathname.includes(path));
+  
+  if (shouldNotCache) {
+    // Always fetch fresh for dynamic pages
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => response)
+        .catch(() => caches.match(event.request))
+    );
     return;
   }
   

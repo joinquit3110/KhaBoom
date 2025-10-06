@@ -326,6 +326,10 @@ function setupAuthEndpoints(app) {
     app.get('/profile', (req, res) => {
         if (!req.user)
             return res.redirect('/login');
+        // Disable caching for profile to always show fresh data
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.render('accounts/profile', { countries: COUNTRY_LIST });
     });
     app.post('/profile/details', (req, res) => __awaiter(this, void 0, void 0, function* () {

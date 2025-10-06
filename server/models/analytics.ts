@@ -42,14 +42,15 @@ CourseAnalyticsSchema.index({user: 1, date: 1}, {unique: true});
 CourseAnalyticsSchema.statics.track = async function(userId: string, points = 0) {
   // TODO Ensure requests are always handled in the correct order (index?).
   // TODO Use client timestamps rather than server timestamps.
-  const today = new Date(date.format(new Date(), 'yyyy-MM-dd'));
+  const now = new Date();
+  const today = new Date(date.format(now, 'yyyy-MM-dd'));
   let analytics = await CourseAnalytics.findOne({date: today, user: userId});
   if (!analytics) analytics = new CourseAnalytics({date: today, user: userId});
 
-  const dt = (+today) - (+analytics.lastTime);
+  const dt = (+now) - (+analytics.lastTime);
   if (dt > 0) {
     analytics.seconds += (dt < TIMEOUT) ? Math.round(dt / 1000) : TRAILING_TIME;
-    analytics.lastTime = today;
+    analytics.lastTime = now; 
   }
   analytics.points += points;
   await analytics.save();
